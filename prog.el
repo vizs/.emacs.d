@@ -1,3 +1,4 @@
+;; autocompletion and other stuff
 (use-package ivy
   :after general
   :ensure t
@@ -24,7 +25,7 @@
    (kbd "M-x") 'counsel-M-x
    (kbd "C-x C-f") 'counsel-find-file
    (kbd "C-x C-h") 'counsel-describe-function
-   (kbd "C-x C-v") 'counsel-describe-variable)
+   (kbd "C-x C-v") 'counsel-describe-variable))
 
 (use-package company
   :ensure t
@@ -33,9 +34,9 @@
   :config
   (vz:theme-company)
   (setq company-require-match 'never
-	company-idle-delay 1
-	company-tooltip-limit 10
-	company-minimum-prefix-length 0)
+        company-idle-delay 1
+        company-tooltip-limit 10
+        company-minimum-prefix-length 0)
   (define-key company-active-map (kbd "M-n") nil)
   (define-key company-active-map (kbd "M-p") nil)
   (define-key company-active-map (kbd "C-n") 'company-select-next)
