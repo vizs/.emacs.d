@@ -16,6 +16,16 @@
 ;; font
 (set-face-attribute 'default t :font "Go Mono-11")
 
+;; disable bold
+(mapc (lambda (face)
+        (set-face-attribute face nil
+          :weight 'normal
+          :slant 'normal
+          :underline nil
+          ;;:inherit nil
+          ))
+  (face-list))
+
 ;; hide fringe
 (set-fringe-mode '(0 . 0))
 

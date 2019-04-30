@@ -22,7 +22,9 @@
    :states '(normal insert)
    :keymaps 'override
    (kbd "M-x") 'counsel-M-x
-   (kbd "C-x C-f") 'counsel-find-file))
+   (kbd "C-x C-f") 'counsel-find-file
+   (kbd "C-x C-h") 'counsel-describe-function
+   (kbd "C-x C-v") 'counsel-describe-variable)
 
 (use-package company
   :ensure t
@@ -30,7 +32,8 @@
   (add-hook 'after-init-hook 'global-company-mode)
   :config
   (vz:theme-company)
-  (setq company-idle-delay 0
+  (setq company-require-match 'never
+	company-idle-delay 1
 	company-tooltip-limit 10
 	company-minimum-prefix-length 0)
   (define-key company-active-map (kbd "M-n") nil)

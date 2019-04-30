@@ -25,9 +25,12 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
+
+;; it gets really confusing
 (setq-default cursor-in-non-selected-windows nil)
 
 ;; initial buffer
+;; not using right now because i end up cumulating a lot of unused buffers
 (defun vz:new-empty-buffer ()
   (interactive)
   (let (($buf (generate-new-buffer "new")))
@@ -43,3 +46,17 @@
       keep-new-versions 5
       keep-old-versions 2
       version-control t)
+
+;; the perfect way to switch windows
+(use-package ace-window
+  :ensure t
+  :config
+  (general-define-key
+   :states '(normal insert)
+   :keymaps 'override
+   (kbd "C-x o") 'ace-window))
+
+;; pretty sane tabs settings
+(setq tab-width 4)
+(defvaralias 'c-basic-offset 'tab-width)
+(defvaralias 'cperl-indent-level 'tab-width)
