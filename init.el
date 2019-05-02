@@ -1,12 +1,7 @@
-(package-initialize)
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/"))
-(add-to-list 'package-archives '("GNU" . "https://elpa.gnu.org/packages/"))
+(load-file (concat user-emacs-directory "util.el"))
 
-;;(when (not package-archive-contents)
-;;  (package-refresh-contents))
-(when (version< emacs-version "27.0")
-  (unless package--initialized (package-initialize t)))
+(vz:init-package)
+
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 
@@ -14,8 +9,6 @@
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
 (setq vc-follow-symlinks t)
-
-(load-file (concat user-emacs-directory "util.el"))
 
 (vz:load-elfiles '("sane.el"
                    "aesthetics.el"
@@ -27,7 +20,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (ace-window use-package twilight-bright-theme general evil eglot counsel company))))
+    (rust-mode use-package twilight-bright-theme general evil eglot counsel company ace-window))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

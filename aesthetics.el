@@ -1,5 +1,5 @@
 ;; A E S T H E T I C S
-;; theme TODO: make your own
+;; theme TODO: make your own from a file of colors
 (use-package twilight-bright-theme
   :ensure t)
 
@@ -14,7 +14,7 @@
      	      display-line-numbers-current-absolute t)
 
 ;; font
-(set-face-attribute 'default t :font "Go Mono-11")
+(set-face-attribute 'default nil :font "Share Tech Mono-11")
 
 ;; disable bold
 (mapc (lambda (face)
@@ -30,6 +30,7 @@
 (set-fringe-mode '(0 . 0))
 
 ;; company mode aesthetics
+;; this looks fucking awful but it works so idrc
 (defun vz:theme-company ()
   (require 'color)
   (let ((bg (face-attribute 'default :background)))
@@ -41,3 +42,8 @@
      `(company-tooltip-annotation ((t (:inherit font-lock-constant-face :background ,(color-lighten-name bg 0)))))
      `(company-tooltip-selection ((t (:inherit font-lock-constant-face :background ,(color-lighten-name bg 8)))))
      `(company-tooltip-annotation-selection ((t (:inherit font-lock-constant-face :background ,(color-lighten-name bg 8))))))))
+
+;; highlight matching parenthesis
+(setq show-paren-delay 0
+      show-paren-when-point-inside-paren t)
+(show-paren-mode t)

@@ -61,3 +61,9 @@
 (defvaralias 'c-basic-offset 'tab-width)
 (defvaralias 'cperl-indent-level 'tab-width)
 (setq-default indent-tabs-mode nil)
+
+;; dont clutter init.el
+(let ((custom-el (concat user-emacs-directory "/.custom.el")))
+  (setq custom-file custom-el)
+  (when (file-exists-p custom-el)
+    (load custom-file)))

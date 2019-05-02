@@ -42,8 +42,17 @@
   (define-key company-active-map (kbd "C-n") 'company-select-next)
   (define-key company-active-map (kbd "C-p") 'company-select-previous))
 
+(use-package rust-mode
+  :ensure t
+  :config
+  (autoload 'rust-mode "rust-mode" nil t)
+  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode)))
+
 ;; this just fucking works
 (use-package eglot
   :ensure t
   :config
-  (add-hook 'python-mode-hook 'eglot-ensure))
+  (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'rust-mode-hook 'eglot-ensure))
+
+;; TODO: racket
