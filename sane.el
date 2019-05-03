@@ -16,7 +16,7 @@
   :ensure t
   :init
   (setq general-override-states '(insert emacs hybrid normal
-                                visual motion operator replace)))
+                                  visual motion operator replace)))
 
 ;; reload config when a new frame is launched
 (add-hook 'after-make-frame-functions (lambda (arg) (vz:reload-config)))
@@ -49,12 +49,7 @@
 
 ;; the perfect way to switch windows
 (use-package ace-window
-  :ensure t
-  :config
-  (general-define-key
-   :states '(normal insert)
-   :keymaps 'override
-   (kbd "C-x o") 'ace-window))
+  :ensure t)
 
 ;; pretty sane tabs settings
 (setq-default tab-width 4)

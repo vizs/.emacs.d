@@ -4,28 +4,11 @@
   :ensure t
   :config
   (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t)
-  (general-define-key
-   :states 'normal
-   :keymaps 'override
-   (kbd "/") 'swiper
-   (kbd "C-s") 'swiper))
+  (setq ivy-use-virtual-buffers t))
 
 (use-package counsel
   :after ivy
-  :ensure t
-  :config
-  (general-define-key
-   :states 'normal
-   :keymaps 'override
-   (kbd ";") 'counsel-M-x)
-  (general-define-key
-   :states '(normal insert)
-   :keymaps 'override
-   (kbd "M-x") 'counsel-M-x
-   (kbd "C-x C-f") 'counsel-find-file
-   (kbd "C-x C-h") 'counsel-describe-function
-   (kbd "C-x C-v") 'counsel-describe-variable))
+  :ensure t)
 
 (use-package company
   :ensure t
@@ -36,11 +19,7 @@
   (setq company-require-match 'never
         company-idle-delay 1
         company-tooltip-limit 10
-        company-minimum-prefix-length 0)
-  (define-key company-active-map (kbd "M-n") nil)
-  (define-key company-active-map (kbd "M-p") nil)
-  (define-key company-active-map (kbd "C-n") 'company-select-next)
-  (define-key company-active-map (kbd "C-p") 'company-select-previous))
+        company-minimum-prefix-length 0))
 
 (use-package rust-mode
   :ensure t
