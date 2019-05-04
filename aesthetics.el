@@ -6,6 +6,11 @@
 ;; cursor face
 (setq-default cursor-type '(hbar . 3))
 (setq-default blink-cursor-mode nil)
+(defun vz:style-evil-cursor ()
+  (setq-default evil-normal-state-cursor '(hbar . 3)
+                evil-insert-state-cursor '(hbar . 3)
+                evil-visual-state-cursor '(hbar . 3)
+                evil-operator-state-cursor '(hbar . 3)))
 
 ;; line numbers
 (global-display-line-numbers-mode)

@@ -10,7 +10,8 @@
 (setq use-package-always-ensure t)
 (setq vc-follow-symlinks t)
 
-(vz:load-elfiles '("sane.el"
-                   "aesthetics.el"
+(vz:load-elfiles '("aesthetics.el"
+                   "sane.el"
                    "prog.el"
+                   "doc.el"
                    "bind.el"))

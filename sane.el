@@ -6,10 +6,7 @@
   (setq evil-want-integration t
         evil-want-keybinding nil)
   (evil-mode t)
-  (setq-default evil-normal-state-cursor '(hbar . 3)
-                evil-insert-state-cursor '(hbar . 3)
-                evil-visual-state-cursor '(hbar . 3)
-                evil-operator-state-cursor '(hbar . 3)))
+  (vz:style-evil-cursor))
 
 (use-package general
   :after evil
@@ -25,6 +22,7 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
+(mouse-wheel-mode -1)
 
 ;; it gets really confusing
 (setq-default cursor-in-non-selected-windows nil)
@@ -58,7 +56,7 @@
 (setq-default indent-tabs-mode nil)
 
 ;; dont clutter init.el
-(let ((custom-el (concat user-emacs-directory "/.custom.el")))
+(let ((custom-el (concat user-emacs-directory ".custom.el")))
   (setq custom-file custom-el)
   (when (file-exists-p custom-el)
     (load custom-file)))

@@ -6,6 +6,10 @@
  (kbd "g c") 'comment-line
  (kbd "C-w o") 'ace-window
  (kbd "C-w O") 'delete-other-windows)
+(general-define-key
+ :states 'visual
+ :keymaps 'override
+ (kbd "g c") 'comment-line)
 
 ;; ivy and counsel
 (general-define-key
@@ -13,7 +17,7 @@
   :keymaps 'override
   (kbd "/") 'swiper
   (kbd "C-s") 'swiper
-  (kbd ";") 'counsel-M-x)
+  (kbd ",") 'counsel-M-x)
 
 (general-define-key
   :states '(normal insert)
@@ -34,3 +38,5 @@
  :states '(normal insert)
  :keymaps 'override
  (kbd "C-x o") 'ace-window)
+
+;; pdf-view-mode
