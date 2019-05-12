@@ -1,9 +1,7 @@
 ;; A E S T H E T I C S
 ;; theme TODO: make your own from a file of colors
-(use-package twilight-bright-theme
-  :ensure t)
+(use-package twilight-bright-theme)
 
-;; cursor face
 (setq-default cursor-type '(hbar . 3))
 (setq-default blink-cursor-mode nil)
 (defun vz:style-evil-cursor ()
@@ -12,14 +10,12 @@
                 evil-visual-state-cursor '(hbar . 3)
                 evil-operator-state-cursor '(hbar . 3)))
 
-;; line numbers
 (global-display-line-numbers-mode)
 (setq-default display-line-numbers-type 'relative
-     	      display-line-numbers-width 2
+     	      display-line-numbers-width 0
      	      display-line-numbers-current-absolute t)
 
-;; font
-(set-face-attribute 'default nil :font "Share Tech Mono-11")
+(add-to-list 'default-frame-alist '(font . "Share Tech Mono-10"))
 
 ;; disable bold
 (mapc (lambda (face)
@@ -27,13 +23,19 @@
           :weight 'normal
           :slant 'normal
           :underline nil))
-          ;;:inherit nil
   (face-list))
 
-;; hide fringe
-(set-fringe-mode '(0 . 0))
+;; TODO: dont hardcode
+(set-face-attribute 'fringe nil
+                    :background "#ffffff")
+(fringe-mode '(5 . 0))
+(set-face-attribute 'mode-line nil
+                    :background "#ffffff"
+                    :foreground "#5f5a60")
 
-;; company mode aesthetics
+;; "disable" line-wrap char
+(set-display-table-slot standard-display-table 'wrap ? )
+
 ;; this looks fucking awful but it works so idrc
 (defun vz:theme-company ()
   (require 'color)

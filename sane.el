@@ -1,7 +1,6 @@
 ;; sane defaults
 ;; im a dirty vim user
 (use-package evil
-  :ensure t
   :config
   (setq evil-want-integration t
         evil-want-keybinding nil)
@@ -10,7 +9,6 @@
 
 (use-package general
   :after evil
-  :ensure t
   :init
   (setq general-override-states '(insert emacs hybrid normal
                                   visual motion operator replace)))
@@ -56,6 +54,9 @@
 (setq-default indent-tabs-mode nil)
 
 ;; dont clutter init.el
-(setq custom-file (concat user-emacs-directory ".custom.el"))
-(when (file-exists-p custom-file)
-  (load custom-file))
+;;(setq custom-file (concat user-emacs-directory ".custom.el"))
+;;(when (file-exists-p custom-file)
+;;  (load custom-file))
+
+;; disable custom.el
+(defconst custom-file "/dev/zero")
