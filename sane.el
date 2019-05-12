@@ -16,7 +16,7 @@
                                   visual motion operator replace)))
 
 ;; reload config when a new frame is launched
-(add-hook 'after-make-frame-functions (lambda (arg) (vz:reload-config)))
+;;(add-hook 'after-make-frame-functions (lambda (arg) (vz:reload-config)))
 
 ;; who even needs these?
 (menu-bar-mode -1)
@@ -56,7 +56,6 @@
 (setq-default indent-tabs-mode nil)
 
 ;; dont clutter init.el
-(let ((custom-el (concat user-emacs-directory ".custom.el")))
-  (setq custom-file custom-el)
-  (when (file-exists-p custom-el)
-    (load custom-file)))
+(setq custom-file (concat user-emacs-directory ".custom.el"))
+(when (file-exists-p custom-file)
+  (load custom-file))

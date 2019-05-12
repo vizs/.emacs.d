@@ -26,9 +26,8 @@
         (set-face-attribute face nil
           :weight 'normal
           :slant 'normal
-          :underline nil
+          :underline nil))
           ;;:inherit nil
-          ))
   (face-list))
 
 ;; hide fringe

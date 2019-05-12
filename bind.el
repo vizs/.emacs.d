@@ -38,5 +38,3 @@
  :states '(normal insert)
  :keymaps 'override
  (kbd "C-x o") 'ace-window)
-
-;; pdf-view-mode
