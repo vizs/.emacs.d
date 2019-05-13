@@ -7,9 +7,11 @@
 (setq-default blink-cursor-mode nil)
 (defun vz:style-evil-cursor ()
   (setq-default evil-normal-state-cursor 'box
-                evil-insert-state-cursor 'bar
+                evil-emacs-state-cursor 'box
+                evil-insert-state-cursor '(bar . 2)
                 evil-visual-state-cursor '(hbar . 3)
-                evil-operator-state-cursor '(hbar . 3)
+                evil-replace-state-cursor '(hbar . 3)
+                evil-operator-state-cursor '(hbar . 2)
                 evil-motion-state-cursor 'box))
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -19,7 +21,7 @@
 
 (add-to-list 'default-frame-alist '(font . "ttyp0-8"))
 
-;; disable bold
+;; disable bold, italic
 (mapc (lambda (face)
         (set-face-attribute face nil
           :weight 'normal
@@ -27,12 +29,13 @@
           :underline nil))
   (face-list))
 
-(set-face-attribute 'fringe nil
-                    :background "#ffffff")
+(set-face-attribute 'fringe nil :background "#ffffff")
 (fringe-mode '(5 . 0))
+
 (set-face-attribute 'mode-line nil
                     :background "#ffffff"
                     :foreground "#5f5a60")
+
 
 ;; "disable" line-wrap char
 (set-display-table-slot standard-display-table 'wrap ? )
@@ -43,7 +46,7 @@
     `(company-scrollbar-bg ((t (:background "#ffffff"))))
     `(company-scrollbar-fg ((t (:background "#a7a7a7"))))
     `(company-tooltip-common ((t (:inherit font-lock-constant-face
-                                           :background "#ffffff"
+                                           :background "#a7a7a7"
                                            :foreground "#5f5a60"))))
     `(company-tooltip-annotation ((t (:inherit font-lock-constant-face
                                                :background "#a7a7a7"

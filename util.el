@@ -16,4 +16,5 @@
     (vz:load-elfiles (cdr files))))
 
 (defun vz:reload-config ()
+  (interactive)
   (load-file (concat user-emacs-directory "init.el")))

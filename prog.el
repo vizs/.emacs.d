@@ -27,7 +27,7 @@
 ;; this just fucking works
 (use-package eglot
   :config
-  (add-hook 'python-mode-hook 'eglot-ensure)
-  (add-hook 'rust-mode-hook 'eglot-ensure))
+  (add-hook 'python-mode-hook 'eglot-ensure))
+  ;;(add-hook 'rust-mode-hook 'eglot-ensure))
 
 ;; TODO: racket

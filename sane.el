@@ -64,3 +64,7 @@
 (use-package rainbow-delimiters
   :config
   (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
+
+(add-hook 'before-save-hook 'whitespace-cleanup)
+
+(setq frame-title-format '("emacs: %f"))
