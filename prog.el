@@ -3,7 +3,8 @@
   :after general
   :config
   (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t))
+  (setq ivy-use-virtual-buffers t)
+  (vz:theme-ivy))
 
 (use-package counsel
   :after ivy)

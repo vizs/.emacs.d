@@ -47,7 +47,6 @@
 (use-package ace-window
   :ensure t)
 
-;; pretty sane tabs settings
 (setq-default tab-width 4)
 (defvaralias 'c-basic-offset 'tab-width)
 (defvaralias 'cperl-indent-level 'tab-width)
@@ -60,3 +59,8 @@
 
 ;; disable custom.el
 (defconst custom-file "/dev/zero")
+
+;; much easier than highlight
+(use-package rainbow-delimiters
+  :config
+  (add-hook 'prog-mode-hook 'rainbow-delimiters-mode))
