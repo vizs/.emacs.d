@@ -1,17 +1,4 @@
 (load-file (concat user-emacs-directory "util.el"))
-
-(vz:init-package)
-
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-
-(require 'use-package)
-(require 'use-package-ensure)
-(setq use-package-always-ensure t)
-(setq vc-follow-symlinks t)
-
-(vz:load-elfiles '("aesthetics.el"
-                   "sane.el"
-                   "prog.el"
-                   "doc.el"
-                   "bind.el"))
+(vz:load-elfiles '("pkg.el" "aesthetics.el" "sane.el"
+                   ".secret.el" "prog.el" "irc.el"
+                   "doc.el" "bind.el"))

@@ -11,7 +11,7 @@
 
 (use-package company
   :init
-  (add-hook 'after-init-hook 'global-company-mode)
+  (add-hook 'prog-mode-hook 'company-mode)
   :config
   (vz:theme-company)
   (setq company-require-match 'never

@@ -24,8 +24,8 @@
   :keymaps 'override
   (kbd "M-x") 'counsel-M-x
   (kbd "C-x C-f") 'counsel-find-file
-  (kbd "C-x C-h") 'counsel-describe-function
-  (kbd "C-x C-v") 'counsel-describe-variable)
+  (kbd "C-h f") 'counsel-describe-function
+  (kbd "C-h v") 'counsel-describe-variable)
 
 ;; company
 (define-key company-active-map (kbd "M-n") nil)
