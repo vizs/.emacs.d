@@ -2,7 +2,7 @@
 (use-package ivy
   :after general
   :config
-  (ivy-mode 1)
+  (add-hook 'prog-mode-hook 'ivy-mode)
   (setq ivy-use-virtual-buffers t)
   (vz:theme-ivy))
 

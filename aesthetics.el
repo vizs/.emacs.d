@@ -6,28 +6,29 @@
 (setq-default cursor-type '(hbar . 3))
 (setq-default blink-cursor-mode nil)
 (defun vz:style-evil-cursor ()
-  (setq-default evil-normal-state-cursor 'box
-                evil-emacs-state-cursor 'box
-                evil-insert-state-cursor '(bar . 2)
-                evil-visual-state-cursor '(hbar . 3)
-                evil-replace-state-cursor '(hbar . 3)
+  (setq-default evil-normal-state-cursor   'box
+                evil-emacs-state-cursor    'box
+                evil-insert-state-cursor   '(bar . 2)
+                evil-visual-state-cursor   '(hbar . 3)
+                evil-replace-state-cursor  '(hbar . 3)
                 evil-operator-state-cursor '(hbar . 2)
-                evil-motion-state-cursor 'box))
+                evil-motion-state-cursor   'box))
 
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
 (setq-default display-line-numbers-type 'relative
-     	      display-line-numbers-width 0
-     	      display-line-numbers-current-absolute t)
+              display-line-numbers-width 0
+              display-line-numbers-current-absolute t)
 
 (add-to-list 'default-frame-alist '(font . "ttyp0-8"))
 
 ;; disable bold, italic
-(mapc (lambda (face)
-        (set-face-attribute face nil
-          :weight 'normal
-          :slant 'normal
-          :underline nil))
-  (face-list))
+(defun vz:disable-bold-italic ()
+  (mapc (lambda (face)
+          (set-face-attribute face nil
+            :weight 'normal
+            :slant 'normal
+            :underline nil))
+    (face-list)))
 
 (set-face-attribute 'fringe nil :background "#ffffff")
 (fringe-mode '(5 . 0))
@@ -36,9 +37,18 @@
                     :background "#ffffff"
                     :foreground "#5f5a60")
 
-
 ;; "disable" line-wrap char
 (set-display-table-slot standard-display-table 'wrap ? )
+
+(defun vz:theme-circe ()
+  (set-face-attribute 'circe-prompt-face         nil :background "#ffffff"
+                                                     :foreground "#a7a7a7")
+  (set-face-attribute 'circe-highlight-nick-face nil :foreground "#a7a7a7")
+  (set-face-attribute 'circe-my-message-face     nil :foreground "#5f5a60")
+  (set-face-attribute 'circe-server-face         nil :foreground "#a7a7a7")
+  (set-face-attribute 'circe-originator-face     nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-highlight-face        nil :foreground "#a7a7a7")
+  (setq mode-line-format nil))
 
 (defun vz:theme-company ()
   (custom-set-faces
