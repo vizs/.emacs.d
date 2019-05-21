@@ -30,4 +30,9 @@
   (add-hook 'python-mode-hook 'eglot-ensure))
   ;;(add-hook 'rust-mode-hook 'eglot-ensure))
 
+;; much easier than highlight
+(use-package rainbow-delimiters
+  :init
+  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode))
+
 ;; TODO: racket
