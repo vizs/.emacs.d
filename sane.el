@@ -4,10 +4,10 @@
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (mouse-wheel-mode -1)
+(blink-cursor-mode 0)
 
-(setq-default cursor-type '(hbar . 3)
-              blink-cursor-mode nil
-              cursor-in-non-selected-windows nil)
+(setq-default cursor-type '(hbar . 3))
+(setq cursor-in-non-selected-windows nil)
 
 (setq backup-by-copying t
       backup-directory-alist '(("." . "~/var/cache/emacs-bkups"))
@@ -23,8 +23,9 @@
 (defvaralias 'cperl-indent-level 'tab-width)
 (setq-default indent-tabs-mode nil)
 
-;; "disable" custom.el
-(defconst custom-file "/dev/zero")
+(setq custom-file (concat user-emacs-directory ".custom.el"))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
 (add-hook 'before-save-hook 'whitespace-cleanup)
 (setq frame-title-format '("emacs: "

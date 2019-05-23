@@ -12,7 +12,8 @@
           ((buffer-modified-p) "*"))))
 
 (setq vz:mode-line-format
-      '((:eval (vz:mode-line-file-name))
+      '("  "
+        (:eval (vz:mode-line-file-name))
         (:eval (vz:mode-line-file-state))
         "     "
         (line-number-mode   "L%l")
@@ -20,19 +21,20 @@
         "     "
         mode-name))
 
-(set-face-attribute 'header-line nil
-                    :background vz:color0
-                    :foreground vz:color7
-                    :underline vz:color7)
-(set-face-attribute 'header-line-highlight nil
-                    :background vz:color0
-                    :foreground vz:color15)
-(set-face-attribute 'mode-line  nil
-                    :background vz:color0
-                    :foreground vz:color7)
-(set-face-attribute 'mode-line-highlight nil
-                    :background vz:color0
-                    :foreground vz:color15)
+(defun vz:set-mode-line-face ()
+  (set-face-attribute 'header-line nil
+                      :background vz:color0
+                      :foreground vz:color7
+                      :underline vz:color7)
+  (set-face-attribute 'header-line-highlight nil
+                      :background vz:color0
+                      :foreground vz:color15)
+  (set-face-attribute 'mode-line  nil
+                      :background vz:color0
+                      :foreground vz:color7)
+  (set-face-attribute 'mode-line-highlight nil
+                      :background vz:color0
+                      :foreground vz:color15))
 
 (setq-default mode-line-format   nil
               header-line-format vz:mode-line-format)

@@ -3,5 +3,5 @@
                    "sane.el" ".secret.el"))
 ;; TODO: find a nice way to integrate these modes
 (vz:norm-mode)
-(vz:disable-bold-italic)
-(vz:load-elfiles '("theme.el"))
+(vz:disable-bold-italic-underline)
+(vz:set-mode-line-face)

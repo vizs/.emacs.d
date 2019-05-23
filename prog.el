@@ -33,6 +33,8 @@
 ;; much easier than highlight
 (use-package rainbow-delimiters
   :init
-  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode))
+  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
+  :config
+  (vz:theme-rainbow-parens))
 
 ;; TODO: racket
