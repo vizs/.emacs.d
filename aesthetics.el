@@ -1,10 +1,49 @@
 ;; A E S T H E T I C S
-;; theme TODO: make your own from a file of colors
-;; TODO: dont hardcode
-(use-package twilight-bright-theme)
+(setq vz:colors (split-string (vz:fread "~/var/cache/tm/colors") "\n"))
+(defun vz:get-color (index)
+  (nth index vz:colors))
 
-(setq-default cursor-type '(hbar . 3))
-(setq-default blink-cursor-mode nil)
+(setq vz:color0 (vz:get-color 0) vz:color1 (vz:get-color 1) vz:color2 (vz:get-color 2)
+      vz:color3 (vz:get-color 3) vz:color4 (vz:get-color 3) vz:color5 (vz:get-color 5)
+      vz:color6  (vz:get-color 6) vz:color7 (vz:get-color 7) vz:color8 (vz:get-color 8)
+      vz:color9  (vz:get-color 9) vz:color10 (vz:get-color 10) vz:color11 (vz:get-color 11)
+      vz:color12 (vz:get-color 12) vz:color13 (vz:get-color 13) vz:color14 (vz:get-color 14)
+      vz:color15 (vz:get-color 15))
+
+(defun vz:theme-company ()
+  (custom-set-faces
+    `(company-tooltip ((t (:inherit default :background ,vz:color0))))
+    `(company-scrollbar-bg ((t (:background ,vz:color0))))
+    `(company-scrollbar-fg ((t (:background ,vz:color8))))
+    `(company-tooltip-common ((t (:inherit font-lock-constant-face
+                                           :background ,vz:color8
+                                           :foreground ,vz:color7))))
+    `(company-tooltip-annotation ((t (:inherit font-lock-constant-face
+                                               :background ,vz:color8
+                                               :foreground ,vz:color15))))
+    `(company-tooltip-selection ((t (:inherit font-lock-constant-face
+                                              :background ,vz:color8
+                                              :foreground ,vz:color15))))
+    `(company-tooltip-annotation-selection ((t (:inherit font-lock-constant-face
+                                                         :background ,vz:color8
+                                                         :foreground ,vz:color15))))
+    `(company-echo-common ((t (:background ,vz:color0
+                               :foreground ,vz:color7))))
+    `(company-preview ((t (:background ,vz:color0
+                           :foreground ,vz:color5))))
+    `(company-preview-common ((t (:foreground ,vz:color13))))
+    `(company-preview-search ((t (:background ,vz:color8
+                                  :foreground ,vz:color13))))))
+
+(defun vz:theme-ivy ()
+  (custom-set-faces
+   `(ivy-current-match ((t (:background ,vz:color0 :foreground ,vz:color5))))
+   `(ivy-minibuffer-match-face-1 ((t (:background ,vz:color8 :foreground ,vz:color15))))
+   `(ivy-minibuffer-match-face-2 ((t (:inherit ivy-minibuffer-match-face-1))))
+   `(ivy-minibuffer-match-face-3 ((t (:inherit ivy-minibuffer-match-face-1))))
+   `(ivy-minibuffer-match-face-4 ((t (:inherit ivy-minibuffer-match-face-1))))
+   `(ivy-match-required-face ((t (:background ,vz:color8 :foreground ,vz:color15))))))
+
 (defun vz:style-evil-cursor ()
   (setq-default evil-normal-state-cursor   'box
                 evil-emacs-state-cursor    'box
@@ -26,11 +65,10 @@
   (mapc (lambda (face)
           (set-face-attribute face nil
             :weight 'normal
-            :slant 'normal
-            :underline nil))
+            :slant 'normal))
     (face-list)))
 
-(set-face-attribute 'fringe nil :background "#ffffff")
+(set-face-attribute 'fringe nil :background (vz:get-color 0))
 (fringe-mode '(5 . 0))
 
 (setq window-divider-default-places       t
@@ -40,33 +78,6 @@
 
 ;; "disable" line-wrap char
 (set-display-table-slot standard-display-table 'wrap ? )
-
-(defun vz:theme-company ()
-  (custom-set-faces
-    `(company-tooltip ((t (:inherit default :background "#ffffff"))))
-    `(company-scrollbar-bg ((t (:background "#ffffff"))))
-    `(company-scrollbar-fg ((t (:background "#a7a7a7"))))
-    `(company-tooltip-common ((t (:inherit font-lock-constant-face
-                                           :background "#a7a7a7"
-                                           :foreground "#5f5a60"))))
-    `(company-tooltip-annotation ((t (:inherit font-lock-constant-face
-                                               :background "#a7a7a7"
-                                               :foreground "#464b50"))))
-    `(company-tooltip-selection ((t (:inherit font-lock-constant-face
-                                              :background "#a7a7a7"
-                                              :foreground "#464b50"))))
-    `(company-tooltip-annotation-selection ((t (:inherit font-lock-constant-face
-                                                         :background "#a7a7a7"
-                                                         :foreground "#464b50"))))))
-
-(defun vz:theme-ivy ()
-  (custom-set-faces
-   `(ivy-current-match ((t (:background "#ffffff" :foreground "#9b859d"))))
-   `(ivy-minibuffer-match-face-1 ((t (:background "#a7a7a7" :foreground "#464b50"))))
-   `(ivy-minibuffer-match-face-2 ((t (:inherit ivy-minibuffer-match-face-1))))
-   `(ivy-minibuffer-match-face-3 ((t (:inherit ivy-minibuffer-match-face-1))))
-   `(ivy-minibuffer-match-face-4 ((t (:inherit ivy-minibuffer-match-face-1))))
-   `(ivy-match-required-face ((t (:background "#a7a7a7" :foreground "#464b50"))))))
 
 ;; highlight matching parenthesis
 (setq show-paren-delay 0

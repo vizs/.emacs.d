@@ -4,3 +4,4 @@
 ;; TODO: find a nice way to integrate these modes
 (vz:norm-mode)
 (vz:disable-bold-italic)
+(vz:load-elfiles '("theme.el"))

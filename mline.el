@@ -1,5 +1,6 @@
 (line-number-mode t)
 (column-number-mode t)
+
 (defun vz:mode-line-file-name ()
   (let ((file-name (buffer-file-name)))
     (cond ((not file-name) (buffer-name))
@@ -20,17 +21,18 @@
         mode-name))
 
 (set-face-attribute 'header-line nil
-                    :background "#ffffff"
-                    :foreground "#5f5a60")
+                    :background vz:color0
+                    :foreground vz:color7
+                    :underline vz:color7)
 (set-face-attribute 'header-line-highlight nil
-                    :background "#ffffff"
-                    :foreground "#464b50")
+                    :background vz:color0
+                    :foreground vz:color15)
 (set-face-attribute 'mode-line  nil
-                    :background "#ffffff"
-                    :foreground "#5f5a60")
+                    :background vz:color0
+                    :foreground vz:color7)
 (set-face-attribute 'mode-line-highlight nil
-                    :background "#ffffff"
-                    :foreground "#464b50")
+                    :background vz:color0
+                    :foreground vz:color15)
 
 (setq-default mode-line-format   nil
               header-line-format vz:mode-line-format)

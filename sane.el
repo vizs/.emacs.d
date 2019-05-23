@@ -5,7 +5,9 @@
 (scroll-bar-mode -1)
 (mouse-wheel-mode -1)
 
-(setq-default cursor-in-non-selected-windows nil)
+(setq-default cursor-type '(hbar . 3)
+              blink-cursor-mode nil
+              cursor-in-non-selected-windows nil)
 
 (setq backup-by-copying t
       backup-directory-alist '(("." . "~/var/cache/emacs-bkups"))

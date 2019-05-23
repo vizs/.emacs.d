@@ -12,8 +12,8 @@
 (defun vz:minimal-ui ()
   "minimal ui - hides mode-line and fringe"
   (interactive)
-  (vz:toggle-header-line)
-  (vz:toggle-mode-line)
+  (setq header-line-format nil)
+  (setq mode-line-format nil)
   (fringe-mode '(0 . 0))
   (display-line-numbers-mode 0))
 
@@ -48,3 +48,8 @@
   (if (eq (boundp 'vz:preferred-mode) nil)
       (setq vz:preferred-mode 'vz:norm-mode))
   (funcall vz:preferred-mode))
+
+(defun vz:fread (path)
+  (with-temp-buffer
+    (insert-file-contents-literally path)
+    (buffer-string)))
