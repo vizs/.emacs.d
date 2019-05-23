@@ -1,3 +1,5 @@
+;; TODO: remove this and remap C-n C-p to C-j C-k in ex
+
 ;; evil
 (general-define-key
  :states 'normal
@@ -27,11 +29,16 @@
   (kbd "C-h f") 'counsel-describe-function
   (kbd "C-h v") 'counsel-describe-variable)
 
+(define-key ivy-minibuffer-map (kbd "C-p") nil)
+(define-key ivy-minibuffer-map (kbd "C-n") nil)
+(define-key ivy-minibuffer-map (kbd "C-j") 'ivy-next-line)
+(define-key ivy-minibuffer-map (kbd "C-k") 'ivy-previous-line)
+
 ;; company
 (define-key company-active-map (kbd "M-n") nil)
 (define-key company-active-map (kbd "M-p") nil)
-(define-key company-active-map (kbd "C-n") 'company-select-next)
-(define-key company-active-map (kbd "C-p") 'company-select-previous)
+(define-key company-active-map (kbd "C-j") 'company-select-next)
+(define-key company-active-map (kbd "C-k") 'company-select-previous)
 
 ;; ace-window
 (general-define-key

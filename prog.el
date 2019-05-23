@@ -33,7 +33,9 @@
 ;; much easier than highlight
 (use-package rainbow-delimiters
   :init
-  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
+  (mapc (lambda (lisp--mode)
+          (add-hook 'lisp--mode 'rainbow-delimiters-mode))
+        '(lisp-mode emacs-lisp-mode))
   :config
   (vz:theme-rainbow-parens))
 

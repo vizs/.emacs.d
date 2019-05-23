@@ -1,4 +1,4 @@
-;; A E S T H E T I C
+;; A E S T H E T I C S
 (setq vz:colors (split-string (vz:fread "~/var/cache/tm/colors") "\n"))
 (defun vz:get-color (index)
   (nth index vz:colors))
@@ -16,13 +16,13 @@
 (set-face-attribute 'font-lock-preprocessor-face nil :foreground vz:color4)
 (set-face-attribute 'font-lock-constant-face nil :foreground vz:color1)
 (set-face-attribute 'font-lock-comment-face nil :foreground vz:color8)
-(set-face-attribute 'font-lock-negation-char-face nil :foreground vz:color0)
+(set-face-attribute 'font-lock-negation-char-face nil :foreground vz:color1)
 (set-face-attribute 'font-lock-constant-face nil :foreground vz:color2)
 (set-face-attribute 'font-lock-doc-face nil :foreground vz:color8)
 (set-face-attribute 'font-lock-function-name-face nil :foreground vz:color5)
 (set-face-attribute 'font-lock-keyword-face nil :foreground vz:color1)
 (set-face-attribute 'font-lock-string-face nil :foreground vz:color5)
-(set-face-attribute 'font-lock-type-face nil :foreground vz:color3)
+(set-face-attribute 'font-lock-type-face nil :foreground vz:color10)
 (set-face-attribute 'font-lock-variable-name-face nil :foreground vz:color4)
 (set-face-attribute 'font-lock-warning-face nil :foreground vz:color3)
 
@@ -61,12 +61,12 @@
   (set-face-attribute 'lazy-highlight nil :background vz:color8 :foreground vz:color13))
 
 (defun vz:theme-company ()
-  (set-face-attribute 'company-tooltip nil :background vz:color0)
+  (set-face-attribute 'company-tooltip nil :background vz:color0 :foreground vz:color7)
   (set-face-attribute 'company-scrollbar-bg nil :background vz:color0)
   (set-face-attribute 'company-scrollbar-fg nil :background vz:color8)
   (set-face-attribute 'company-tooltip-common nil :background vz:color8 :foreground vz:color7)
   (set-face-attribute 'company-tooltip-annotation nil :background vz:color8 :foreground vz:color15)
-  (set-face-attribute 'company-tooltip-selection nil :background vz:color8 :foreground vz:color15)
+  (set-face-attribute 'company-tooltip-selection nil :background vz:color8 :foreground vz:color5)
   (set-face-attribute 'company-tooltip-annotation-selection nil :background vz:color8 :foreground vz:color15)
   (set-face-attribute 'company-echo-common nil :background vz:color0 :foreground vz:color7)
   (set-face-attribute 'company-preview nil :background vz:color0 :foreground vz:color5)
