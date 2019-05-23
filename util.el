@@ -5,12 +5,15 @@
 
 (defun vz:reload-config ()
   (interactive)
-  (load-file (concat user-emacs-directory "init.el")))
+  (load-file (concat user-emacs-directory "init.el"))
+  (redraw-display)
+  (force-mode-line-update t))
 
 (defun vz:minimal-ui ()
   "minimal ui - hides mode-line and fringe"
   (interactive)
-  (setq mode-line-format nil)
+  (vz:toggle-header-line)
+  (vz:toggle-mode-line)
   (fringe-mode '(0 . 0))
   (display-line-numbers-mode 0))
 

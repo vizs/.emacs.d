@@ -12,6 +12,22 @@
           :channels ("#home" "#man" "#programming" "#ricing")
           :pass (lambda (x) vz:disc-rup)))))
 
+(defun vz:theme-circe ()
+  (set-face-attribute 'circe-prompt-face          nil :background "#ffffff"
+                                                      :foreground "#a7a7a7")
+  (set-face-attribute 'circe-highlight-nick-face  nil :foreground "#a7a7a7")
+  (set-face-attribute 'circe-my-message-face      nil :foreground "#5f5a60")
+  (set-face-attribute 'circe-server-face          nil :foreground "#a7a7a7")
+  (set-face-attribute 'circe-originator-face      nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-highlight-face         nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-irc-colors-fg-6-face   nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-irc-colors-fg-5-face   nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-irc-colors-fg-7-face   nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-irc-colors-fg-8-face   nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-irc-colors-fg-2-face   nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-irc-colors-fg-13-face  nil :foreground "#a7a7a7")
+  (set-face-attribute 'lui-button-face            nil :foreground "#a7a7a7"))
+
 (defun vz:circe-general ()
   (require 'lui-autopaste)
   (add-hook 'circe-channel-mode-hook 'enable-lui-autopaste)

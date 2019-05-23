@@ -33,28 +33,13 @@
 (set-face-attribute 'fringe nil :background "#ffffff")
 (fringe-mode '(5 . 0))
 
-(set-face-attribute 'mode-line nil
-                    :background "#ffffff"
-                    :foreground "#5f5a60")
+(setq window-divider-default-places       t
+      window-divider-default-bottom-width 1
+      window-divider-default-right-width  1)
+(window-divider-mode t)
 
 ;; "disable" line-wrap char
 (set-display-table-slot standard-display-table 'wrap ? )
-
-(defun vz:theme-circe ()
-  (set-face-attribute 'circe-prompt-face          nil :background "#ffffff"
-                                                      :foreground "#a7a7a7")
-  (set-face-attribute 'circe-highlight-nick-face  nil :foreground "#a7a7a7")
-  (set-face-attribute 'circe-my-message-face      nil :foreground "#5f5a60")
-  (set-face-attribute 'circe-server-face          nil :foreground "#a7a7a7")
-  (set-face-attribute 'circe-originator-face      nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-highlight-face         nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-irc-colors-fg-6-face   nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-irc-colors-fg-5-face   nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-irc-colors-fg-7-face   nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-irc-colors-fg-8-face   nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-irc-colors-fg-2-face   nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-irc-colors-fg-13-face  nil :foreground "#a7a7a7")
-  (set-face-attribute 'lui-button-face            nil :foreground "#a7a7a7"))
 
 (defun vz:theme-company ()
   (custom-set-faces

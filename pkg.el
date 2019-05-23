@@ -1,5 +1,5 @@
 ;; use-package and friends
-(setq package-user-dir (concat user-emacs-directory "pkgs"))
+(setq package-user-dir "~/var/cache/emacs-pkgs")
 
 (when (version< emacs-version "27.0")
   (package-initialize))

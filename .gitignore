@@ -1,7 +1,6 @@
 *~
-pkgs/
 recentf
 auto-save-list/
 .*
 network-security.data
-#*
+\#*
