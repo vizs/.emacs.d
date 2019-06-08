@@ -99,7 +99,7 @@
               display-line-numbers-width 0
               display-line-numbers-current-absolute t)
 
-(add-to-list 'default-frame-alist '(font . "ttyp0-8"))
+(add-to-list 'default-frame-alist '(font . "Share Tech Mono-10"))
 (add-to-list 'default-frame-alist `(cursor-color . ,vz:color8))
 
 (defun vz:disable-bold-italic-underline ()

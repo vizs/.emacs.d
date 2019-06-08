@@ -24,8 +24,7 @@
 (defun vz:set-mode-line-face ()
   (set-face-attribute 'header-line nil
                       :background vz:color0
-                      :foreground vz:color7
-                      :underline vz:color7)
+                      :foreground vz:color7)
   (set-face-attribute 'header-line-highlight nil
                       :background vz:color0
                       :foreground vz:color15)
