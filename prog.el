@@ -30,15 +30,14 @@
   (add-hook 'python-mode-hook 'eglot-ensure))
   ;;(add-hook 'rust-mode-hook 'eglot-ensure))
 
-
 (use-package racket-mode)
 
 ;; much easier than highlight
 (use-package rainbow-delimiters
   :init
-  (mapc (lambda (lisp--mode)
-          (add-hook 'lisp--mode 'rainbow-delimiters-mode))
-        '(lisp-mode-hook emacs-lisp-mode-hook racket-mode-hook))
+  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'racket-mode-hook 'rainbow-delimiters-mode)
   :config
   (vz:theme-rainbow-parens))
 

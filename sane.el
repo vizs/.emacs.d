@@ -14,7 +14,8 @@
       delete-old-versions t
       keep-new-versions 5
       keep-old-versions 2
-      version-control t)
+      version-control t
+      auto-save-file-name-transforms `(("." "~/var/cache/emacs-bkups" t)))
 
 (use-package ace-window)
 
@@ -29,6 +30,6 @@
 
 (add-hook 'before-save-hook 'whitespace-cleanup)
 (setq frame-title-format '("emacs: "
-                           (vz:mode-line-file-name)))
+                           (:eval (vz:mode-line-file-name))))
 (setq gc-cons-threshold 50000000)
 (defalias 'yes-or-no-p 'y-or-n-p)

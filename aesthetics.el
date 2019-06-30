@@ -10,42 +10,37 @@
       vz:color12 (vz:get-color 12) vz:color13 (vz:get-color 13) vz:color14 (vz:get-color 14)
       vz:color15 (vz:get-color 15))
 
-(set-face-attribute 'default nil :background vz:color0   :foreground vz:color7)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(setq-default display-line-numbers-type 'relative
+              display-line-numbers-width 0
+              display-line-numbers-current-absolute t)
 
-(set-face-attribute 'font-lock-builtin-face nil :foreground vz:color2)
-(set-face-attribute 'font-lock-preprocessor-face nil :foreground vz:color4)
-(set-face-attribute 'font-lock-constant-face nil :foreground vz:color1)
-(set-face-attribute 'font-lock-comment-face nil :foreground vz:color8)
-(set-face-attribute 'font-lock-negation-char-face nil :foreground vz:color1)
-(set-face-attribute 'font-lock-constant-face nil :foreground vz:color2)
-(set-face-attribute 'font-lock-doc-face nil :foreground vz:color8)
-(set-face-attribute 'font-lock-function-name-face nil :foreground vz:color5)
-(set-face-attribute 'font-lock-keyword-face nil :foreground vz:color1)
-(set-face-attribute 'font-lock-string-face nil :foreground vz:color5)
-(set-face-attribute 'font-lock-type-face nil :foreground vz:color10)
-(set-face-attribute 'font-lock-variable-name-face nil :foreground vz:color4)
-(set-face-attribute 'font-lock-warning-face nil :foreground vz:color3)
+(add-to-list 'default-frame-alist '(font . "Go Mono-9"))
+(add-to-list 'default-frame-alist `(cursor-color . ,vz:color8))
 
-(set-face-attribute 'region nil :background vz:color8 :foreground vz:color15)
-(set-face-attribute 'highlight nil :background vz:color8 :foreground vz:color15)
+(defun vz:disable-bold-italic-underline ()
+  (mapc (lambda (face)
+          (set-face-attribute face nil
+            :weight 'normal
+            :slant 'normal
+            :underline nil))
+    (face-list)))
 
-(set-face-attribute 'show-paren-match nil :background vz:color8 :foreground vz:color15)
-(set-face-attribute 'show-paren-mismatch nil :background vz:color1 :foreground vz:color15)
+(set-face-attribute 'fringe nil :background (vz:get-color 0))
+(fringe-mode '(5 . 0))
 
-(set-face-attribute 'isearch nil :background vz:color8 :foreground vz:color15)
+(setq window-divider-default-places       t
+      window-divider-default-bottom-width 1
+      window-divider-default-right-width  1)
+(window-divider-mode t)
 
-(set-face-attribute 'vertical-border nil :foreground vz:color15)
+;; "disable" line-wrap char
+(set-display-table-slot standard-display-table 'wrap ? )
 
-(set-face-attribute 'minibuffer-prompt nil :foreground vz:color5)
-
-(set-face-attribute 'link nil :foreground vz:color5)
-
-(set-face-attribute 'warning nil :foreground vz:color3)
-
-(set-face-attribute 'trailing-whitespace nil :background vz:color8)
-
-(set-face-attribute 'line-number nil :foreground vz:color8)
-(set-face-attribute 'line-number-current-line nil :foreground vz:color5)
+;; highlight matching parenthesis
+(setq show-paren-delay 0
+      show-paren-when-point-inside-paren t)
+(show-paren-mode t)
 
 (defun vz:theme-rainbow-parens ()
   (set-face-attribute 'rainbow-delimiters-base-face nil :foreground vz:color7)
@@ -91,37 +86,4 @@
                 evil-operator-state-cursor '(hbar . 2)
                 evil-motion-state-cursor   'box))
 
-(set-cursor-color vz:color8)
-(set-face-attribute 'cursor nil :background nil)
-
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
-(setq-default display-line-numbers-type 'relative
-              display-line-numbers-width 0
-              display-line-numbers-current-absolute t)
-
-(add-to-list 'default-frame-alist '(font . "Share Tech Mono-10"))
-(add-to-list 'default-frame-alist `(cursor-color . ,vz:color8))
-
-(defun vz:disable-bold-italic-underline ()
-  (mapc (lambda (face)
-          (set-face-attribute face nil
-            :weight 'normal
-            :slant 'normal
-            :underline nil))
-    (face-list)))
-
-(set-face-attribute 'fringe nil :background (vz:get-color 0))
-(fringe-mode '(5 . 0))
-
-(setq window-divider-default-places       t
-      window-divider-default-bottom-width 1
-      window-divider-default-right-width  1)
-(window-divider-mode t)
-
-;; "disable" line-wrap char
-(set-display-table-slot standard-display-table 'wrap ? )
-
-;; highlight matching parenthesis
-(setq show-paren-delay 0
-      show-paren-when-point-inside-paren t)
-(show-paren-mode t)
+(vz:load-elfiles '("themes/mayan.el"))
