@@ -15,7 +15,8 @@
       keep-new-versions 5
       keep-old-versions 2
       version-control t
-      auto-save-default nil)
+      auto-save-file-transforms '((".*" "~/var/cache/emacs-bkups" t))
+      auto-save-list-file-prefix "~/var/cache/emacs-bkups")
 
 (use-package ace-window)
 
