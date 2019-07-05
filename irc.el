@@ -32,26 +32,30 @@
   (require 'lui-autopaste)
   (add-hook 'circe-channel-mode-hook 'enable-lui-autopaste)
   (setq circe-use-cycle-completion t
-        circe-reduce-lurker-spam t)
+        circe-reduce-lurker-spam   t
+        circe-split-line-length    250)
   (setq lui-logging-directory "~/var/cache/irc-log")
   (setq circe-use-cycle-completion t)
   (load "lui-logging" nil t)
-  (enable-lui-logging-globally))
+  (enable-lui-logging-globally)
+  (circe-set-display-handler "353" 'circe-display-ignore)
+  (circe-set-display-handler "366" 'circe-display-ignore))
 
 (defun vz:circe-format ()
-  (setq circe-format-self-say            "{nick} {body}"
-        circe-format-self-action         "{nick} {body}"
-        circe-format-self-message-action "{nick} {body}"
-        circe-format-self-message        "{nick} {body}"
-        circe-format-say                 "{nick} {body}"
-        circe-format-action              "{nick} {body}"
-        circe-format-message-action      "{nick} {body}"
-        circe-format-message             "{nick} {body}"
+  (setq circe-format-self-say            " {nick:-5s} {body}"
+        circe-format-self-action         " {nick:-5s} {body}"
+        circe-format-self-message-action " {nick:-5s} {body}"
+        circe-format-self-message        " {nick:-5s} {body}"
+        circe-format-say                 " {nick:-5s} {body}"
+        circe-format-action              " {nick:-5s} {body}"
+        circe-format-message-action      " {nick:-5s} {body}"
+        circe-format-message             " {nick:-5s} {body}"
         lui-time-stamp-position                     nil))
 
 (defun vz:circe-prompt ()
   (lui-set-prompt
-   (concat (propertize (buffer-name) 'face 'circe-prompt-face) " ")))
+   (concat (propertize (buffer-name)
+                       'face 'circe-prompt-face) " ")))
 
 (use-package circe
   :config
