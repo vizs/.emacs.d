@@ -20,6 +20,10 @@
 
 (use-package ace-window)
 
+(use-package disable-mouse
+  :config
+  (global-disable-mouse-mode))
+
 (setq-default tab-width 4)
 (defvaralias 'c-basic-offset 'tab-width)
 (defvaralias 'cperl-indent-level 'tab-width)
