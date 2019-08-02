@@ -15,7 +15,7 @@
               display-line-numbers-width 0
               display-line-numbers-current-absolute t)
 
-(add-to-list 'default-frame-alist '(font . "Go Mono-9"))
+(add-to-list 'default-frame-alist '(font . "Go Mono:pixelsize=14"))
 (add-to-list 'default-frame-alist `(cursor-color . ,vz:color8))
 
 (defun vz:disable-bold-italic-underline ()
@@ -27,7 +27,7 @@
     (face-list)))
 
 (set-face-attribute 'fringe nil :background (vz:get-color 0))
-(fringe-mode '(5 . 0))
+(fringe-mode '(10 . 10))
 
 (setq window-divider-default-places       t
       window-divider-default-bottom-width 1
