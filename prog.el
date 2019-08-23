@@ -26,9 +26,9 @@
 
 ;; this just fucking works
 (use-package eglot
-  :config
-  (add-hook 'python-mode-hook 'eglot-ensure))
-  ;;(add-hook 'rust-mode-hook 'eglot-ensure))
+ :config
+  (add-hook 'python-mode-hook 'eglot-ensure)
+  (add-hook 'rust-mode-hook 'eglot-ensure))
 
 (use-package racket-mode)
 
@@ -41,4 +41,8 @@
   :config
   (vz:theme-rainbow-parens))
 
-;; TODO: racket
+(let ((tabnine-path (concat user-emacs-directory "/pkgs/company-tabnine")))
+  (if (file-directory-p tabnine-path)
+      (progn
+        (add-to-list 'load-path tabnine-path)
+        (add-to-list 'company-backends #'company-tabnine))))
