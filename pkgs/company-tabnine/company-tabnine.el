@@ -178,13 +178,6 @@ at the cost of less responsive completions."
   :group 'company-tabnine
   :type 'boolean)
 
-(defcustom company-tabnine-install-static-binary (file-exists-p "/etc/nixos/hardware-configuration.nix")
-  "Whether to install the musl-linked static binary instead of
-the standard glibc-linked dynamic binary.
-Only useful on GNU/Linux.  Automatically set if NixOS is detected."
-  :group 'company-tabnine
-  :type 'boolean)
-
 (defcustom company-tabnine-log-file-path nil
   "If non-nil, next TabNine restart will write debug log to this path."
   :group 'company-tabnine
@@ -200,7 +193,7 @@ Only useful on GNU/Linux.  Automatically set if NixOS is detected."
 ;;   :group 'company-tabnine
 ;;   :type 'boolean)
 
-(defcustom company-tabnine-show-annotation t
+(defcustom company-tabnine-show-annotation nil
   "Whether to show an annotation inline with the candidate."
   :group 'company-tabnine
   :type 'boolean)
@@ -267,30 +260,6 @@ Resets every time successful completion is returned.")
   "Return t if CANDIDATE string begins with PREFIX."
   (let ((insertion-text (cdr (assq 'insertion_text candidate))))
     (s-starts-with? prefix insertion-text t)))
-
-(defun company-tabnine--get-target ()
-  "Return TabNine's system configuration.  Used for finding the correct binary."
-  (let ((architecture
-         (cond
-          ((string= (s-left 6 system-configuration) "x86_64")
-           "x86_64")
-          (t
-           "i686")))
-
-        (os
-         (cond
-          ((or (eq system-type 'ms-dos)
-               (eq system-type 'windows-nt)
-               (eq system-type 'cygwin))
-           "pc-windows-gnu")
-          ((or (eq system-type 'darwin))
-           "apple-darwin")
-          (company-tabnine-install-static-binary
-           "unknown-linux-musl")
-          (t
-           "unknown-linux-gnu"))))
-
-    (concat architecture "-" os)))
 
 (defun company-tabnine--version-comp (ver1 ver2)
   "Compare two TabNine versions (semver) VER1 and VER2."

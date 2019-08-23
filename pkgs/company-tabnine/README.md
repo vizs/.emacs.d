@@ -1,3 +1,5 @@
+its here because i couldn't get company-tabnine to know tabnine's path correctly
+
 # company-tabnine
 
 [![MELPA](https://melpa.org/packages/company-tabnine-badge.svg)](https://melpa.org/#/company-tabnine)
