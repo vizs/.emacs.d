@@ -30,7 +30,9 @@
   (add-hook 'python-mode-hook 'eglot-ensure)
   (add-hook 'rust-mode-hook 'eglot-ensure))
 
-(use-package racket-mode)
+(use-package racket-mode
+  :config
+  (racket-unicode-input-method-enable))
 
 ;; much easier than highlight
 (use-package rainbow-delimiters
