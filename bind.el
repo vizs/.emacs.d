@@ -1,18 +1,5 @@
 ;; TODO: remove this and remap C-n C-p to C-j C-k in ex
 
-;; evil
-(general-define-key
- :states 'normal
- :keymaps 'override
- (kbd "C-w o") nil
- (kbd "g c") 'comment-line
- (kbd "C-w o") 'ace-window
- (kbd "C-w O") 'delete-other-windows)
-(general-define-key
- :states 'visual
- :keymaps 'override
- (kbd "g c") 'comment-line)
-
 ;; ivy and counsel
 (general-define-key
   :states 'normal

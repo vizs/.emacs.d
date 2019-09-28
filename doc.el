@@ -1,4 +1,12 @@
 ;; document related stuff
-;; TODO: add latex stuff
 
-(use-package pdf-tools)
+;; org-mode
+(setq org-src-preserve-indentation t)
+
+(general-define-key
+ :states      'normal
+ :keymaps     'org-mode-map
+ :prefix      "SPC"
+ "e p"        'org-latex-export-to-pdf
+ "e t"        'org-latex-export-to-latex
+ "t"          'org-babel-tangle)
