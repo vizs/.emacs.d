@@ -7,7 +7,7 @@
           (t (replace-regexp-in-string "/home/viz" "~" file-name)))))
 
 (defun vz:mode-line-file-state ()
-  (unless (not (buffer-file-name))
+  (when (buffer-file-name)
     (cond (buffer-read-only "!")
           ((buffer-modified-p) "*"))))
 
