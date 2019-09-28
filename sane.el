@@ -9,16 +9,21 @@
 (setq-default cursor-type '(hbar . 3))
 (setq cursor-in-non-selected-windows nil)
 
-(setq backup-by-copying t
-      backup-directory-alist '(("." . "~/var/cache/emacs-bkups"))
-      delete-old-versions t
-      keep-new-versions 5
-      keep-old-versions 2
-      version-control t
-      auto-save-file-transforms '((".*" "~/var/cache/emacs-bkups" t))
-      auto-save-list-file-prefix "~/var/cache/emacs-bkups")
+(setq backup-by-copying            t
+      backup-directory-alist      '(("." . "~/var/cache/emacs-bkups"))
+      delete-old-versions          t
+      keep-new-versions            5
+      keep-old-versions            2
+      version-control              t
+      auto-save-file-transforms   '((".*" "~/var/cache/emacs-bkups" t))
+      auto-save-list-file-prefix   "~/var/cache/emacs-bkups")
 
-(use-package ace-window)
+(use-package ace-window
+  :config
+  (general-define-key
+  :states   '(normal insert)
+  :keymaps  'override
+  "C-w o"   'ace-window))
 
 (use-package disable-mouse
   :config

@@ -1,15 +1,19 @@
 ;; im a dirty vim user
+;; TODO: change ex mode keybindings
+
 (use-package evil
+  :init
+  (setq evil-want-keybinding nil)
   :config
-  (setq evil-want-integration t
-        evil-want-keybinding  t)
+  (setq evil-want-integration t)
   (evil-mode t)
   (vz:style-evil-cursor))
 
 (use-package evil-collection
   :after evil
   :config
-  (evil-collection-init))
+  (evil-collection-init)
+  (setq evil-want-keybinding t))
 
 (use-package general
   :after evil
@@ -21,7 +25,6 @@
  :keymaps   'override
  "C-w o"     nil
  "g c"      'comment-line
- "C-w o"    'ace-window
  "C-w O"    'delete-other-windows)
 
 (general-define-key

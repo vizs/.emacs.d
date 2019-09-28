@@ -38,11 +38,11 @@
 (defun vz:norm-mode ()
   (interactive)
   (vz:load-elfiles '("evil.el" "prog.el" "irc.el"
-                     "doc.el" "bind.el")))
+                     "doc.el")))
 
 (defun vz:prog-mode ()
   (interactive)
-  (vz:load-elfiles '("evil.el" "prog.el" "bind.el")))
+  (vz:load-elfiles '("evil.el" "prog.el")))
 
 (defun vz:do-client-mode ()
   (if (eq (boundp 'vz:preferred-mode) nil)
