@@ -18,12 +18,7 @@
       auto-save-file-transforms   '((".*" "~/var/cache/emacs-bkups" t))
       auto-save-list-file-prefix   "~/var/cache/emacs-bkups")
 
-(use-package ace-window
-  :config
-  (general-define-key
-  :states   '(normal insert)
-  :keymaps  'override
-  "C-w o"   'ace-window))
+(use-package ace-window)
 
 (use-package disable-mouse
   :config

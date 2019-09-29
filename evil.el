@@ -23,9 +23,14 @@
 (general-define-key
  :states    'normal
  :keymaps   'override
- "C-w o"     nil
  "g c"      'comment-line
  "C-w O"    'delete-other-windows)
+
+(general-define-key
+ :states    '(normal insert)
+ :keymaps   'override
+ "C-w o"     nil
+ "C-w o"     'ace-window)
 
 (general-define-key
  :states    'visual

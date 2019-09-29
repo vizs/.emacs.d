@@ -32,7 +32,7 @@
 (set-face-attribute 'trailing-whitespace nil :background vz:color8)
 
 (set-face-attribute 'line-number nil :foreground vz:color8)
-(set-face-attribute 'line-number-current-line nil :foreground vz:color5)
+(set-face-attribute 'line-number-current-line nil :foreground vz:color15)
 
 (defun vz:--sh ()
   (set-face-attribute 'sh-heredoc     nil :foreground vz:color2)
