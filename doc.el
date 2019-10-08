@@ -9,5 +9,7 @@
  :prefix      "SPC"
  "e p"        'org-latex-export-to-pdf
  "e t"        'org-latex-export-to-latex
- "t a"        'org-babel-tangle
- "t"          'org-todo)
+ "t"          'org-todo
+ "s t"        'org-babel-tangle)
+
+(add-hook 'org-mode-hook 'display-line-numbers-mode)
