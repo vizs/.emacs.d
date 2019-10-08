@@ -4,7 +4,7 @@
   :config
   (add-hook 'prog-mode-hook 'ivy-mode)
   (setq ivy-use-virtual-buffers t)
-  (vz:theme-ivy)
+  (vz/theme-ivy)
   (general-define-key
    :states    'normal
    :keymaps   'override
@@ -31,7 +31,7 @@
   :init
   (add-hook 'prog-mode-hook 'company-mode)
   :config
-  (vz:theme-company)
+  (vz/theme-company)
   (setq company-require-match 'never
         company-idle-delay 1
         company-tooltip-limit 10
@@ -65,7 +65,7 @@
   (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'racket-mode-hook 'rainbow-delimiters-mode)
   :config
-  (vz:theme-rainbow-parens))
+  (vz/theme-rainbow-parens))
 
 (let ((tabnine-path (concat user-emacs-directory "/pkgs/company-tabnine")))
   (if (file-directory-p tabnine-path)

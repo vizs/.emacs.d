@@ -7,7 +7,7 @@
   :config
   (setq evil-want-integration t)
   (evil-mode t)
-  (vz:style-evil-cursor))
+  (vz/style-evil-cursor))
 
 (use-package evil-collection
   :after evil

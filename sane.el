@@ -35,6 +35,6 @@
 
 (add-hook 'before-save-hook 'whitespace-cleanup)
 (setq frame-title-format '("emacs: "
-                           (:eval (vz:mode-line-file-name))))
+                           (:eval (vz/mode-line-file-name))))
 (setq gc-cons-threshold 50000000)
 (defalias 'yes-or-no-p 'y-or-n-p)
