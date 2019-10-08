@@ -9,4 +9,5 @@
  :prefix      "SPC"
  "e p"        'org-latex-export-to-pdf
  "e t"        'org-latex-export-to-latex
- "t"          'org-babel-tangle)
+ "t a"        'org-babel-tangle
+ "t"          'org-todo)
