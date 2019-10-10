@@ -32,7 +32,16 @@
 (setq window-divider-default-places       t
       window-divider-default-bottom-width 1
       window-divider-default-right-width  1)
-(window-divider-mode t)
+
+(defun vz/draw-window-dividers ()
+  "draw window-dividers only when one window is open"
+  (if (eq (length (delete-dups (mapcar #'window-buffer
+                                      (window-list nil nil))))
+          1)
+      (window-divider-mode -1)
+    (window-divider-mode t)))
+
+(add-hook 'window-configuration-change-hook 'vz/draw-window-dividers)
 
 ;; "disable" line-wrap char
 (set-display-table-slot standard-display-table 'wrap ? )
