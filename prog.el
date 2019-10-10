@@ -56,7 +56,7 @@
 
 (use-package racket-mode
   :config
-  (racket-unicode-input-method-enable))
+  (add-hook 'racket-mode-hook 'racket-unicode-input-method-enable))
 
 ;; much easier than highlight
 (use-package rainbow-delimiters
@@ -67,8 +67,5 @@
   :config
   (vz/theme-rainbow-parens))
 
-(let ((tabnine-path (concat user-emacs-directory "/pkgs/company-tabnine")))
-  (if (file-directory-p tabnine-path)
-      (progn
-        (add-to-list 'load-path tabnine-path)
-        (add-to-list 'company-backends #'company-tabnine))))
+(when (vz/load-pkg "company-tabnine")
+  (add-to-list 'company-backends #'company-tabnine))
