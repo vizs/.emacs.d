@@ -33,11 +33,13 @@
       window-divider-default-bottom-width 1
       window-divider-default-right-width  1)
 
+(defun vz/count-windows ()
+  (length (mapcar #'window-buffer
+                               (window-list nil nil))))
+
 (defun vz/draw-window-dividers ()
   "draw window-dividers only when one window is open"
-  (if (eq (length (delete-dups (mapcar #'window-buffer
-                                      (window-list nil nil))))
-          1)
+  (if (eq (vz/count-windows) 1)
       (window-divider-mode -1)
     (window-divider-mode t)))
 
