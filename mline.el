@@ -9,7 +9,9 @@
 (defun vz/mode-line-file-state ()
   (when (buffer-file-name)
     (cond (buffer-read-only "!")
-          ((buffer-modified-p) "*"))))
+          ((buffer-modified-p) "*")
+          (t "")))
+  "")
 
 (setq vz/mode-line-format
       '("  "
@@ -49,3 +51,27 @@
   (if (not mode-line-format)
       (setq mode-line-format vz/mode-line-format)
     (setq mode-line-format nil)))
+
+(when (vz/load-pkg "awesome-tray")
+  (require 'awesome-tray)
+  (defun vz/tray-line-column ()
+    (format "L%s C%s"
+            (format-mode-line "%l")
+            (format-mode-line "%c")))
+
+  (add-to-list 'awesome-tray-module-alist
+               '("vz/loc" .
+                 (vz/tray-line-column default)))
+
+  (defun vz/tray-file-name ()
+    (format "%s%s"
+            (vz/mode-line-file-name)
+            (vz/mode-line-file-state)))
+
+  (add-to-list 'awesome-tray-module-alist
+               '("vz/file" .
+                 (vz/tray-file-name default)))
+
+  (setq awesome-tray-active-modules '("vz/file" "vz/loc"))
+  (setq-default header-line-format nil)
+  (awesome-tray-mode 1))
