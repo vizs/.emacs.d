@@ -1,4 +1,7 @@
 ;; autocompletion and other stuff
+
+(electric-pair-mode)
+
 (use-package ivy
   :after general
   :config
@@ -8,7 +11,8 @@
   (general-define-key
    :states    'normal
    :keymaps   'override
-   "/"        'swiper)
+   "/"        'swiper
+   "SPC b"    'ivy-switch-buffer)
   (general-define-key
    :keymaps  'ivy-minibuffer-map
    "C-p"      nil
@@ -25,7 +29,8 @@
    ","        'counsel-M-x
    "SPC d f"  'counsel-describe-function
    "SPC d v"  'counsel-describe-variable
-   "SPC d F"  'counsel-describe-face))
+   "SPC d F"  'counsel-describe-face
+   "SPC ,"    'counsel-imenu))
 
 (use-package company
   :init

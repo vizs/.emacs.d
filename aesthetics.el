@@ -39,7 +39,7 @@
 
 (defun vz/draw-window-dividers ()
   "draw window-dividers only when one window is open"
-  (if (eq (vz/count-windows) 1)
+  (if (= (vz/count-windows) 1)
       (window-divider-mode -1)
     (window-divider-mode t)))
 
@@ -49,7 +49,7 @@
 (set-display-table-slot standard-display-table 'wrap ? )
 
 ;; highlight matching parenthesis
-(setq show-paren-delay 0
+(setq show-paren-delay                   0
       show-paren-when-point-inside-paren t)
 (show-paren-mode t)
 
@@ -57,7 +57,7 @@
   (setq evil-default-cursor t)
   (setq-default evil-normal-state-cursor   'box
                 evil-emacs-state-cursor    'box
-                evil-insert-state-cursor   '(bar . 2)
+                evil-insert-state-cursor   '(bar  . 2)
                 evil-visual-state-cursor   '(hbar . 3)
                 evil-replace-state-cursor  '(hbar . 3)
                 evil-operator-state-cursor '(hbar . 2)
