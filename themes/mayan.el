@@ -34,6 +34,8 @@
 (set-face-attribute 'line-number nil :foreground vz/color8)
 (set-face-attribute 'line-number-current-line nil :foreground vz/color15)
 
+(set-face-attribute 'window-divider nil :foreground vz/color7)
+
 (defun vz/--sh ()
   (set-face-attribute 'sh-heredoc     nil :foreground vz/color2)
   (set-face-attribute 'sh-quoted-exec nil :foreground vz/color4))
@@ -48,7 +50,7 @@
   (set-face-attribute 'rainbow-delimiters-depth-5-face nil :foreground vz/color5)
   (set-face-attribute 'rainbow-delimiters-depth-6-face nil :foreground vz/color6)
   (set-face-attribute 'rainbow-delimiters-depth-7-face nil :foreground vz/color7)
-  (set-face-attribute 'rainbow-delimiters-depth-8-face nil :foreground vz/color8)
+  (set-face-attribute 'rainbow-delimiters-depth-8-face nil :foreground vz/color15)
   (set-face-attribute 'rainbow-delimiters-unmatched-face nil :background vz/color1 :foreground vz/color15)
   (set-face-attribute 'lazy-highlight nil :background vz/color8 :foreground vz/color13))
 
@@ -73,5 +75,9 @@
  (set-face-attribute 'ivy-minibuffer-match-face-4 nil :background vz/color8 :foreground vz/color15)
  (set-face-attribute 'ivy-match-required-face nil :background vz/color8 :foreground vz/color15))
 
-(set-cursor-color vz/color8)
+(defun vz/theme-racket ()
+  (set-face-attribute 'racket-selfeval-face nil :foreground vz/color2)
+  (set-face-attribute 'racket-keyword-argument-face nil :foreground vz/color1))
+
+(set-cursor-color vz/color15)
 (set-face-attribute 'cursor nil :background nil)

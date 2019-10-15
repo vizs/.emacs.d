@@ -10,6 +10,6 @@
  "e p"        'org-latex-export-to-pdf
  "e t"        'org-latex-export-to-latex
  "t"          'org-todo
- "s t"        'org-babel-tangle)
+ "s T"        'org-babel-tangle)
 
 (add-hook 'org-mode-hook 'display-line-numbers-mode)

@@ -15,8 +15,8 @@
               display-line-numbers-width 0
               display-line-numbers-current-absolute t)
 
-(add-to-list 'default-frame-alist '(font . "ctrld:pixelsize=14"))
-(add-to-list 'default-frame-alist `(cursor-color . ,vz/color8))
+(add-to-list 'default-frame-alist '(font . "Go Mono:pixelsize=14"))
+(add-to-list 'default-frame-alist `(cursor-color . ,vz/color15))
 
 (defun vz/disable-bold-italic-underline ()
   (mapc (lambda (face)

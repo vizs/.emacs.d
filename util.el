@@ -61,3 +61,7 @@
           (add-to-list 'load-path pkg-path)
           t)
       nil)))
+
+(defun vz/spawn-st ()
+  (interactive)
+  (call-process "st"))

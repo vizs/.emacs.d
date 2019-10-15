@@ -25,7 +25,8 @@
  :keymaps   'override
  "g c"      'comment-line
  "C-w O"    'delete-other-windows
- "SPC r c"  'vz/reload-config)
+ "SPC r c"  'vz/reload-config
+ "SPC s t"  'vz/spawn-st)
 
 (general-define-key
  :states    '(normal insert)

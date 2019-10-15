@@ -61,6 +61,7 @@
 
 (use-package racket-mode
   :config
+  (vz/theme-racket)
   (add-hook 'racket-mode-hook 'racket-unicode-input-method-enable))
 
 ;; much easier than highlight
