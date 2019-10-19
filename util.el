@@ -64,4 +64,4 @@
 
 (defun vz/spawn-st ()
   (interactive)
-  (call-process "st"))
+  (call-process "tab" nil 0 nil "-w" "st"))
