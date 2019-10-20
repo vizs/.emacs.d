@@ -79,5 +79,5 @@
   (set-face-attribute 'racket-selfeval-face nil :foreground vz/color2)
   (set-face-attribute 'racket-keyword-argument-face nil :foreground vz/color1))
 
-(set-cursor-color vz/color15)
+(set-cursor-color vz/color8)
 (set-face-attribute 'cursor nil :background nil)
