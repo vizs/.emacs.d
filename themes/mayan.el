@@ -36,6 +36,12 @@
 
 (set-face-attribute 'window-divider nil :foreground vz/color7)
 
+(defun vz/--org ()
+  (set-face-attribute 'org-table nil :foreground vz/color3)
+  (set-face-attribute 'org-document-info-keyword nil :foreground vz/color8)
+  (set-face-attribute 'org-document-title nil :foreground vz/color8))
+(add-hook 'org-mode-hook 'vz/--org)
+
 (defun vz/--sh ()
   (set-face-attribute 'sh-heredoc     nil :foreground vz/color2)
   (set-face-attribute 'sh-quoted-exec nil :foreground vz/color4))

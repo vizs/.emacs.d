@@ -55,9 +55,12 @@
 
 ;; this just fucking works
 (use-package eglot
- :config
+  :config
+  (add-to-list 'eglot-server-programs
+               '(racket-mode . ("racket-language-server")))
   (add-hook 'python-mode-hook 'eglot-ensure)
-  (add-hook 'rust-mode-hook 'eglot-ensure))
+  (add-hook 'rust-mode-hook 'eglot-ensure)
+  (add-hook 'racket-mode-hook 'eglot-ensure))
 
 (use-package racket-mode
   :config

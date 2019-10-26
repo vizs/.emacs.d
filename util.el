@@ -54,14 +54,6 @@
     (insert-file-contents-literally path)
     (buffer-string)))
 
-(defun vz/load-pkg (pkg-name)
-  (let ((pkg-path (concat user-emacs-directory "/pkgs/" pkg-name)))
-    (if (file-directory-p pkg-path)
-        (progn
-          (add-to-list 'load-path pkg-path)
-          t)
-      nil)))
-
 (defun vz/spawn-st ()
   (interactive)
   (call-process "tab" nil 0 nil "-w" "st"))
