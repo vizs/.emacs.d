@@ -1,7 +1,5 @@
 ;; autocompletion and other stuff
 
-(electric-pair-mode)
-
 (use-package ivy
   :after general
   :config
@@ -37,7 +35,7 @@
   (add-hook 'prog-mode-hook 'company-mode)
   :config
   (vz/theme-company)
-  (setq company-require-match 'never
+  (setq company-require-match nil
         company-idle-delay 1
         company-tooltip-limit 10
         company-minimum-prefix-length 0)
@@ -47,6 +45,11 @@
    "M-p"       nil
    "C-j"      'company-select-next
    "C-k"      'company-select-previous))
+
+(use-package company-fuzzy
+  :after company
+  :init
+  (add-hook 'prog-mode-hook '(lambda () (company-fuzzy-mode 1))))
 
 (use-package rust-mode
   :config

@@ -10,7 +10,6 @@
   (force-mode-line-update t))
 
 (defun vz/minimal-ui ()
-  "minimal ui - hides mode-line and fringe"
   (interactive)
   (setq header-line-format nil)
   (setq mode-line-format nil)
@@ -18,7 +17,6 @@
   (display-line-numbers-mode 0))
 
 (defun vz/no-bloat ()
-  "no bloat - disable company, ivy, etc."
   (interactive)
   (company-mode -1)
   (ivy-mode -1))
