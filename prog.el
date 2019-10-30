@@ -5,7 +5,6 @@
   :config
   (add-hook 'prog-mode-hook 'ivy-mode)
   (setq ivy-use-virtual-buffers t)
-  (vz/theme-ivy)
   (general-define-key
    :states    'normal
    :keymaps   'override
@@ -34,7 +33,6 @@
   :init
   (add-hook 'prog-mode-hook 'company-mode)
   :config
-  (vz/theme-company)
   (setq company-require-match nil
         company-idle-delay 1
         company-tooltip-limit 10
@@ -67,7 +65,6 @@
 
 (use-package racket-mode
   :config
-  (vz/theme-racket)
   (add-hook 'racket-mode-hook 'racket-unicode-input-method-enable))
 
 ;; much easier than highlight
@@ -75,9 +72,7 @@
   :init
   (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'racket-mode-hook 'rainbow-delimiters-mode)
-  :config
-  (vz/theme-rainbow-parens))
+  (add-hook 'racket-mode-hook 'rainbow-delimiters-mode))
 
 (when (vz/load-pkg "company-tabnine")
   (add-to-list 'company-backends #'company-tabnine))

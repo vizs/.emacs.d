@@ -46,11 +46,13 @@
 
 ;; "disable" line-wrap char
 (set-display-table-slot standard-display-table 'wrap ? )
+(setf (cdr (assq 'continuation fringe-indicator-alist))
+      '(nil nil))
 
 ;; highlight matching parenthesis
 (setq show-paren-delay                   0
       show-paren-when-point-inside-paren t)
-(show-paren-mode t)
+; (show-paren-mode t)
 
 (defun vz/style-evil-cursor ()
   (setq evil-default-cursor t)
