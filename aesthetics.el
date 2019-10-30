@@ -21,12 +21,11 @@
 (defun vz/disable-bold-italic-underline ()
   (mapc (lambda (face)
           (set-face-attribute face nil
-            :weight 'normal
-            :slant 'normal
-            :underline nil))
+            :weight    'normal
+            :slant     'normal
+            :underline  nil))
     (face-list)))
 
-(set-face-attribute 'fringe nil :background (vz/get-color 0))
 (fringe-mode '(10 . 10))
 
 (setq window-divider-default-places       t

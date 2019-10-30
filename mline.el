@@ -24,18 +24,11 @@
         mode-name))
 
 (defun vz/set-mode-line-face ()
-  (set-face-attribute 'header-line nil
-                      :background vz/color0
-                      :foreground vz/color7)
-  (set-face-attribute 'header-line-highlight nil
-                      :background vz/color0
-                      :foreground vz/color15)
-  (set-face-attribute 'mode-line  nil
-                      :background vz/color0
-                      :foreground vz/color7)
-  (set-face-attribute 'mode-line-highlight nil
-                      :background vz/color0
-                      :foreground vz/color15))
+  (custom-set-faces
+   `(header-line           ((t :background ,vz/color0 :foreground ,vz/color7)))
+   `(header-line-highlight ((t :background ,vz/color0 :foreground ,vz/color15)))
+   `(mode-line             ((t :background ,vz/color0 :foreground ,vz/color7)))
+   `(mode-line-highlight   ((t :background ,vz/color0 :foreground ,vz/color15)))))
 
 (setq-default mode-line-format   nil
               header-line-format vz/mode-line-format)
