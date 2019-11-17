@@ -33,8 +33,11 @@
  `(line-number              ((t :foreground ,vz/color8)))
  `(line-number-current-line ((t :foreground ,vz/color15)))
 
- `(window-divider ((t :foreground ,vz/color7)))
- `(fringe         ((t :background ,vz/color0)))
+ `(window-divider             ((t :foreground ,vz/color7)))
+ `(window-divider-first-pixel ((t :foreground ,vz/color7)))
+ `(window-divider-last-pixel  ((t :foreground ,vz/color7)))
+ `(fringe                     ((t :foreground ,vz/color0)))
+ `(vertical-border            ((t :foreground ,vz/color0 :background ,vz/color0)))
 
  `(org-table                 ((t :foreground ,vz/color3)))
  `(org-document-info-keyword ((t :foreground ,vz/color8)))

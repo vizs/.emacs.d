@@ -63,5 +63,4 @@
   (vz/circe-general)
   (vz/circe-format)
   (vz/theme-circe)
-  (add-hook 'circe-chat-mode-hook 'vz/circe-prompt)
-  (add-hook 'circe-chat-mode-hook 'vz/minimal-ui))
+  (add-hook 'circe-chat-mode-hook 'vz/circe-prompt))

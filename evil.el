@@ -26,7 +26,8 @@
  "g c"      'comment-line
  "C-w O"    'delete-other-windows
  "SPC r c"  'vz/reload-config
- "SPC s t"  'vz/spawn-st)
+ "SPC s t"  'vz/spawn-st
+ "SPC c d"  'counsel-find-file)
 
 (general-define-key
  :states    '(normal insert)

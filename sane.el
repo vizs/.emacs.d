@@ -16,9 +16,9 @@
       keep-new-versions               5
       keep-old-versions               2
       version-control                 t
-      auto-save-file-transforms      '((".*" "~/var/cache/emacs-bkups" t))
-      auto-save-list-file-prefix     "~/var/cache/emacs-bkups"
-      auto-save-default               nil
+      auto-save-file-transforms      '((".*" "~/var/cache/emacs-bkups/" t))
+      auto-save-list-file-prefix     "~/var/cache/emacs-bkups/"
+   ;; auto-save-default               nil
       create-lockfiles                nil
       cursor-in-non-selected-windows  nil
       custom-file                     (concat user-emacs-directory ".custom.el")
