@@ -1,9 +1,9 @@
 ;; A E S T H E T I C S
 
 (let ((colors "~/var/cache/tm/colors.el"))
-  (if (file-exists-p colors)
-      (load-file colors)
-    (load-file (concat user-emacs-directory "/themes/defcolors.el"))))
+  (load-file (if (file-exists-p colors)
+                 colors
+               (concat user-emacs-directory "/themes/defcolors.el"))))
 
 (when vz/show-numbers?
   (add-hook 'prog-mode-hook 'display-line-numbers-mode))
@@ -77,4 +77,4 @@
                 evil-operator-state-cursor '(hbar . 2)
                 evil-motion-state-cursor   'box))
 
-(vz/load-elfiles '("themes/mayan.el"))
+(load-file "themes/mayan.el")
