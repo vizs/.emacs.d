@@ -5,13 +5,12 @@
   :config
   (add-hook 'prog-mode-hook 'ivy-mode)
   (setq ivy-use-virtual-buffers t)
-  (general-define-key
-   :states    'normal
-   :keymaps   'override
+  (vz/bind-norm
    "/"        'swiper
    "SPC b"    'ivy-switch-buffer)
-  (general-define-key
-   :keymaps  'ivy-minibuffer-map
+  (vz/bind
+   ""
+   'ivy-minibuffer-map
    "C-p"      nil
    "C-n"      nil
    "C-j"     'ivy-next-line
@@ -20,9 +19,7 @@
 (use-package counsel
   :after ivy
   :config
-  (general-define-key
-   :states    'normal
-   :keymaps   'override
+  (vz/bind-norm
    ","        'counsel-M-x
    "SPC d f"  'counsel-describe-function
    "SPC d v"  'counsel-describe-variable
@@ -37,8 +34,9 @@
         company-idle-delay 1
         company-tooltip-limit 10
         company-minimum-prefix-length 0)
-  (general-define-key
-   :keymaps   'company-active-map
+  (vz/bind
+   ""
+   'company-active-map
    "M-n"       nil
    "M-p"       nil
    "C-j"      'company-select-next

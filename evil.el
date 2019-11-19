@@ -19,23 +19,21 @@
   :after evil
   :init
   (setq general-override-states '(insert emacs hybrid normal
-                                  visual motion operator replace)))
-(general-define-key
- :states    'normal
- :keymaps   'override
+                                         visual motion operator replace)))
+
+(vz/bind-norm
  "g c"      'comment-line
  "C-w O"    'delete-other-windows
+ "C-w q"    'evil-window-delete
  "SPC r c"  'vz/reload-config
  "SPC s t"  'vz/spawn-st
  "SPC c d"  'counsel-find-file)
 
-(general-define-key
- :states    '(normal insert)
- :keymaps   'override
- "C-w o"     nil
+(vz/bind-nois
+ "C-w o"      nil
+ "C-w c"      nil
+ "C-w C-c"    nil
  "C-w o"     'ace-window)
 
-(general-define-key
- :states    'visual
- :keymaps   'override
- "g c"      'comment-line)
+(vz/bind-vis
+ "g c" 'comment-line)

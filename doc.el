@@ -8,14 +8,14 @@
 
 (setq org-src-preserve-indentation t)
 
-(general-define-key
- :states      'normal
- :keymaps     'org-mode-map
- :prefix      "SPC"
- "e p"        'org-latex-export-to-pdf
- "e t"        'org-latex-export-to-latex
- "t"          'org-todo
- "s T"        'org-babel-tangle
- "p p"        'vz/org-preview-pdf)
+(vz/bind
+ 'normal
+ 'org-mode-map
+ "SPC e p"        'org-latex-export-to-pdf
+ "SPC e t"        'org-latex-export-to-latex
+ "SPC t"          'org-todo
+ "SPC s T"        'org-babel-tangle
+ "SPC p p"        'vz/org-preview-pdf)
 
-(add-hook 'org-mode-hook 'display-line-numbers-mode)
+(when vz/show-numbers?
+  (add-hook 'org-mode-hook 'display-line-numbers-mode))
