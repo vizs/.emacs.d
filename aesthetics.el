@@ -1,16 +1,13 @@
 ;; A E S T H E T I C S
-(setq vz/colors (split-string (vz/fread "~/var/cache/tm/colors") "\n"))
-(defun vz/get-color (index)
-  (nth index vz/colors))
 
-(setq vz/color0  (vz/get-color 0)  vz/color1  (vz/get-color 1)  vz/color2  (vz/get-color 2)
-      vz/color3  (vz/get-color 3)  vz/color4  (vz/get-color 3)  vz/color5  (vz/get-color 5)
-      vz/color6  (vz/get-color 6)  vz/color7  (vz/get-color 7)  vz/color8  (vz/get-color 8)
-      vz/color9  (vz/get-color 9)  vz/color10 (vz/get-color 10) vz/color11 (vz/get-color 11)
-      vz/color12 (vz/get-color 12) vz/color13 (vz/get-color 13) vz/color14 (vz/get-color 14)
-      vz/color15 (vz/get-color 15))
+(let ((colors "~/var/cache/tm/colors.el"))
+  (if (file-exists-p colors)
+      (load-file colors)
+    (load-file (concat user-emacs-directory "/themes/defcolors.el"))))
 
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(when vz/show-numbers?
+  (add-hook 'prog-mode-hook 'display-line-numbers-mode))
+
 (setq-default display-line-numbers-type            'relative
               display-line-numbers-width            0
               display-line-numbers-current-absolute t)
@@ -26,7 +23,7 @@
             :underline  nil))
     (face-list)))
 
-(fringe-mode '(2 . 2))
+(fringe-mode '(20 . 0))
 
 (defun vz/count-windows ()
   (length (mapcar #'window-buffer
@@ -56,15 +53,19 @@
 
 (add-hook 'window-configuration-change-hook 'vz/draw-window-dividers)
 
+;; wrapping
 (set-display-table-slot standard-display-table 'wrap ? )
+
 ;; don't show curly arrow in fringe
 (setf (cdr (assq 'continuation fringe-indicator-alist))
       '(nil nil))
 
 ;; highlight matching parenthesis
+(when vz/show-paren-highlight?
+  (show-paren-mode t))
+
 (setq show-paren-delay                   0
       show-paren-when-point-inside-paren t)
-; (show-paren-mode t)
 
 (defun vz/style-evil-cursor ()
   (setq evil-default-cursor t)
