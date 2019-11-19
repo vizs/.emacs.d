@@ -9,7 +9,7 @@
    "/"        'swiper
    "SPC b"    'ivy-switch-buffer)
   (vz/bind
-   ""
+   nil
    'ivy-minibuffer-map
    "C-p"      nil
    "C-n"      nil
@@ -35,7 +35,7 @@
         company-tooltip-limit 10
         company-minimum-prefix-length 0)
   (vz/bind
-   ""
+   nil
    'company-active-map
    "M-n"       nil
    "M-p"       nil
@@ -54,16 +54,9 @@
 ;; much easier than highlight
 (use-package rainbow-delimiters
   :init
-  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'racket-mode-hook 'rainbow-delimiters-mode))
-
-;; much easier than highlight
-(use-package rainbow-delimiters
-  :init
-  (add-hook 'lisp-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'racket-mode-hook 'rainbow-delimiters-mode))
+  (mapc (lambda (mode)
+          (add-hook mode 'rainbow-delimiters-mode))
+        (list 'lisp-mode-hook 'emacs-lisp-mode-hook 'racket-mode-hook)))
 
 (when (vz/load-pkg "company-tabnine")
   (add-to-list 'company-backends #'company-tabnine))
@@ -72,6 +65,6 @@
   :config
   (add-to-list 'eglot-server-programs
                '(racket-mode . ("racket-language-server")))
-  (add-hook 'python-mode-hook 'eglot-ensure)
-  (add-hook 'rust-mode-hook 'eglot-ensure)
-  (add-hook 'racket-mode-hook 'eglot-ensure))
+  (mapc (lambda (mode)
+          (add-hook mode 'eglot-ensure))
+        (list 'python-mode-hook 'rust-mode-hook 'racket-mode-hook)))
