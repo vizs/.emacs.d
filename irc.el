@@ -57,6 +57,7 @@
         lui-time-stamp-position                     nil)
 
   ;; prompt
-  (lui-set-prompt
-   (concat (propertize (buffer-name)
-                       'face 'circe-prompt-face) " ")))
+  (add-hook 'circe-chat-mode-hook
+            '(lui-set-prompt
+              (concat (propertize (buffer-name)
+                                  'face 'circe-prompt-face) " "))))
