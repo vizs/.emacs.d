@@ -77,4 +77,4 @@
                 evil-operator-state-cursor '(hbar . 2)
                 evil-motion-state-cursor   'box))
 
-(load-file "themes/mayan.el")
+(vz/load-elfiles '("themes/mayan.el"))
