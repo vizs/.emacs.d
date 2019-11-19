@@ -18,8 +18,5 @@
           (switch-to-buffer-other-window vterm-buf)
         (vterm-other-window))))
 
-  (general-define-key
-   :states  'normal
-   :keymaps 'override
-   :prefix  "SPC"
-   "T"      'vz/term-switch))
+  (vz/bind-norm
+   "SPC T"      'vz/term-switch))
