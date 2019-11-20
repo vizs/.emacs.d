@@ -4,7 +4,8 @@
 ;; variables
 (setq vz/show-numbers?          nil
       vz/show-paren-highlight?  nil
-      vz/tray                   0)
+      vz/tray                   3
+      vz/pad                    15)
 
 ;; load rest of the files
 
@@ -14,4 +15,3 @@
 
 ;; run functions
 (vz/disable-bold-italic-underline)
-(vz/set-mode-line-face)

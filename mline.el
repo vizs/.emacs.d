@@ -25,12 +25,11 @@
 
 (setq vz/mode-line-format '((:eval (vz/mode-line-file-name))))
 
-(defun vz/set-mode-line-face ()
-  (custom-set-faces
-   `(header-line           ((t :background ,vz/color0 :foreground ,vz/color7)))
-   `(header-line-highlight ((t :background ,vz/color8 :foreground ,vz/color15)))
-   `(mode-line             ((t :background ,vz/color0 :foreground ,vz/color7)))
-   `(mode-line-highlight   ((t :background ,vz/color0 :foreground ,vz/color15)))))
+(custom-set-faces
+ `(header-line           ((t :background ,vz/color0 :foreground ,vz/color7)))
+ `(header-line-highlight ((t :background ,vz/color0 :foreground ,vz/color7)))
+ `(mode-line             ((t :background ,vz/color0 :foreground ,vz/color7)))
+ `(mode-line-highlight   ((t :background ,vz/color0 :foreground ,vz/color7))))
 
 (defun vz/toggle-header-line ()
   (interactive)
@@ -76,6 +75,22 @@
  ((= vz/tray 2)
   (setq-default header-line-format vz/mode-line-format
                 mode-line-format   nil))
+
+ ;; use header-line and mode-line to add fake padding,
+ ((vz/between? vz/tray 3 4)
+  (progn
+    (setq-default mode-line-format   " "
+                  header-line-format " ")
+
+    (let ((font (format "monospace:pixelsize=%d" vz/pad)))
+      (custom-set-faces
+       `(header-line          ((t :font ,font :foreground ,vz/color0)))
+       `(header-line-inactive ((t :font ,font :foreground ,vz/color0)))
+       `(mode-line            ((t :font ,font :foreground ,vz/color0)))
+       `(mode-line-inactive   ((t :font ,font :foreground ,vz/color0)))))
+
+    (when (= vz/tray 4)
+      (awesome-tray-mode))))
 
  ;; if anything else, don't display {mode,head}-line or awesome-tray
  (t

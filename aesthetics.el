@@ -23,7 +23,7 @@
             :underline  nil))
     (face-list)))
 
-(fringe-mode '(20 . 0))
+(fringe-mode `(,vz/pad . ,vz/pad))
 
 (defun vz/count-windows ()
   (length (mapcar #'window-buffer

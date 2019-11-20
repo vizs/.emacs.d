@@ -1,9 +1,9 @@
 ;; sane defaults
 
 ;; remove unnecessary visual clutter
-(menu-bar-mode -1)
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
+(menu-bar-mode    -1)
+(tool-bar-mode    -1)
+(scroll-bar-mode  -1)
 (mouse-wheel-mode -1)
 (blink-cursor-mode 0)
 
@@ -25,7 +25,7 @@
       version-control                 t
       auto-save-file-transforms      '((".*" "~/var/cache/emacs-bkups/" t))
       auto-save-list-file-prefix     "~/var/cache/emacs-bkups/"
-   ;; auto-save-default               nil
+    ; auto-save-default               nil
       create-lockfiles                nil
       cursor-in-non-selected-windows  nil
       custom-file                     (concat user-emacs-directory ".custom.el")
@@ -44,7 +44,6 @@
   (global-disable-mouse-mode))
 
 ;; i hate HATE when custom junk go to init.el
-
 (when (file-exists-p custom-file)
   (load custom-file))
 

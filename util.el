@@ -24,6 +24,10 @@
         evar
       fallback)))
 
+(defun vz/between? (n a b)
+  (and (>= n a)
+       (<= n b)))
+
 (defun vz/bind (state keymap &rest binds)
   (when binds
     (general-define-key
