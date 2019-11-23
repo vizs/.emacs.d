@@ -12,7 +12,9 @@
               display-line-numbers-width            0
               display-line-numbers-current-absolute t)
 
-(add-to-list 'default-frame-alist `(font . ,(vz/getenv-or "XFONT" "monospace:pixelsize=12")))
+(setq vz/font (vz/getenv-or "XFONT" "monospace:pixelsize=12"))
+
+(add-to-list 'default-frame-alist `(font . ,vz/font))
 (add-to-list 'default-frame-alist `(cursor-color . ,vz/color8))
 
 (defun vz/disable-bold-italic-underline ()
@@ -77,4 +79,4 @@
                 evil-operator-state-cursor '(hbar . 2)
                 evil-motion-state-cursor   'box))
 
-(vz/load-elfiles '("themes/mayan.el"))
+(vz/load-elfiles (list (format "themes/%s.el" vz/theme)))

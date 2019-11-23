@@ -5,7 +5,8 @@
 (setq vz/show-numbers?          nil
       vz/show-paren-highlight?  nil
       vz/tray                   3
-      vz/pad                    15)
+      vz/pad                    20
+      vz/theme                 "mughal")
 
 ;; load rest of the files
 
