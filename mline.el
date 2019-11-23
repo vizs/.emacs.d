@@ -13,16 +13,6 @@
           (t "")))
   "")
 
-;; (setq vz/mode-line-format
-;;       '("  "
-;;         (:eval (vz/mode-line-file-name))
-;;         (:eval (vz/mode-line-file-state))
-;;         "     "
-;;         (line-number-mode   "L%l")
-;;         (column-number-mode " C%c" t)
-;;         "     "
-;;         mode-name))
-
 (setq vz/mode-line-format '((:eval (vz/mode-line-file-name))))
 
 (custom-set-faces
@@ -43,10 +33,7 @@
       (setq mode-line-format vz/mode-line-format)
     (setq mode-line-format nil)))
 
-
-(cond
- ;; awesome-tray
- ((= vz/tray 1)
+(defun vz/init-awesome-tray ()
   (when (vz/load-pkg "awesome-tray")
     (require 'awesome-tray)
 
@@ -66,7 +53,13 @@
                  '("vz/file" .
                    (vz/tray-file-name default)))
 
-    (setq awesome-tray-active-modules '("vz/file" "vz/loc"))
+    (setq awesome-tray-active-modules '("vz/file" "vz/loc"))))
+
+(cond
+ ;; awesome-tray
+ ((= vz/tray 1)
+  (progn
+    (vz/init-awesome-tray)
     (setq-default header-line-format nil
                   mode-line-format   nil)
     (awesome-tray-mode)))
@@ -81,15 +74,15 @@
   (progn
     (setq-default mode-line-format   " "
                   header-line-format " ")
-
-    (let ((font (format "monospace:pixelsize=%d" vz/pad)))
+    (let ((size (* vz/pad 0.075)))
       (custom-set-faces
-       `(header-line          ((t :font ,font :foreground ,vz/color0)))
-       `(header-line-inactive ((t :font ,font :foreground ,vz/color0)))
-       `(mode-line            ((t :font ,font :foreground ,vz/color0)))
-       `(mode-line-inactive   ((t :font ,font :foreground ,vz/color0)))))
+       `(header-line          ((t :height ,size :foreground ,vz/color0)))
+       `(header-line-inactive ((t :height ,size :foreground ,vz/color0)))
+       `(mode-line            ((t :height ,size :foreground ,vz/color0)))
+       `(mode-line-inactive   ((t :height ,size :foreground ,vz/color0)))))
 
     (when (= vz/tray 4)
+      (vz/init-awesome-tray)
       (awesome-tray-mode))))
 
  ;; if anything else, don't display {mode,head}-line or awesome-tray
