@@ -42,10 +42,10 @@
    "C-j"      'company-select-next
    "C-k"      'company-select-previous))
 
-(use-package rust-mode
-  :config
-  (autoload 'rust-mode "rust-mode" nil t)
-  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode)))
+;; (use-package rust-mode
+;;   :config
+;;   (autoload 'rust-mode "rust-mode" nil t)
+;;   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode)))
 
 (use-package racket-mode
   :config
@@ -67,4 +67,4 @@
                '(racket-mode . ("racket-language-server")))
   (mapc (lambda (mode)
           (add-hook mode 'eglot-ensure))
-        (list 'python-mode-hook 'rust-mode-hook 'racket-mode-hook)))
+        (list 'python-mode-hook 'racket-mode-hook)))
