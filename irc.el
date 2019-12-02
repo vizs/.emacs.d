@@ -61,3 +61,6 @@
             '(lui-set-prompt
               (concat (propertize (buffer-name)
                                   'face 'circe-prompt-face) " "))))
+
+;; gopher client is here, dont ask why
+(use-package elpher)

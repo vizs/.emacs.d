@@ -28,7 +28,7 @@
     ; auto-save-default               nil
       create-lockfiles                nil
       cursor-in-non-selected-windows  nil
-      custom-file                     (concat user-emacs-directory ".custom.el")
+      custom-file                    "/dev/null"
       frame-title-format             '("emacs: "
                                        (:eval (vz/mode-line-file-name)))
       gc-cons-threshold               50000000)

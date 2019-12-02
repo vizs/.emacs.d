@@ -63,8 +63,8 @@
 
 (use-package eglot
   :config
-  (add-to-list 'eglot-server-programs
-               '(racket-mode . ("racket-language-server")))
+  ;; (add-to-list 'eglot-server-programs
+  ;;              '(racket-mode . ("racket-language-server")))
   (mapc (lambda (mode)
           (add-hook mode 'eglot-ensure))
         (list 'python-mode-hook 'racket-mode-hook)))
