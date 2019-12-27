@@ -17,13 +17,13 @@
 
 ;; jesus fucking christ, emacs' backup system is a pain in the fucking arse
 (setq backup-by-copying               t
-	  backup-directory-alist         '(("." . "~/var/cache/emacs-bkups"))
+	  backup-directory-alist         '(("." . "~/usr/local/cache/emacs-bkups"))
 	  delete-old-versions             t
 	  keep-new-versions               5
 	  keep-old-versions               2
 	  version-control                 t
-	  auto-save-file-transforms      '((".*" "~/var/cache/emacs-bkups/" t))
-	  auto-save-list-file-prefix     "~/var/cache/emacs-bkups/"
+	  auto-save-file-transforms      '((".*" "~/usr/local/cache/emacs-bkups/" t))
+	  auto-save-list-file-prefix     "~/usr/local/cache/emacs-bkups/"
 	; auto-save-default               nil
 	  create-lockfiles                nil
 	  cursor-in-non-selected-windows  nil

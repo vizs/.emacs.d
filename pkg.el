@@ -1,5 +1,5 @@
 ;; use-package and friends
-(setq package-user-dir "~/var/cache/emacs-pkgs")
+(setq package-user-dir (expand-file-name "~/usr/local/cache/emacs-pkgs"))
 
 (when (version< emacs-version "27.0")
   (package-initialize))
@@ -20,9 +20,10 @@
       vc-follow-symlinks         t)
 
 (defun vz/load-pkg (pkg-name)
-  (let ((pkg-path (concat user-emacs-directory "/pkgs/" pkg-name)))
+  (let ((pkg-path (expand-file-name (concat user-emacs-directory "pkgs/" pkg-name))))
     (if (file-directory-p pkg-path)
-	(progn
-	  (add-to-list 'load-path pkg-path)
-	  t)
+        (progn
+          (add-to-list 'load-path pkg-path)
+          (load pkg-name)
+          t)
       nil)))

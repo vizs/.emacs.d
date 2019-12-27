@@ -1,7 +1,7 @@
 (setq vz/accent    vz/color15
       vz/accent1   vz/color7
       vz/accent2   vz/color7
-      vz/highlight vz/color1)
+      vz/highlight vz/color4)
 
 (custom-set-faces
  `(default ((t :background ,vz/color0 :foreground ,vz/color7)))
@@ -92,4 +92,8 @@
 
  `(racket-selfeval-face         ((t :foreground ,vz/color7)))
  `(racket-keyword-argument-face ((t :foreground ,vz/color15)))
- `(cursor                       ((t :background ,vz/color8))))
+
+ `(makefile-space       ((t :background ,vz/color0)))
+ `(makefile-makepp-perl ((t :background ,vz/color0)))
+
+ `(cursor ((t :background ,vz/color8))))

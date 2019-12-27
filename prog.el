@@ -42,29 +42,26 @@
    "C-j"      'company-select-next
    "C-k"      'company-select-previous))
 
-;; (use-package rust-mode
-;;   :config
-;;   (autoload 'rust-mode "rust-mode" nil t)
-;;   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode)))
-
 (use-package racket-mode
   :config
   (add-hook 'racket-mode-hook 'racket-unicode-input-method-enable))
 
-;; much easier than highlight
 (use-package rainbow-delimiters
   :init
   (mapc (lambda (mode)
           (add-hook mode 'rainbow-delimiters-mode))
         (list 'lisp-mode-hook 'emacs-lisp-mode-hook 'racket-mode-hook)))
 
+;; if u know a better way, hmu thx
+(use-package cl-lib)
+(use-package s)
+(use-package dash)
+(use-package unicode-escape)
 (when (vz/load-pkg "company-tabnine")
   (add-to-list 'company-backends #'company-tabnine))
 
 (use-package eglot
   :config
-  ;; (add-to-list 'eglot-server-programs
-  ;;              '(racket-mode . ("racket-language-server")))
   (mapc (lambda (mode)
           (add-hook mode 'eglot-ensure))
-        (list 'python-mode-hook 'racket-mode-hook)))
+        (list 'python-mode-hook)))

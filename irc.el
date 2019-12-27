@@ -6,7 +6,7 @@
   (setq circe-network-options
         '(("Freenode"
            :nick "viz"
-           :channels (:afterauth "#emacs" "##cordance")
+           :channels (:afterauth "#emacs" "#nixhub")
            :nickserv-nick "_viz_"
            :nickserv-password (lambda (x) vz/freenode-passwd))
           ("disc:r/up"
@@ -38,7 +38,7 @@
   (setq circe-use-cycle-completion t
         circe-reduce-lurker-spam   t
         circe-split-line-length    250
-        lui-logging-directory "~/var/cache/irc-log"
+        lui-logging-directory "~/usr/local/cache/irc-log"
         circe-use-cycle-completion t)
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
@@ -58,9 +58,7 @@
 
   ;; prompt
   (add-hook 'circe-chat-mode-hook
-            '(lui-set-prompt
-              (concat (propertize (buffer-name)
-                                  'face 'circe-prompt-face) " "))))
-
-;; gopher client is here, dont ask why
-(use-package elpher)
+            '(lambda ()
+               (lui-set-prompt
+                (concat (propertize (buffer-name)
+                                    'face 'circe-prompt-face) " ")))))
