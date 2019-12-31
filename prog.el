@@ -52,9 +52,9 @@
           (add-hook mode 'rainbow-delimiters-mode))
         (list 'lisp-mode-hook 'emacs-lisp-mode-hook 'racket-mode-hook)))
 
-;; if u know a better way, hmu thx
-(use-package cl-lib)
+;; if u know a cleaner way, hmu
 (use-package s)
+(use-package cl-lib)
 (use-package dash)
 (use-package unicode-escape)
 (when (vz/load-pkg "company-tabnine")

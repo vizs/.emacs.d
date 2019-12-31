@@ -38,7 +38,7 @@
   (setq circe-use-cycle-completion t
         circe-reduce-lurker-spam   t
         circe-split-line-length    250
-        lui-logging-directory "~/usr/local/cache/irc-log"
+        lui-logging-directory "~/usr/local/share/cache/irc-log"
         circe-use-cycle-completion t)
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)
