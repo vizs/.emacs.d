@@ -46,6 +46,10 @@
   :config
   (add-hook 'racket-mode-hook 'racket-unicode-input-method-enable))
 
+(use-package go-mode
+  ;; TODO: add go-fmt in before-save-hook
+  )
+
 (use-package rainbow-delimiters
   :init
   (mapc (lambda (mode)
