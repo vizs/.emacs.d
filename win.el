@@ -42,3 +42,9 @@
   (setq beacon-blink-when-window-scrolls           nil
         beacon-blink-when-point-moves-horizontally nil
         beacon-blink-when-point-moves-vertically   nil))
+
+(use-package ivy-posframe
+  :config
+  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point))
+        ivy-posframe-border-width 0)
+  (ivy-posframe-mode 1))

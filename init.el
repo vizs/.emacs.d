@@ -10,8 +10,8 @@
 
 ;; load rest of the files
 (vz/load-elfiles '("pkg.el" "aesthetics.el" "mline.el"
-                   "evil.el" "doc.el" "irc.el" "win.el"
-                   "prog.el" "sane.el" ".secret.el"))
+                   "evil.el" "doc.el" "irc.el" ".secret.el"
+                   "prog.el" "sane.el" "win.el"))
 
 ;; run functions
 (vz/disable-bold-italic-underline)
