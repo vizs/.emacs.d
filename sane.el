@@ -35,8 +35,13 @@
 ;; i cba to type yes
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(use-package ace-window)
-(use-package avy)
+(use-package ace-window
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+
+(use-package avy
+  :config
+  (setq avy-background t))
 
 ;; i hate when i touch my touchpad accidentally
 (use-package disable-mouse

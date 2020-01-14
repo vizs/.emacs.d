@@ -96,14 +96,15 @@
  `(racket-selfeval-face         ((t :foreground ,vz/color7)))
  `(racket-keyword-argument-face ((t :foreground ,vz/color15)))
 
- `(aw-background-face              ((t :foreground ,vz/color7)))
- `(aw-leading-char-face            ((t :foreground ,vz/color15)))
- `(aw-minibuffer-leading-char-face ((t :foreground ,vz/color15)))
+ `(aw-background-face              ((t :foreground ,vz/color8)))
+ `(aw-leading-char-face            ((t :foreground ,vz/highlight)))
+ `(aw-minibuffer-leading-char-face ((t :foreground ,vz/highlight)))
 
- `(avy-lead-face    ((t :foreground ,vz/accent :background ,vz/color0)))
- `(avy-lead-face-0  ((t :foreground ,vz/accent :background ,vz/color0)))
- `(avy-lead-face-1  ((t :foreground ,vz/accent :background ,vz/color0)))
- `(avy-lead-face-2  ((t :foreground ,vz/accent :background ,vz/color0)))
+ `(avy-background-face ((t :foreground ,vz/color15)))
+ `(avy-lead-face       ((t :foreground ,vz/highlight :background ,vz/color0)))
+ `(avy-lead-face-0     ((t :foreground ,vz/highlight :background ,vz/color0)))
+ `(avy-lead-face-1     ((t :foreground ,vz/highlight :background ,vz/color0)))
+ `(avy-lead-face-2     ((t :foreground ,vz/highlight :background ,vz/color0)))
 
  `(makefile-space       ((t :background ,vz/color0)))
  `(makefile-makepp-perl ((t :background ,vz/color0)))
