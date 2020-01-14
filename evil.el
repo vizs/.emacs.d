@@ -38,6 +38,8 @@
     (apply 'vz/bind 'visual 'override binds)))
 
 (vz/bind-norm
+ "J"        'avy-goto-line-below
+ "K"        'avy-goto-line-above
  "g c"      'comment-line
  "C-w O"    'delete-other-windows
  "C-w q"    'evil-window-delete

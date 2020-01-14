@@ -7,6 +7,7 @@
   (setq ivy-use-virtual-buffers t)
   (vz/bind-norm
    "/"        'swiper
+   "?"        'swiper-backward
    "SPC b"    'ivy-switch-buffer)
   (vz/bind
    nil

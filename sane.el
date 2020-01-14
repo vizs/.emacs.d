@@ -36,6 +36,7 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (use-package ace-window)
+(use-package avy)
 
 ;; i hate when i touch my touchpad accidentally
 (use-package disable-mouse

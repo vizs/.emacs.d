@@ -100,6 +100,11 @@
  `(aw-leading-char-face            ((t :foreground ,vz/color15)))
  `(aw-minibuffer-leading-char-face ((t :foreground ,vz/color15)))
 
+ `(avy-lead-face    ((t :foreground ,vz/accent :background ,vz/color0)))
+ `(avy-lead-face-0  ((t :foreground ,vz/accent :background ,vz/color0)))
+ `(avy-lead-face-1  ((t :foreground ,vz/accent :background ,vz/color0)))
+ `(avy-lead-face-2  ((t :foreground ,vz/accent :background ,vz/color0)))
+
  `(makefile-space       ((t :background ,vz/color0)))
  `(makefile-makepp-perl ((t :background ,vz/color0)))
 

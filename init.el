@@ -9,7 +9,6 @@
       vz/theme                 "mughal")
 
 ;; load rest of the files
-
 (vz/load-elfiles '("pkg.el" "aesthetics.el" "mline.el"
                    "evil.el" "doc.el" "irc.el"
                    "prog.el" "sane.el" ".secret.el"))
