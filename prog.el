@@ -48,11 +48,7 @@
 
 (use-package go-mode
   :config
-  (defun vz/go-fmt ()
-    (when (string= major-mode "go-mode")
-      (call-process "go" nil 0 nil "fmt" (buffer-file-name))
-      (revert-buffer :ignore-auto :noconfirm)))
-  (add-hook 'before-save-hook 'vz/go-fmt))
+  (gofmt-before-save))
 
 (use-package rainbow-delimiters
   :init
