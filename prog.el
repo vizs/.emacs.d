@@ -47,8 +47,12 @@
   (add-hook 'racket-mode-hook 'racket-unicode-input-method-enable))
 
 (use-package go-mode
-  ;; TODO: add go-fmt in before-save-hook
-  )
+  :config
+  (defun vz/go-fmt ()
+    (when (string= major-mode "go-mode")
+      (call-process "go" nil 0 nil "rest" (buffer-file-name))
+      (revert-buffer :ignore-auto :noconfirm)))
+  (add-hook 'before-save-hook 'vz/go-fmt))
 
 (use-package rainbow-delimiters
   :init
