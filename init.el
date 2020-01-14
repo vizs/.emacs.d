@@ -10,7 +10,7 @@
 
 ;; load rest of the files
 (vz/load-elfiles '("pkg.el" "aesthetics.el" "mline.el"
-                   "evil.el" "doc.el" "irc.el"
+                   "evil.el" "doc.el" "irc.el" "win.el"
                    "prog.el" "sane.el" ".secret.el"))
 
 ;; run functions

@@ -35,23 +35,19 @@
     (apply 'vz/bind '(normal insert) 'override binds))
 
   (defun vz/bind-vis (&rest binds)
-    (apply 'vz/bind 'visual 'override binds)))
+    (apply 'vz/bind 'visual 'override binds))
+
+  (defun vz/bind-novs (&rest binds)
+    (apply 'vz/bind '(normal visual) 'override binds)))
 
 (vz/bind-norm
- "J"        'avy-goto-line-below
- "K"        'avy-goto-line-above
- "g c"      'comment-line
  "C-w O"    'delete-other-windows
- "C-w q"    'evil-window-delete
  "SPC r c"  'vz/reload-config
  "SPC s t"  'vz/spawn-st
  "SPC c d"  'counsel-find-file)
 
-(vz/bind-nois
- "C-w o"      nil
- "C-w c"      nil
- "C-w C-c"    nil
- "C-w o"     'ace-window)
+(vz/bind-novs
+ "g c" 'comment-line)
 
 (vz/bind-vis
- "g c" 'comment-line)
+ "g a" 'align-regexp)
