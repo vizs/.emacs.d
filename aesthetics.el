@@ -69,6 +69,14 @@
 (setq show-paren-delay                   0
       show-paren-when-point-inside-paren t)
 
+;; so i dont get lost
+(use-package beacon
+  :config
+  (beacon-mode 1)
+  (setq beacon-blink-when-window-scrolls           nil
+        beacon-blink-when-point-moves-horizontally nil
+        beacon-blink-when-point-moves-vertically   nil))
+
 (defun vz/style-evil-cursor ()
   (setq evil-default-cursor t)
   (setq-default evil-normal-state-cursor   'box
