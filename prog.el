@@ -50,7 +50,7 @@
   :config
   (defun vz/go-fmt ()
     (when (string= major-mode "go-mode")
-      (call-process "go" nil 0 nil "rest" (buffer-file-name))
+      (call-process "go" nil 0 nil "fmt" (buffer-file-name))
       (revert-buffer :ignore-auto :noconfirm)))
   (add-hook 'before-save-hook 'vz/go-fmt))
 

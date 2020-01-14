@@ -62,6 +62,7 @@
  `(rainbow-delimiters-depth-8-face   ((t :foreground ,vz/accent1)))
  `(rainbow-delimiters-unmatched-face ((t :background ,vz/color1 :foreground ,vz/accent2)))
  `(lazy-highlight                    ((t :background ,vz/color8 :foreground ,vz/highlight)))
+ `(beacon-fallback-background        ((t :background ,vz/color8 :foreground ,vz/color8)))
 
  `(evil-ex-substitute-matches      ((t :background ,vz/color0 :foreground ,vz/highlight)))
  `(evil-ex-substitute-replacement  ((t :background ,vz/color0 :foreground ,vz/color1)))
@@ -94,6 +95,10 @@
 
  `(racket-selfeval-face         ((t :foreground ,vz/color7)))
  `(racket-keyword-argument-face ((t :foreground ,vz/color15)))
+
+ `(aw-background-face              ((t :foreground ,vz/color7)))
+ `(aw-leading-char-face            ((t :foreground ,vz/color15)))
+ `(aw-minibuffer-leading-char-face ((t :foreground ,vz/color15)))
 
  `(makefile-space       ((t :background ,vz/color0)))
  `(makefile-makepp-perl ((t :background ,vz/color0)))
