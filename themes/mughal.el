@@ -88,6 +88,8 @@
  `(ivy-current-face            ((t :background ,vz/color0 :foreground ,vz/color15)))
  `(ivy-current-grep-info       ((t :background ,vz/color0 :foreground ,vz/color15)))
  `(ivy-match-required-face     ((t :background ,vz/color0 :foreground ,vz/color8)))
+ `(ivy-grep-info               ((t :background ,vz/color0 :foreground ,vz/color7)))
+ `(ivy-confirm-face            ((t :background ,vz/color0 :foreground ,vz/color7)))
  `(ivy-cursor                  ((t :background ,vz/color8)))
 
  `(racket-selfeval-face         ((t :foreground ,vz/color7)))
