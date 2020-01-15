@@ -20,12 +20,13 @@
 (use-package counsel
   :after ivy
   :config
+  (vz/bind-novs "," 'counsel-M-x)
   (vz/bind-norm
-   ","        'counsel-M-x
-   "SPC d f"  'counsel-describe-function
-   "SPC d v"  'counsel-describe-variable
-   "SPC d F"  'counsel-describe-face
-   "SPC j"    'counsel-imenu))
+   :prefix "SPC"
+   "df"  'counsel-describe-function
+   "dv"  'counsel-describe-variable
+   "dF"  'counsel-describe-face
+   "j"    'counsel-imenu))
 
 (use-package company
   :init
@@ -49,7 +50,7 @@
 
 (use-package go-mode
   :config
-  (gofmt-before-save))
+  (add-hook 'before-save-hook #'gofmt-before-save))
 
 (use-package rainbow-delimiters
   :init

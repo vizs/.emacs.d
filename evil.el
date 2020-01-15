@@ -19,35 +19,46 @@
   :after evil
   :init
   (setq general-override-states '(insert emacs hybrid normal
-                                         visual motion operator replace))
+                                  visual motion operator replace))
 
-  (defun vz/bind (state keymap &rest binds)
-    (when binds
-      (general-define-key
-       :states state :keymaps keymap
-       (car binds) (cadr binds))
-      (apply 'vz/bind state keymap (cddr binds))))
+  (defmacro vz/bind (state keymap &rest body)
+    `(general-define-key
+      :states  ,state
+      :keymaps ,keymap
+      ,@body))
 
-  (defun vz/bind-norm (&rest binds)
-    (apply 'vz/bind 'normal 'override binds))
+  (defmacro vz/bind-norm (&rest body)
+    `(general-define-key
+      :states  'normal
+      :keymaps 'override
+      ,@body))
 
-  (defun vz/bind-nois (&rest binds)
-    (apply 'vz/bind '(normal insert) 'override binds))
+  (defmacro vz/bind-novs (&rest body)
+    `(general-define-key
+      :states  '(normal visual)
+      :keymaps 'override
+      ,@body))
 
-  (defun vz/bind-vis (&rest binds)
-    (apply 'vz/bind 'visual 'override binds))
+  (defmacro vz/bind-nois (&rest body)
+    `(general-define-key
+      :states  '(normal insert)
+      :keymaps 'override
+      ,@body))
 
-  (defun vz/bind-novs (&rest binds)
-    (apply 'vz/bind '(normal visual) 'override binds)))
+  (defmacro vz/bind-vis (&rest body)
+    `(general-define-key
+      :states  'visual
+      :keymaps 'override
+      ,@body)))
 
 (vz/bind-norm
- "C-w O"    'delete-other-windows
- "SPC r c"  'vz/reload-config
- "SPC s t"  'vz/spawn-st
- "SPC c d"  'counsel-find-file)
+ :prefix "SPC"
+ "rc"  'vz/reload-config
+ "st"  'vz/spawn-st
+ "cd"  'counsel-find-file)
 
 (vz/bind-novs
- "g c" 'comment-line)
+ "gc" 'comment-line)
 
 (vz/bind-vis
- "g a" 'align-regexp)
+ "ga" 'align-regexp)

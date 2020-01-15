@@ -8,21 +8,22 @@
     (edwina-arrange))
   (edwina-mode 1)
   (vz/bind-nois
-   "C-w o"   'ace-window
-   "C-w x"   'ace-delete-window
-   "C-w r"   'edwina-arrange
-   "C-w R"   'vz/edwina-default-mfact
-   "C-w j"   'edwina-select-next-window
-   "C-w k"   'edwina-select-previous-window
-   "C-w h"   'evil-window-left
-   "C-w l"   'evil-window-right
-   "C-w H"   'edwina-dec-mfact
-   "C-w L"   'edwina-inc-mfact
-   "C-w i"   'edwina-inc-nmaster
-   "C-w d"   'edwina-dec-nmaster
-   "C-w RET" 'edwina-zoom
-   "C-w s"   'edwina-clone-window
-   "C-w q"   'edwina-delete-window))
+   :prefix "C-w"
+   "o"   'ace-window
+   "x"   'ace-delete-window
+   "r"   'edwina-arrange
+   "R"   'vz/edwina-default-mfact
+   "j"   'edwina-select-next-window
+   "k"   'edwina-select-previous-window
+   "h"   'evil-window-left
+   "l"   'evil-window-right
+   "H"   'edwina-dec-mfact
+   "L"   'edwina-inc-mfact
+   "i"   'edwina-inc-nmaster
+   "d"   'edwina-dec-nmaster
+   "RET" 'edwina-zoom
+   "s"   'edwina-clone-window
+   "q"   'edwina-delete-window))
 
 (use-package avy
   :config
@@ -45,6 +46,6 @@
 
 (use-package ivy-posframe
   :config
-  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-point))
+  (setq ivy-posframe-display-functions-alist '((t . ivy-posframe-display-at-frame-top-center))
         ivy-posframe-border-width 0)
   (ivy-posframe-mode 1))
