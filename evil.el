@@ -51,6 +51,9 @@
       :keymaps 'override
       ,@body)))
 
+(vz/bind-nois
+ "C-V" 'evil-paste-after)
+
 (vz/bind-norm
  :prefix "SPC"
  "rc"  'vz/reload-config

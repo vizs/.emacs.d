@@ -27,3 +27,9 @@
 (defun vz/between? (n a b)
   (and (>= n a)
        (<= n b)))
+
+;; from https://github.com/neeasade/dotfiles/blob/master/bin/bin/elisp
+(defun vz/eval-file (path)
+  (eval
+   (ignore-errors
+     (read-from-whole-string (vz/fread path)))))

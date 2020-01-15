@@ -17,6 +17,5 @@
       (if (member vterm-buf (buffer-list))
           (switch-to-buffer-other-window vterm-buf)
         (vterm-other-window))))
-
   (vz/bind-norm
-   "SPC T"      'vz/term-switch))
+   "SPC T" 'vz/term-switch))
