@@ -52,11 +52,11 @@
   :config
   (add-hook 'before-save-hook #'gofmt-before-save))
 
-(use-package rainbow-delimiters
-  :init
-  (mapc (lambda (mode)
-          (add-hook mode 'rainbow-delimiters-mode))
-        (list 'lisp-mode-hook 'emacs-lisp-mode-hook 'racket-mode-hook)))
+;; (use-package rainbow-delimiters
+;;   :init
+;;   (mapc (lambda (mode)
+;;           (add-hook mode 'rainbow-delimiters-mode))
+;;         (list 'lisp-mode-hook 'emacs-lisp-mode-hook 'racket-mode-hook)))
 
 ;; if u know a cleaner way, hmu
 (use-package s)

@@ -1,5 +1,5 @@
 ;; use-package and friends
-(setq package-user-dir (expand-file-name "~/usr/local/share/cache/emacs-pkgs"))
+(setq package-user-dir (expand-file-name "~/.cache/emacs-pkgs"))
 
 (when (version< emacs-version "27.0")
   (package-initialize))

@@ -1,4 +1,4 @@
-(setq user-emacs-directory (expand-file-name "~/etc/emacs.d/"))
+(setq user-emacs-directory (expand-file-name "~/lib/emacs/"))
 (load-file (concat user-emacs-directory "util.el"))
 
 ;; variables
@@ -11,7 +11,7 @@
 ;; load rest of the files
 (vz/load-elfiles '("pkg.el" "aesthetics.el" "mline.el"
                    "evil.el" "doc.el" "irc.el" ".secret.el"
-                   "prog.el" "sane.el" "win.el" "term.el"))
+                   "prog.el" "sane.el" "win.el")) ;; "term.el"))
 
 ;; run functions
 (vz/disable-bold-italic-underline)

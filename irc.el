@@ -6,7 +6,7 @@
   (setq circe-network-options
         '(("Freenode"
            :nick "viz"
-           :channels (:afterauth "#emacs" "#nixhub")
+           :channels (:afterauth "#emacs" "#nixhub" "#vis-editor")
            :nickserv-nick "_viz_"
            :nickserv-password (lambda (x) vz/freenode-passwd))
           ("disc:r/up"
@@ -38,7 +38,7 @@
   (setq circe-use-cycle-completion t
         circe-reduce-lurker-spam   t
         circe-split-line-length    250
-        lui-logging-directory "~/usr/local/share/cache/irc-log"
+        lui-logging-directory "~/.cache/irc-log"
         circe-use-cycle-completion t)
   (load "lui-logging" nil t)
   (enable-lui-logging-globally)

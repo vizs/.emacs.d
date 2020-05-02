@@ -1,6 +1,6 @@
 ;; A E S T H E T I C S
 
-(let ((colors "~/usr/local/share/cache/tm/colors.el"))
+(let ((colors "~/.cache/tm/colors.el"))
   (load-file (if (file-exists-p colors)
                  colors
                (concat user-emacs-directory "/themes/defcolors.el"))))

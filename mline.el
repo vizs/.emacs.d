@@ -23,15 +23,13 @@
 
 (defun vz/toggle-header-line ()
   (interactive)
-  (if (not header-line-format)
-      (setq header-line-format vz/mode-line-format)
-    (setq header-line-format nil)))
+  (setq header-line-format
+        (if (not header-line-format) vz/mode-line-format nil)))
 
 (defun vz/toggle-mode-line ()
   (interactive)
-  (if (not mode-line-format)
-      (setq mode-line-format vz/mode-line-format)
-    (setq mode-line-format nil)))
+  (setq mode-line-format
+        (if (not mode-line-format) vz/mode-line-format nil)))
 
 (defun vz/init-awesome-tray ()
   (when (vz/load-pkg "awesome-tray")
