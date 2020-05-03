@@ -8,27 +8,27 @@
 (use-package ivy
   :config
   (setq ivy-use-virtual-buffers t)
-  (add-hook 'prog-mode-hook 'ivy-mode)
+  (ivy-mode 1)
   (general-define-key
    :keymaps 'ivy-minibuffer-map
    "C-p" nil
    "C-n" nil
    "C-j" 'ivy-next-line
    "C-k" 'ivy-previous-line)
-  (general-define-key
-   :states 'normal :keymaps 'override
+  (general-nmap
+   :keymaps 'override
    "/" 'swiper
    "?" 'swiper-backward))
 
 (use-package counsel
   :after ivy
   :config
-  (general-define-key
-   :states 'normal :keymaps 'override
+  (general-nmap
    :prefix "SPC"
    "df" 'counsel-describe-function
    "dv" 'counsel-describe-variable
    "dF" 'counsel-describe-face
+   "ff" 'counsel-find-file
    "j" 'counsel-imenu
    "b" 'ivy-switch-buffer))
 
@@ -45,6 +45,10 @@
    "M-p" nil
    "C-n" 'company-select-next
    "C-p" 'company-select-previous))
+
+(use-package hl-todo
+  :config
+  (global-hl-todo-mode))
 
 (use-package go-mode
   :config

@@ -16,4 +16,4 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (load-file (concat user-emacs-directory "util.el"))
-(vz/load-files '("pkg.el" "ui.el" "evil.el" "prog.el"))
+(vz/load-files '("pkg.el" "evil.el" "prog.el" "doc.el" "ui.el"))

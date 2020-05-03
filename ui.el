@@ -9,6 +9,8 @@
 
 (add-to-list 'default-frame-alist '(font . "Verily Serif Mono:pixelsize=12"))
 
+(setq-default left-fringe-width 2)
+
 ;; Emacs 27 feature
 (when (= emacs-major-version 27)
   (setq-default display-fill-column-indicator-column 80
@@ -37,8 +39,8 @@
   
 (defun vz/mode-line-evil-state ()
   (cond
-   ((eq evil-state 'visual) "    VISUAL »")
-   ((eq evil-state 'insert) "    INSERT »")
+   ((eq evil-state 'visual) "    VISUAL » ")
+   ((eq evil-state 'insert) "    INSERT » ")
    (:else                   "    ")))
 
 ;; From https://0x0.st/oYX8

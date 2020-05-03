@@ -1,9 +1,10 @@
-;; I'm a sinner
-;; This evil configuration acts more like vis
+;; This configuration tries to act more like vis
 
 (use-package evil
   :init
   (setq-default
+   ;; evil-want-minibuffer t
+   evil-want-keybinding nil
    evil-want-C-d-scroll t
    evil-want-C-u-scroll t
    evil-want-Y-yank-to-eol t)
@@ -12,8 +13,6 @@
 
 (use-package evil-collection
   :after evil
-  :init
-  (setq evil-want-keybinding nil)
   :config
   (evil-collection-init)
   (setq evil-want-keybinding t))
@@ -23,24 +22,53 @@
   :config
   (setq general-override-states '(insert emacs hybrid normal
 										 visual motion operator replace))
-  (general-define-key
-   :states 'normal :keymaps 'override
+  ;; NOTE: Add t if you want to shorten
+  (general-evil-setup)
+  (general-nmap
    "gc" 'comment-line
-   "C-e" 'eval-last-sexp)
-  (general-define-key
-   :states 'normal :keymaps 'override
+   "C-e" 'eval-last-sexp
    :prefix "SPC"
    "rc" 'vz/reload-config))
 
 (use-package evil-numbers
   :after evil
   :config
-  (general-define-key
-   :states 'normal :keymaps 'override
+  (general-nmap
    "C-a" 'evil-numbers/inc-at-pt
    "C-x" 'evil-numbers/dec-at-pt))
 
-;; TODO: package sam.el (https://github.com/realwhz/sam.el)
+;; The bitmaps don't look good
+(use-package evil-fringe-mark
+  :config
+  (setq-default
+   evil-fringe-mark-side 'left-fringe
+   evil-fringe-mark-show-special nil))
+
+;; Doesn't leave visual mode
+(defun vz/evil-shift-left ()
+  (interactive)
+  (evil-shift-left (region-beginning) (region-end))
+  (evil-normal-state)
+  (evil-visual-restore))
+
+(defun vz/evil-shift-right ()
+  (interactive)
+  (evil-shift-right (region-beginning) (region-end))
+  (evil-normal-state)
+  (evil-visual-restore))
+
+(general-vmap
+  ">" 'vz/evil-shift-right
+  "<" 'vz/evil-shift-left)
+
+(use-package avy
+  :config
+  (general-nmap
+	"C-f" 'avy-goto-char
+	"C-S-f" 'avy-goto-char-timer))
+
+;; TODO: * package sam.el (https://github.com/realwhz/sam.el)
+;;       * make 0x0 an ex command
 
 ;; Multiple cursor implementation akin to vis'
 ;; TODO: * C-p in visual and normal mode
@@ -78,6 +106,7 @@
   (when (evil-mc-has-cursors-p)
 	(evil-mc-undo-all-cursors)))
 
+;; BROKEN
 (defun vz/mc--C-p ()
   (interactive)
   (when (evil-mc-has-cursors-p)
@@ -89,8 +118,8 @@
   (evil-mc-skip-and-goto-next-match)
   (evil-visual-state))
 
-(general-define-key
- :states 'normal :keymaps 'override
+(general-nmap
+ :keymaps 'override
  "C-n" 'vz/mc--C-n
  "C-p" 'vz/mc--C-p
  "C-l" 'evil-mc-make-all-cursors
@@ -98,8 +127,8 @@
  "C-k" 'evil-mc-make-cursor-move-prev-line
  "<escape>" 'vz/mc--remove)
 
-(general-define-key
- :states 'visual :keymaps 'override
+(general-vmap
+ :keymaps 'override
  "C-n" 'vz/mc--C-n
  "C-x" 'vz/mc--visual-C-x
  "C-p" 'vz/mc--C-p)
