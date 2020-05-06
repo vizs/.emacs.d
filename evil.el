@@ -35,7 +35,7 @@
   :config
   (general-nmap
    "C-a" 'evil-numbers/inc-at-pt
-   "C-x" 'evil-numbers/dec-at-pt))
+   "C-S-x" 'evil-numbers/dec-at-pt))
 
 ;; The bitmaps don't look good
 (use-package evil-fringe-mark
@@ -66,6 +66,16 @@
   (general-nmap
 	"C-f" 'avy-goto-char
 	"C-S-f" 'avy-goto-char-timer))
+
+(use-package ace-window
+  :after avy
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
+  (general-nmap
+   :prefix "C-w"
+   "o" 'ace-window
+   "O" 'delete-other-windows
+   "X" 'ace-delete-window))
 
 ;; TODO: * package sam.el (https://github.com/realwhz/sam.el)
 ;;       * make 0x0 an ex command

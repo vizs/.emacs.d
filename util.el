@@ -21,11 +21,6 @@
     (insert-file-contents-literally path)
     (buffer-string)))
 
-(defun vz/getenv-or (env fb)
-  "Get env environment variable or return fb if unset"
-  (let ((e (getenv env)))
-    (if e e fb)))
-
 ;; From https://github.com/neeasade
 (defun vz/eval-file (path)
   "Evaluate elisp file in path"

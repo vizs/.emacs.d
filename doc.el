@@ -15,6 +15,9 @@ it to pdf. If file is unsaved, it will not save it."
 	;; TODO: Consider using an emacs' plugin instead of zathura
 	(call-process "zathura" nil 0 nil pdf)))
 
+(dolist (h '(org-mode-hook latex-mode-hook))
+  `(add-hook ,h #'display-line-numbers-mode))
+
 ;; Set it if you want to literate python
 ;; (setq org-src-preserve-indentation t)
 (general-nmap
