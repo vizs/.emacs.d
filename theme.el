@@ -114,8 +114,8 @@
    `(mode-line-inactive               ((t :background ,bu :foreground ,lf)))
    `(comint-highlight-prompt          ((t :backgorund ,bg :foreground ,lf))))
   (setq hl-todo-keyword-faces
-		`(("TODO" . ,re)
-		  ("FIXME" . ,re)
-		  ("BROKEN" . ,re)
-		  ("NOTE" . ,fg)))
+        `(("TODO" . ,re)
+          ("FIXME" . ,re)
+          ("BROKEN" . ,re)
+          ("NOTE" . ,fg)))
   (add-to-list 'default-frame-alist `(cursor-color . ,gr)))

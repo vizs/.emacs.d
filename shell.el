@@ -1,14 +1,15 @@
 ;; NOTE: * you can see if you are using comint-mode if you check INSIDE_EMACS
 ;;       * man is significantly faster than woman
 
+;; TODO: get mksh history synced
+
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
 ;; Disable colours in shell-mode
 (setf ansi-color-for-comint-mode 'filter)
 (setq-default
  shell-font-lock-keywords nil
- comint-buffer-maximum-size 2000
- shell-cd-regexp "cd\\|c")
+ comint-buffer-maximum-size 2000)
 
 (defun vz/shell-mode-init ()
   (setq

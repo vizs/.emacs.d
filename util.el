@@ -25,3 +25,8 @@
 (defun vz/eval-file (path)
   "Evaluate elisp file in path"
   (eval (ignore-errors (read-from-whole-string (vz/fread path)))))
+
+(defun vz/cd-selbuf (path)
+  "Change working directory of selected buffer"
+  (with-current-buffer (window-buffer (selected-window))
+	(setq default-directory path)))
