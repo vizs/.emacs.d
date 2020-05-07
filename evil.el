@@ -26,9 +26,9 @@
   (general-evil-setup)
   (general-nmap
    "gc" 'comment-line
-   "C-e" 'eval-last-sexp
-   :prefix "SPC"
-   "rc" 'vz/reload-config))
+   "C-e" 'eval-last-sexp)
+  (general-nmap
+	:prefix "SPC" "rc" 'vz/reload-config))
 
 (use-package evil-numbers
   :after evil
@@ -75,7 +75,7 @@
    :prefix "C-w"
    "o" 'ace-window
    "O" 'delete-other-windows
-   "X" 'ace-delete-window))
+   "x" 'ace-delete-window))
 
 ;; TODO: * package sam.el (https://github.com/realwhz/sam.el)
 ;;       * make 0x0 an ex command

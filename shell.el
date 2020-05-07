@@ -12,8 +12,11 @@
  comint-buffer-maximum-size 2000)
 
 (defun vz/shell-mode-init ()
+  (dolist (h '(comint-truncate-buffer comint-watch-for-password-prompt))
+	`(add-hook 'comint-output-filter-functions ,h))
+  (shell-dirtrack-mode nil)
   (setq
-   comint-process-echoes t
+   comint-process-echoes t ;; Disables duplicates
    Man-notify-method 'quiet))
 
 (defun vz/comint-send-input (&optional start end)
@@ -30,8 +33,6 @@
 	(evil-exit-visual-state)))
 
 ;; Disable duplicates
-(dolist (h '(comint-truncate-buffer comint-watch-for-password-prompt))
-  `(add-hook 'comint-output-filter-functions ,h))
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
 ;; TODO: consider changing this to comint-mode-map?

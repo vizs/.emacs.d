@@ -1,6 +1,5 @@
-(dolist  (f #'(menu-bar-mode tool-bar-mode scroll-bar-mode))
+(dolist  (f #'(menu-bar-mode tool-bar-mode scroll-bar-mode blink-cursor-mode))
   (funcall f -1))
-(blink-cursor-mode 0)
 
 (setq-default
  display-line-numbers-type 'relative
@@ -25,7 +24,7 @@
 ;; Disable all bold and italic fonts
 (dolist (f (face-list))
   (set-face-attribute f nil
-    :weight 'normal :slant 'normal :underline nil))
+	:weight 'normal :slant 'normal :underline nil))
 
 (setq-default show-paren-delay 0
         show-paren-when-point-inside-paren t)
@@ -70,6 +69,14 @@
    beacon-blink-when-window-scrolls nil
    beacon-blink-when-point-moves-horizontally nil
    beacon-blink-when-point-moves-vertically nil))
+
+(custom-set-faces
+ '(italic         ((t :slant italic)))
+ '(bold           ((t :weight bold)))
+ '(variable-pitch ((t :family "Charter" :height 100)))
+ '(fixed-pitch    ((t :family "Verily Serif Mono")))
+ '(org-quote      ((t :inherit italic)))
+ '(fixed-pitch-serif ((t :inherit fixed-pitch))))
 
 ;; Change faces
 (load-file (vz/conf-path "theme.el"))
