@@ -14,33 +14,34 @@ it to pdf. If file i unsaved, it will not save it."
 	;; TODO: Consider using an emacs' plugin instead of zathura
 	(call-process "zathura" nil 0 nil pdf)))
 
-(dolist (v '(org-hide-emphasis-markers
-             org-fontify-emphasized-text
-             org-fontify-done-headline
-             org-fontify-quote-and-verse-blocks
-             org-fontify-whole-heading-line
-             org-src-fontify-natively))
-  (setq v t))
+(setq
+ org-hide-emphasis-markers t
+ org-fontify-emphasized-text t
+ org-fontify-done-headline t
+ org-fontify-quote-and-verse-blocks t
+ org-fontify-whole-heading-line t
+ org-src-fontify-natively t)
 
 (use-package org-bullets
   :config
   (setq org-bullets-bullet-list '(" ")))
 
 (dolist (f '(org-table org-link org-code org-block
-			 org-date org-special-keyword org-verbatim))
+             org-date org-special-keyword org-verbatim))
   (set-face-attribute f nil :inherit 'fixed-pitch))
-
 
 (dolist (f org-level-faces)
   (custom-set-faces
    `(,f ((t :weight bold)))))
 
-(custom-set-faces
- '(org-level-1 ((t :height 140 :weight bold)))
- '(org-level-2 ((t :height 120 :weight bold)))
- '(org-quote ((t :slant italic)))
- '(org-block-begin-line ((t :weight bold)))
- '(org-block-end-line ((t :inherit org-block-begin-line))))
+(let* ((height1 (+ (face-attribute 'variable-pitch :height) 40))
+	   (height2 (- height1 20)))
+  (custom-set-faces
+   `(org-level-1 ((t :height ,height1 :weight bold)))
+   `(org-level-2 ((t :height ,height2 :weight bold)))
+   '(org-quote ((t :slant italic)))
+   '(org-block-begin-line ((t :weight bold)))
+   '(org-block-end-line ((t :inherit org-block-begin-line)))))
 
 (defun vz/org-mode-init ()
   (variable-pitch-mode t)
@@ -50,8 +51,6 @@ it to pdf. If file i unsaved, it will not save it."
 
 (add-hook 'org-mode-hook 'vz/org-mode-init)
 
-;; Set it if you want to write literate python
-;; (setq org-src-preserve-indentation t)
 (general-nmap
   :keymaps 'org-mode-map
   :prefix "SPC"

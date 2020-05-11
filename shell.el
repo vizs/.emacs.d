@@ -32,12 +32,10 @@
   (when (evil-visual-state-p)
 	(evil-exit-visual-state)))
 
-;; Disable duplicates
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
-;; TODO: consider changing this to comint-mode-map?
 (general-nmap
-  :keymaps 'shell-mode-map
+  :keymaps 'comint-mode-map
   "<RET>" 'vz/comint-send-input
   :prefix "["
   "w" 'comint-write-output

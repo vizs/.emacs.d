@@ -36,10 +36,11 @@
 
 (defun vz/mode-line-file-state ()
   (if (buffer-file-name)
-    (cond (buffer-read-only    " [!]")
-      ((buffer-modified-p) " [+]")
-      (:else               ""))
-  ""))
+      (cond
+	   (buffer-read-only    " [!]")
+       ((buffer-modified-p) " [+]")
+       (:else               ""))
+	""))
   
 (defun vz/mode-line-evil-state ()
   (cond
@@ -59,7 +60,7 @@
           "%b"
            (:eval (vz/mode-line-file-state))
            (:eval (vz/mode-line-fill 'mode-line 10))
-           "« %l, %c    "))
+           "« %l    "))
 
 ;; How to be sane when you're working with multiple windows
 (use-package beacon
@@ -73,7 +74,7 @@
 (custom-set-faces
  '(italic         ((t :slant italic)))
  '(bold           ((t :weight bold)))
- '(variable-pitch ((t :family "Charter" :height 100)))
+ '(variable-pitch ((t :family "Charter" :height 120)))
  '(fixed-pitch    ((t :family "Verily Serif Mono")))
  '(org-quote      ((t :inherit italic)))
  '(fixed-pitch-serif ((t :inherit fixed-pitch))))

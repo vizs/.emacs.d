@@ -30,3 +30,8 @@
   "Change working directory of selected buffer"
   (with-current-buffer (window-buffer (selected-window))
 	(setq default-directory path)))
+
+(defun pass (passwd)
+  "Get password"
+  (replace-regexp-in-string "\n$" ""
+	(shell-command-to-string (format "pass get %s" passwd))))
