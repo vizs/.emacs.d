@@ -1,4 +1,5 @@
 (setq
+ vz/initial-loaded nil
  backup-by-copying t
  backup-directory-alist '((".*" . "~/.cache/emacs-bkups/"))
  delete-old-versions t
@@ -18,3 +19,5 @@
 (load-file (concat user-emacs-directory "util.el"))
 (vz/load-files '("pkg.el" "evil.el" "prog.el" "shell.el" "ui.el" "doc.el"
 				 "irc.el"))
+
+(defvar vz/initial-loaded t)

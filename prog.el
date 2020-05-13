@@ -27,6 +27,7 @@
    :prefix "SPC"
    "df" 'counsel-describe-function
    "dv" 'counsel-describe-variable
+   "dk" 'counsel-descbinds
    "dF" 'counsel-describe-face
    "ff" 'counsel-find-file
    "j" 'counsel-imenu
@@ -35,25 +36,15 @@
 (use-package company
   :config
   (add-hook 'prog-mode-hook 'company-mode)
-  (setq company-require-match nil
-        company-idle-delay 1
-        company-tooltip-limit 10
-        company-minimum-prefix-length 0)
+  (setq-ns company
+   require-match nil
+   idle-delay 0.1
+   tooltip-limit 10
+   minimum-prefix-length 0)
   (general-define-key
    :keymaps 'company-active-map
    "M-n" nil
-   "M-p" nil
-   "C-j" 'company-select-next
-   "C-k" 'company-select-previous))
-
-(use-package hl-todo
-  :config
-  (add-hook 'prog-mode-hook #'hl-todo-mode)
-  (general-nmap
-	:keymaps 'prog-mode-map
-	:prefix "["
-	"j" 'hl-todo-next
-	"k" 'hl-todo-previous))
+   "M-p" nil))
 
 (use-package go-mode
   :config
@@ -63,9 +54,9 @@
   :config
   (add-hook 'racket-mode-hook #'racket-unicode-input-method-enable))
 
-(use-package nix-mode
-  :mode "\\.nix\\'")
+(use-package nix-mode :mode "\\.nix\\'")
 
-(dolist (h '(racket-mode-hook emacs-lisp-mode-hook scheme-mode nix-mode))
-  `(add-hook ,h #'(lambda (x) (setq indent-tabs-mode nil
-									tab-width 2))))
+(dolist (h '(racket-mode-hook emacs-lisp-mode-hook
+             scheme-mode-hook nix-mode-hook))
+  (add-hook h #'(lambda () (setq indent-tabs-mode nil
+                                 tab-width 2))))

@@ -14,13 +14,13 @@ it to pdf. If file i unsaved, it will not save it."
 	;; TODO: Consider using an emacs' plugin instead of zathura
 	(call-process "zathura" nil 0 nil pdf)))
 
-(setq
- org-hide-emphasis-markers t
- org-fontify-emphasized-text t
- org-fontify-done-headline t
- org-fontify-quote-and-verse-blocks t
- org-fontify-whole-heading-line t
- org-src-fontify-natively t)
+(setq-ns org
+ hide-emphasis-markers t
+ fontify-emphasized-text t
+ fontify-done-headline t
+ fontify-quote-and-verse-blocks t
+ fontify-whole-heading-line t
+ src-fontify-natively t)
 
 (use-package org-bullets
   :config

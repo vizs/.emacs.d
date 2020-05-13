@@ -2,12 +2,12 @@
 
 (use-package evil
   :init
-  (setq-default
-   ;; evil-want-minibuffer t
-   evil-want-keybinding nil
-   evil-want-C-d-scroll t
-   evil-want-C-u-scroll t
-   evil-want-Y-yank-to-eol t)
+  (setq-ns evil-want
+   ;; minibuffer t
+   keybinding nil
+   C-d-scroll t
+   C-u-scroll t
+   Y-yank-to-eol t)
   :config
   (evil-mode t))
 

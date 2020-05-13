@@ -22,7 +22,7 @@
     (buffer-string)))
 
 ;; From https://github.com/neeasade
-(defun vz/eval-file (path)
+(defun vz/eval-file (path stdin args)
   "Evaluate elisp file in path"
   (eval (ignore-errors (read-from-whole-string (vz/fread path)))))
 
@@ -35,3 +35,11 @@
   "Get password"
   (replace-regexp-in-string "\n$" ""
 	(shell-command-to-string (format "pass get %s" passwd))))
+
+;; inspo: https://github.com/neeasade/emacs.d
+(defmacro setq-ns (ns &rest args)
+  "Set variables with pre as their `namespace'"
+  (let ((ns (prin1-to-string ns)))
+    (dolist (x (seq-partition args 2))
+      (set (intern (format "%s-%s" ns (car x)));;(prin1-to-string (car x))))
+           (cadr x)))))

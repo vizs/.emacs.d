@@ -26,8 +26,9 @@
   (set-face-attribute f nil
 	:weight 'normal :slant 'normal :underline nil))
 
-(setq-default show-paren-delay 0
-        show-paren-when-point-inside-paren t)
+(setq-default
+ show-paren-delay 0
+ show-paren-when-point-inside-paren t)
 (show-paren-mode t)
 
 ;; Modeline
@@ -66,10 +67,10 @@
 (use-package beacon
   :config
   (beacon-mode 1)
-  (setq
-   beacon-blink-when-window-scrolls nil
-   beacon-blink-when-point-moves-horizontally nil
-   beacon-blink-when-point-moves-vertically nil))
+  (setq-ns beacon-blink-when
+    window-scrolls nil
+    point-moves-horizontally nil
+    point-moves-vertically nil))
 
 (custom-set-faces
  '(italic         ((t :slant italic)))

@@ -45,11 +45,15 @@
   "c" 'comint-clear-buffer)
 
 (general-imap
+  :keymaps 'comint-mode-map
+  "<S-return>" 'comint-accumulate)
+
+(general-imap
   :keymaps 'shell-mode-map
   "C-c" 'comint-interrupt-subjob
   "C-z" 'comint-stop-subjob
   "C-l" 'comint-clear-buffer)
 
 (general-vmap
-  :keymaps 'shell-mode-map
+  :keymaps 'comint-mode-map
   "<RET>" 'vz/comint-send-input)
