@@ -35,7 +35,7 @@ it to pdf. If file i unsaved, it will not save it."
    `(,f ((t :weight bold)))))
 
 (let* ((height1 (+ (face-attribute 'variable-pitch :height) 40))
-	   (height2 (- height1 20)))
+       (height2 (- height1 20)))
   (custom-set-faces
    `(org-level-1 ((t :height ,height1 :weight bold)))
    `(org-level-2 ((t :height ,height2 :weight bold)))

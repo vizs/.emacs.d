@@ -13,7 +13,7 @@
 
 (defun vz/shell-mode-init ()
   (dolist (h '(comint-truncate-buffer comint-watch-for-password-prompt))
-	`(add-hook 'comint-output-filter-functions ,h))
+  `(add-hook 'comint-output-filter-functions ,h))
   (shell-dirtrack-mode nil)
   (setq
    comint-process-echoes t ;; Disables duplicates
@@ -23,14 +23,14 @@
   "Send region if present, otherwise current line to current buffer's process"
   (interactive "r")
   (if (use-region-p)
-	  (comint-send-string
-	   (get-buffer-process (current-buffer))
-	   (concat (buffer-substring (or start (region-beginning))
-								 (or end (region-end)))
-			   "\n"))
-	(comint-send-input))
+    (comint-send-string
+     (get-buffer-process (current-buffer))
+     (concat (buffer-substring (or start (region-beginning))
+                               (or end (region-end)))
+             "\n"))
+  (comint-send-input))
   (when (evil-visual-state-p)
-	(evil-exit-visual-state)))
+  (evil-exit-visual-state)))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 

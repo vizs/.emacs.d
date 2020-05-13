@@ -138,7 +138,7 @@
    `(lui-irc-colors-fg-15-face        ((t :foreground ,fg)))
    `(lui-highlight-face               ((t :background ,bg :foreground ,lf)))
    `(lui-time-stamp-face              ((t :background ,bg :foreground ,lf)))
-   `(lui-button-face                  ((t :background ,bg :foreground ,yw)))
+   `(lui-button-face                  ((t :background ,bg :foreground ,lf)))
    `(lui-server-face                  ((t :background ,bg :foreground ,lf)))
    `(circe-highlight-nick-face        ((t :background ,bg :foreground ,lf)))
    `(circe-my-message-face            ((t :background ,bg :foreground ,gr)))

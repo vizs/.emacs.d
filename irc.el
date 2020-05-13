@@ -71,8 +71,8 @@
      (propertize
       (concat " " body)
       'face (cond
-             ((string-match-p vz/circe-mynicks-re body) 'circe-highlight-nick-face)
              ((not (null body-face)) body-face)
+             ((string-match-p vz/circe-mynicks-re body) 'circe-highlight-nick-face)
              (:else 'default))))))
 
 (defun vz/circe-draw-prompt ()

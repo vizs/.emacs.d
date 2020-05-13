@@ -21,7 +21,7 @@
   :after evil
   :config
   (setq general-override-states '(insert emacs hybrid normal
-										 visual motion operator replace))
+                                  visual motion operator replace))
   ;; NOTE: Add t if you want to shorten
   (general-evil-setup)
   (general-nmap
