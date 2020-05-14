@@ -1,9 +1,9 @@
 (defun vz/make-pdf ()
   "Compile org/tex document to pdf"
   (interactive)
-  (cond
-   ((equal major-mode 'org-mode) (org-latex-export-to-pdf))
-   ((equal major-mode 'latex-mode) (call-process "pdflatex" nil 0 nil "buf"))))
+  (pcase major-mode
+   ('org-mode (org-latex-export-to-pdf))
+   ('latex-mode (call-process "pdflatex" nil 0 nil "buf"))))
 
 (defun vz/preview-doc ()
   "Preview org or latex document. If it is an org-mode document, then compiles
