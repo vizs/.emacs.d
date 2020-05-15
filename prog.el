@@ -38,9 +38,9 @@
   (add-hook 'prog-mode-hook 'company-mode)
   (setq-ns company
    require-match nil
-   idle-delay 0.1
+   idle-delay 0.2
    tooltip-limit 10
-   minimum-prefix-length 0)
+   minimum-prefix-length 2)
   (general-define-key
    :keymaps 'company-active-map
    "M-n" nil

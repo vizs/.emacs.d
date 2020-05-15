@@ -15,7 +15,7 @@
 	  :port 6667
 	  :channels (:afterauth "#nixhub" "#macs" "#vis-editor" "#unixporn" "#nixos")
 	  :nickserv-nick "_viz_"
-	  :nickserv-password ,(pass "irc/Freenode"))
+	  :nickserv-password ,(pass-irc "Freenode"))
    ("Madhouse"
 	  :host "irc.astrak.co"
 	  :port 6667
@@ -23,21 +23,21 @@
 	  :channels (:afterauth "#mh-general" "#mh-linux" "#mh-unixporn"
                           "#mh-memes" "#mh-scripting")
 	  :nickserv-nick "_viz_"
-	  :nickserv-password ,(pass "irc/MadHouse"))
+	  :nickserv-password ,(pass-irc "MadHouse"))
    ("Discord Nixhub"
 	  :host "localhost"
     :reduce-lurker-spam t
 	  :user "viz"
 	  :port 6667
 	  :channels ("#home" "#man" "#programming" "#devnull" "#music")
-	  :pass ,(format "%s:361910177961738242" (pass "misc/discord")))
+	  :pass ,(pass-discord 361910177961738242))
    ("Discord Frens"
 	  :host "localhost"
     :reduce-lurker-spam t
 	  :user "viz"
 	  :port 6667
 	  :channel ("#general" "#commands")
-	  :pass ,(format "%s:702578317081182258" (pass "misc/discord")))
+	  :pass ,(pass-discord 702578317081182258))
    ))
 
 (setq-ns circe
@@ -46,29 +46,14 @@
  highlight-nick-type 'message
  server-buffer-name "{network}:{host}")
 
-(setq-ns lui
-  fill-type nil
-  time-stamp-format "%H:%M"
-  time-stamp-position 'right-margin)
-
-(defun vz/lui-init ()
-  (setq
-   fringes-outside-margins t
-   right-margin-width 5
-   word-wrap t
-   wrap-prefix (propertize (make-string 9 ? ) 'face 'circe-originator-face))
-  (setf (cdr (assoc 'continuation fringe-indicator-alist)) nil))
-
-(add-hook 'lui-mode-hook #'vz/lui-init)
-
 (defun vz/circe-init ()
   (setq
    vz/circe--old-nick ""
-   buffer-face-mode-face '(:family "Charter" :height 100)
+   buffer-face-mode-face '(:family "Charter" :height 120)
    mode-line-format "    %b")
   (buffer-face-mode)
   (defface circe-my-message-body-face
-    '((t :inherit circe-my-message-face :family "Charter"))
+    '((t :inherit circe-my-message-face :family "Charter" :height 120))
     "Face for self-say body")
   (dolist (f '(circe-prompt-face circe-originator-face circe-my-message-face))
     (set-face-attribute f nil :inherit 'fixed-pitch)))
@@ -85,7 +70,8 @@
          (lnick (length nick))
          (lbody (length body))
          (spaces (propertize (make-string 9 ? ) 'face 'circe-originator-face)))
-    (when nick (setq vz/circe--old-nick nick))
+    (unless (string-empty-p nick)
+      (setq-local vz/circe--old-nick nick))
     (concat
      (propertize
       (if (> lnick 8)
@@ -116,7 +102,7 @@
         (reason (plist-get args :reason))
         (old-nick (plist-get args :old-nick))
         (new-nick (plist-get args :new-nick)))
-    (unless (boundp 'vz/circe--old-nick) (setq vz/circe--old-nick ""))
+    (unless (boundp 'vz/circe--old-nick) (setq-local vz/circe--old-nick ""))
     (pcase type
       ('say      (vz/circe-draw-msg-generic nick body))
       ('self-say (vz/circe-draw-msg-generic "me" body 'circe-my-message-body-face))
@@ -138,3 +124,21 @@
 
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
 (add-hook 'circe-chat-mode-hook #'vz/circe-init)
+
+
+(setq-ns lui
+  logging-directory (expand-file-name "~/.cache/irc-log")
+  fill-type nil
+  time-stamp-format "%H:%M"
+  time-stamp-position 'right-margin)
+
+(defun vz/lui-init ()
+  (setq
+   fringes-outside-margins t
+   right-margin-width 5
+   left-margin-width 5
+   word-wrap t
+   wrap-prefix (propertize (make-string 9 ? ) 'face 'circe-originator-face))
+  (setf (cdr (assoc 'continuation fringe-indicator-alist)) nil))
+
+(add-hook 'lui-mode-hook #'vz/lui-init)

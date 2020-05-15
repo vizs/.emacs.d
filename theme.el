@@ -146,7 +146,6 @@
    `(circe-server-face                ((t :background ,bg :foreground ,lf)))
    `(circe-originator-face            ((t :background ,bg :foreground ,lf)))
    )
-  `(defface circe-my-message-body-face ((t :background ,bg :foreground ,gr)))
   (setq hl-todo-keyword-faces
         `(("TODO"   . ,re)
           ("FIXME"  . ,re)

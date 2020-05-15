@@ -35,12 +35,13 @@ it to pdf. If file i unsaved, it will not save it."
    `(,f ((t :weight bold)))))
 
 (let* ((height1 (+ (face-attribute 'variable-pitch :height) 40))
-       (height2 (- height1 20)))
+       (height2 (- height1 20))
+       (height3 (- height1 60)))
   (custom-set-faces
    `(org-level-1 ((t :height ,height1 :weight bold)))
    `(org-level-2 ((t :height ,height2 :weight bold)))
-   '(org-quote ((t :slant italic)))
-   '(org-block-begin-line ((t :weight bold)))
+   `(org-quote   ((t :family "IBM Plex Serif" :slant italic :height ,height1)))
+   `(org-block-begin-line ((t :height ,height3 :weight bold)))
    '(org-block-end-line ((t :inherit org-block-begin-line)))))
 
 (defun vz/org-mode-init ()

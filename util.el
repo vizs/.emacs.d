@@ -36,10 +36,18 @@
   (replace-regexp-in-string "\n$" ""
 	(shell-command-to-string (format "pass get %s" passwd))))
 
+(defun pass-irc (serv)
+  `(lambda (_) (pass (format "irc/%s" ,serv))))
+
+(defun pass-discord (serv)
+  `(lambda (_) (format "%s:%d" (pass "misc/discord") ,serv)))
+
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
   "Set variables with pre as their `namespace'"
   (let ((ns (prin1-to-string ns)))
     (dolist (x (seq-partition args 2))
-      (set (intern (format "%s-%s" ns (car x)));;(prin1-to-string (car x))))
-           (cadr x)))))
+      (set (intern (format "%s-%s" ns (car x))) (cadr x)))))
+
+(defun vz/random-choice (list)
+  (nth (random 0 (1- (length list))) list))
