@@ -1,3 +1,5 @@
+;; Dangling parenthesis are present for making my life in the future easier
+
 (use-package circe)
 
 (setq
@@ -45,9 +47,19 @@
  server-buffer-name "{network}:{host}")
 
 (setq-ns lui
-  fill-type nil ;; 9 spaces
+  fill-type nil
   time-stamp-format "%H:%M"
   time-stamp-position 'right-margin)
+
+(defun vz/lui-init ()
+  (setq
+   fringes-outside-margins t
+   right-margin-width 5
+   word-wrap t
+   wrap-prefix (propertize (make-string 9 ? ) 'face 'circe-originator-face))
+  (setf (cdr (assoc 'continuation fringe-indicator-alist)) nil))
+
+(add-hook 'lui-mode-hook #'vz/lui-init)
 
 (defun vz/circe-init ()
   (setq
@@ -55,6 +67,9 @@
    buffer-face-mode-face '(:family "Charter" :height 100)
    mode-line-format "    %b")
   (buffer-face-mode)
+  (defface circe-my-message-body-face
+    '((t :inherit circe-my-message-face :family "Charter"))
+    "Face for self-say body")
   (dolist (f '(circe-prompt-face circe-originator-face circe-my-message-face))
     (set-face-attribute f nil :inherit 'fixed-pitch)))
 
@@ -63,7 +78,7 @@
                      ((string= nick vz/circe--old-nick) "")
                      (:else nick)))
          (body-face (cond
-                     ((string= "me") 'circe-my-message-body-face)
+                     ((string= "me" nick) 'circe-my-message-body-face)
                      ((string-match-p vz/circe-mynicks-re body) 'circe-highlight-nick-face)
                      ((null body-face) 'default)
                      (:else body-face)))
@@ -77,33 +92,36 @@
           (concat (substring nick 0 7) "… ")
         (concat (make-string (- 8 lnick) ? ) nick " "))
       'face (if (string= nick "me") 'circe-my-message-face 'circe-originator-face))
-     (if (> lbody 70)
-         (let ((msg (seq-partition body 70)))
-           (seq-reduce (lambda (res x)
-                         (concat
-                          res "\n" spaces
-                          (propertize x 'face body-face)))
-                       (cdr msg) (car msg)))
-        (propertize body 'face body-face)))))
+     (propertize body 'face body-face))))
 
 (defun vz/circe-draw-prompt ()
   (lui-set-prompt (vz/circe-draw-msg-generic (buffer-name) "")))
   
 ;; I'm quite fond of the old discord join messages
+(defun vz/circe-join-msg (nick)
+  (let ((msg '("%s has come hear to chew bubblegum and damn they are all out of gum"
+               "%s has joined the party"
+               "A %s has spawned in the channel"
+               "%s has just arrived. Seems OP - nerf please"
+               "Roses are red, violets are blue, %s has joined the channel with you"
+               )))
+    (format (vz/random-choice msg) nick)))
+
+(defun vz/circe-leave-msg (nick)
+  (format "%s has left" nick))
+
 (defun vz/circe-handle-msg (type args)
   (let ((nick (plist-get args :nick))
         (body (plist-get args :body))
         (reason (plist-get args :reason))
         (old-nick (plist-get args :old-nick))
-        (new-nick (plist-get args :new-nick))
-        )
+        (new-nick (plist-get args :new-nick)))
     (unless (boundp 'vz/circe--old-nick) (setq vz/circe--old-nick ""))
     (pcase type
       ('say      (vz/circe-draw-msg-generic nick body))
       ('self-say (vz/circe-draw-msg-generic "me" body 'circe-my-message-body-face))
       ('join     (vz/circe-draw-msg-generic ">" (vz/circe-join-msg nick)))
-      ('left     (vz/circe-draw-msg-generic "<" reason))
-      ('part     (vz/circe-draw-msg-generic "<" reason))
+      ('part     (vz/circe-draw-msg-generic "<" (vz/circe-leave-msg nick)))
       ('action   (vz/circe-draw-msg-generic "*" (concat nick " " body)))
       ('nick-ch  (vz/circe-draw-msg-generic old-nick (concat "is now " new-nick)))
       )))
@@ -112,10 +130,11 @@
   say                (lambda (&rest args) (vz/circe-handle-msg 'say args))
   self-say           (lambda (&rest args) (vz/circe-handle-msg 'self-say args))
   action             (lambda (&rest args) (vz/circe-handle-msg 'action args))
-  server-quit        (lambda (&rest args) (vz/circe-handle-msg 'left args))
+  server-quit        (lambda (&rest args) (vz/circe-handle-msg 'part args))
   server-join        (lambda (&rest args) (vz/circe-handle-msg 'join args))
   server-part        (lambda (&rest args) (vz/circe-handle-msg 'part args))
-  server-nick-change (lambda (&rest args) (vz/circe-handle-msg 'nick-ch args)))
+  server-nick-change (lambda (&rest args) (vz/circe-handle-msg 'nick-ch args))
+  server-rejoin      (lambda (&rest args) (vz/circe-handle-msg 'join args)))
 
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
-(add-hook 'circe-channel-mode-hook #'vz/circe-init)
+(add-hook 'circe-chat-mode-hook #'vz/circe-init)
