@@ -39,9 +39,12 @@
 (defun pass-irc (serv)
   `(lambda (_) (pass (format "irc/%s" ,serv))))
 
-;; TODO: start ircdiscord if not alive
 (defun pass-discord (serv)
-  `(lambda (_) (format "%s:%d" (pass "misc/discord") ,serv)))
+  `(lambda (_)
+     (unless (or vz/ircdiscord-process (process-live-p vz/ircdiscord-process))
+       (setq-default vz/ircdiscord-process
+                     (start-process "ircdiscord" nil "ircdiscord")))
+     (format "%s:%d" (pass "misc/discord") ,serv)))
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)

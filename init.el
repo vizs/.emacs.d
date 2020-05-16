@@ -1,5 +1,6 @@
 (setq
  vz/initial-loaded nil
+ vz/ircdiscord-process nil
  use-dialog-box nil
  backup-by-copying t
  backup-directory-alist '((".*" . "~/.cache/emacs-bkups/"))
