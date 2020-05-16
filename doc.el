@@ -55,11 +55,11 @@ it to pdf. If file i unsaved, it will not save it."
 (general-nmap
   :keymaps 'org-mode-map
   :prefix "SPC"
-  "et" 'org-latex-export-to-latex
-  "t" 'org-todo
-  "sT" 'org-babel-tangle)
+  "et" #'org-latex-export-to-latex
+  "t" #'org-todo
+  "sT" #'org-babel-tangle)
 (general-nmap
   :prefix "SPC"
   :keymaps '(org-mode-map latex-mode-map)
-  "pp" 'vz/preview-doc
-  "ep" 'vz/make-pdf)
+  "pp" #'vz/preview-doc
+  "ep" #'vz/make-pdf)

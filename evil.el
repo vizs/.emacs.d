@@ -25,17 +25,17 @@
   ;; NOTE: Pass t if you want to shorten
   (general-evil-setup)
   (general-nmap
-   "gc" 'comment-line
-   "C-e" 'eval-last-sexp)
+   "gc" #'comment-line
+   "C-e" #'eval-last-sexp)
   (general-nmap
-	  :prefix "SPC" "rc" 'vz/reload-config))
+	  :prefix "SPC" "rc" #'vz/reload-config))
 
 (use-package evil-numbers
   :after evil
   :config
   (general-nmap
-   "C-a" 'evil-numbers/inc-at-pt
-   "C-S-x" 'evil-numbers/dec-at-pt))
+   "C-a" #'evil-numbers/inc-at-pt
+   "C-S-x" #'evil-numbers/dec-at-pt))
 
 ;; The bitmaps don't look good
 (use-package evil-fringe-mark
@@ -58,8 +58,8 @@
   (evil-visual-restore))
 
 (general-vmap
-  ">" 'vz/evil-shift-right
-  "<" 'vz/evil-shift-left)
+  ">" #'vz/evil-shift-right
+  "<" #'vz/evil-shift-left)
 
 (use-package avy
   :config
@@ -95,14 +95,14 @@ in the same vertical column"
 
 (general-nmap
   :prefix "C-w"
-  "o" 'ace-window
-  "O" 'delete-other-windows
-  "x" 'ace-delete-window
-  "S" 'vz/split-window-below-ask
-  "V" 'vz/split-window-right-ask
-  "C-h" 'vz/shrink-other-windows
-  "s" 'split-window-below
-  "v" 'split-window-right)
+  "o" #'ace-window
+  "O" #'delete-other-windows
+  "x" #'ace-delete-window
+  "S" #'vz/split-window-below-ask
+  "V" #'vz/split-window-right-ask
+  "C-h" #'vz/shrink-other-windows
+  "s" #'split-window-below
+  "v" #'split-window-right)
 
 ;; TODO
 (unless (vz/load-pkg "sam") ;; (when (vz/load-pkg "sam")
@@ -190,15 +190,15 @@ in the same vertical column"
 
 (general-nmap
  :keymaps 'override
- "C-n" 'vz/mc--C-n
- "C-p" 'vz/mc--C-p
- "C-l" 'evil-mc-make-all-cursors
- "C-j" 'evil-mc-make-cursor-move-next-line
- "C-k" 'evil-mc-make-cursor-move-prev-line
- "<escape>" 'vz/mc--remove)
+ "C-n" #'vz/mc--C-n
+ "C-p" #'vz/mc--C-p
+ "C-l" #'evil-mc-make-all-cursors
+ "C-j" #'evil-mc-make-cursor-move-next-line
+ "C-k" #'evil-mc-make-cursor-move-prev-line
+ "<escape>" #'vz/mc--remove)
 
 (general-vmap
  :keymaps 'override
- "C-n" 'vz/mc--C-n
- "C-x" 'vz/mc--visual-C-x
- "C-p" 'vz/mc--C-p)
+ "C-n" #'vz/mc--C-n
+ "C-x" #'vz/mc--visual-C-x
+ "C-p" #'vz/mc--C-p)
