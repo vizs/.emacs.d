@@ -3,8 +3,6 @@
 
 ;; TODO: * Find out how to add functions to executable list thing
 ;;       * Find out how to expand directory aliases
-;;       * Maybe make a minor mode for *term* buffers so I can kill the frame
-;;         and buffer when I press ^D?
 
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
@@ -33,7 +31,7 @@
   (setq-local
    inhibit-field-text-motion t
    comint-process-echoes t) ;; Disables duplicates
-   (setq Man-notify-method 'quiet)
+  (setq Man-notify-method 'quiet)
   (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt))
 
 (defun vz/comint-send-input (&optional start end)
@@ -62,6 +60,19 @@
    (get-buffer-process (current-buffer))
    (concat (ivy-read "> " (vz/shell-history)) "\n")))
 
+(define-minor-mode vz/term-mode
+  "Minor mode for binding ^D in *term* buffers")
+
+(defun vz/shell-send-eof ()
+  "Wrapper around comint-send-eof. Kills and deletes vz/term-mode--frame
+if vz/term-mode is active"
+  (interactive)
+  (comint-send-eof)
+  (when (bound-and-true-p vz/term-mode)
+    (let ((kill-buffer-query-functions nil))
+      (kill-buffer (current-buffer)))
+    (delete-frame vz/term-mode--frame)))
+
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
 (general-nmap :keymaps 'comint-mode-map
@@ -77,7 +88,7 @@
   "c" #'comint-clear-buffer)
 
 (general-imap
-  :keymaps #'comint-mode-map
+  :keymaps 'comint-mode-map
   "<S-return>" #'comint-accumulate)
 
 (general-nmap
@@ -90,8 +101,9 @@
   "C-c" #'comint-interrupt-subjob
   "C-z" #'comint-stop-subjob
   "C-l" #'comint-clear-buffer
-  "C-/" #'vz/shell-insert-from-hist)
+  "C-/" #'vz/shell-insert-from-hist
+  "C-d" #'vz/shell-send-eof)
 
 (general-vmap
-  :keymaps #'comint-mode-map
+  :keymaps 'comint-mode-map
   "<RET>" #'vz/comint-send-input)
