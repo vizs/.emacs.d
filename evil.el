@@ -17,36 +17,18 @@
   (evil-collection-init)
   (setq evil-want-keybinding t))
 
-(defun vz/split-window-below-ask ()
-  (interactive)
-  (let ((buf (vz/get-file-or-buffer))
-        (win (split-window-below)))
-    (set-window-buffer win buf)))
-
-(defun vz/split-window-right-ask ()
-  (interactive)
-  (let ((buf (vz/get-file-or-buffer))
-        (win (split-window-right)))
-    (set-window-buffer win buf)))
-
 (use-package general
   :after evil
   :config
   (setq general-override-states '(insert emacs hybrid normal
                                   visual motion operator replace))
-  ;; NOTE: Add t if you want to shorten
+  ;; NOTE: Pass t if you want to shorten
   (general-evil-setup)
   (general-nmap
    "gc" 'comment-line
    "C-e" 'eval-last-sexp)
   (general-nmap
-	  :prefix "SPC" "rc" 'vz/reload-config)
-  (general-nmap :prefix "C-w"
-   ;; These don't change the layout which is perfect
-   "S" 'vz/split-window-below-ask
-   "V" 'vz/split-window-right-ask
-   "s" 'split-window-below
-   "v" 'split-window-right))
+	  :prefix "SPC" "rc" 'vz/reload-config))
 
 (use-package evil-numbers
   :after evil
@@ -87,16 +69,76 @@
 
 (use-package ace-window
   :after avy
-  :config
-  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
-  (general-nmap
-   :prefix "C-w"
-   "o" 'ace-window
-   "O" 'delete-other-windows
-   "x" 'ace-delete-window))
+  :init
+  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)))
 
-;; TODO: * package sam.el (https://github.com/realwhz/sam.el)
-;;       * make 0x0 an ex command
+(defun vz/split-window-below-ask ()
+  (interactive)
+  (let ((buf (vz/get-file-or-buffer))
+        (win (split-window-below)))
+    (set-window-buffer win buf)
+    (select-window win)))
+
+(defun vz/split-window-right-ask ()
+  (interactive)
+  (let ((buf (vz/get-file-or-buffer))
+        (win (split-window-right)))
+    (set-window-buffer win buf)
+    (select-window win)))
+
+;; Behaves sort of like acme(1)
+(defun vz/shrink-other-windows ()
+  "Shorten all other windows except the selected window
+in the same vertical column"
+  (interactive)
+  (window-resize (selected-window) (window-max-delta)))
+
+(general-nmap
+  :prefix "C-w"
+  "o" 'ace-window
+  "O" 'delete-other-windows
+  "x" 'ace-delete-window
+  "S" 'vz/split-window-below-ask
+  "V" 'vz/split-window-right-ask
+  "C-h" 'vz/shrink-other-windows
+  "s" 'split-window-below
+  "v" 'split-window-right)
+
+;; TODO
+(unless (vz/load-pkg "sam") ;; (when (vz/load-pkg "sam")
+  (define-minor-mode vz/sam-minor-mode
+    "Minor mode for vz/sam commands"
+    :init-value nil)
+
+  (defvar vz/sam-initial-dot nil)
+
+  (defun vz/sam--quit-win ()
+    (when (string= (buffer-name (current-buffer)) "*sam-cmd*")
+      (window--delete (selected-window))
+      (vz/sam--eval-command)))
+
+  (general-nmap
+    :keymaps 'vz/sam-minor-mode-map
+    "q" 'vz/sam--quit-win)
+
+  (defun vz/sam--eval-command ()
+    (let ((sam-cmd (with-current-buffer "*sam-cmd*"
+                     (buffer-string))))
+      ))
+
+  (defun vz/sam-eval-command ()
+    (interactive)
+    (setq vz/sam-initial-dot
+          (if (use-region-p)
+              (buffer-substring (region-beginning) (region-end))
+            (buffer-string)))
+    (when (bufferp "*sam-cmd*")
+      (with-current-buffer "*sam-cmd*" (erase-buffer)))
+    (let ((cmd-buf (get-buffer-create "*sam-cmd*"))
+          (win (split-window-above)))
+      (set-window-buffer win cmd-buf)
+      (select-window win)
+      (vz/sam-minor-mode))))
 
 ;; Multiple cursor implementation akin to vis'
 ;; TODO: * C-p in visual and normal mode

@@ -61,5 +61,12 @@ Create file-buffer if it such no buffer/file exists"
                              (seq-filter #'file-regular-p
                                          (directory-files default-directory))
                              (mapcar #'buffer-name (buffer-list))))))
-    (or (get-file-buffer buf-name)
-        (find-file-noselect buf-name))))
+    (or (get-buffer buf-name) (find-file-noselect buf-name))))
+
+(defun vz/windows-in-direction (direction &optional windows)
+  "Get all windows in direction relative to selected window"
+  (let ((win (window-in-direction direction
+                                  (or (car windows) (selected-window)))))
+    (if win
+        (vz/windows-in-direction direction (cons win windows))
+      windows)))
