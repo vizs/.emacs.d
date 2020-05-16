@@ -1,7 +1,10 @@
 ;; NOTE: * you can see if you are using comint-mode if you check INSIDE_EMACS
 ;;       * man is significantly faster than woman
 
-;; TODO: get mksh history synced
+;; TODO: * Find out how to add functions to executable list thing
+;;       * Find out how to expand directory aliases
+;;       * Maybe make a minor mode for *term* buffers so I can kill the frame
+;;         and buffer when I press ^D?
 
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
@@ -29,8 +32,8 @@
   (shell-dirtrack-mode nil)
   (setq-local
    inhibit-field-text-motion t
-   comint-process-echoes t ;; Disables duplicates
-   Man-notify-method 'quiet)
+   comint-process-echoes t) ;; Disables duplicates
+   (setq Man-notify-method 'quiet)
   (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt))
 
 (defun vz/comint-send-input (&optional start end)
@@ -43,7 +46,21 @@
                                (or end (region-end))) "\n"))
   (comint-send-input))
   (when (evil-visual-state-p)
-  (evil-exit-visual-state)))
+    (evil-exit-visual-state)))
+
+(defun vz/shell-history ()
+  "Returns current shell's history as a list"
+  (when (file-regular-p "/tmp/shhist")
+    (delete-file "/tmp/shhist"))
+  (call-process "mksh" nil nil nil "-ic" "fc -l -n 1 >/tmp/shhist")
+  (split-string (vz/fread "/tmp/shhist") "\n"))
+
+(defun vz/shell-insert-from-hist ()
+  "Search for command in history and run it"
+  (interactive)
+  (comint-send-string
+   (get-buffer-process (current-buffer))
+   (concat (ivy-read "> " (vz/shell-history)) "\n")))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
@@ -63,11 +80,17 @@
   :keymaps #'comint-mode-map
   "<S-return>" #'comint-accumulate)
 
+(general-nmap
+  :keymaps 'shell-mode-map
+  :prefix "["
+  "/" #'vz/shell-insert-from-hist)
+
 (general-imap
   :keymaps 'shell-mode-map
   "C-c" #'comint-interrupt-subjob
   "C-z" #'comint-stop-subjob
-  "C-l" #'comint-clear-buffer)
+  "C-l" #'comint-clear-buffer
+  "C-/" #'vz/shell-insert-from-hist)
 
 (general-vmap
   :keymaps #'comint-mode-map
