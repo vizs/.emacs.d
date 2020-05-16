@@ -39,6 +39,7 @@
 (defun pass-irc (serv)
   `(lambda (_) (pass (format "irc/%s" ,serv))))
 
+;; TODO: start ircdiscord if not alive
 (defun pass-discord (serv)
   `(lambda (_) (format "%s:%d" (pass "misc/discord") ,serv)))
 
@@ -51,3 +52,14 @@
 
 (defun vz/random-choice (list)
   (nth (random 0 (1- (length list))) list))
+
+(defun vz/get-file-or-buffer ()
+  "Return buffer corresponding to buffer-name or file-name
+Create file-buffer if it such no buffer/file exists"
+  (let ((buf-name (ivy-read "> "
+                            (append
+                             (seq-filter #'file-regular-p
+                                         (directory-files default-directory))
+                             (mapcar #'buffer-name (buffer-list))))))
+    (or (get-file-buffer buf-name)
+        (find-file-noselect buf-name))))

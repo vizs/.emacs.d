@@ -17,6 +17,18 @@
   (evil-collection-init)
   (setq evil-want-keybinding t))
 
+(defun vz/split-window-below-ask ()
+  (interactive)
+  (let ((buf (vz/get-file-or-buffer))
+        (win (split-window-below)))
+    (set-window-buffer win buf)))
+
+(defun vz/split-window-right-ask ()
+  (interactive)
+  (let ((buf (vz/get-file-or-buffer))
+        (win (split-window-right)))
+    (set-window-buffer win buf)))
+
 (use-package general
   :after evil
   :config
@@ -28,7 +40,13 @@
    "gc" 'comment-line
    "C-e" 'eval-last-sexp)
   (general-nmap
-	:prefix "SPC" "rc" 'vz/reload-config))
+	  :prefix "SPC" "rc" 'vz/reload-config)
+  (general-nmap :prefix "C-w"
+   ;; These don't change the layout which is perfect
+   "S" 'vz/split-window-below-ask
+   "V" 'vz/split-window-right-ask
+   "s" 'split-window-below
+   "v" 'split-window-right))
 
 (use-package evil-numbers
   :after evil
