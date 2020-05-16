@@ -3,7 +3,7 @@
  tab-width 4)
 
 (dolist (v '(c-basic-offset cperl-basic-offset python-indent))
-  (defvaralias v 'tab-width))
+  `(defvaralias v ,tab-width))
 
 (use-package ivy
   :config
@@ -46,6 +46,14 @@
    "M-n" nil
    "M-p" nil))
 
+(use-package hl-todo
+  :config
+  (add-hook 'prog-mode-hook #'hl-todo-mode)
+  (general-nmap
+    :prefix "["
+    "j" 'hl-todo-next
+    "k" 'hl-todo-previous))
+
 (use-package go-mode
   :config
   (add-hook 'before-save-hook #'gofmt-before-save))
@@ -60,3 +68,7 @@
              scheme-mode-hook nix-mode-hook))
   (add-hook h #'(lambda () (setq indent-tabs-mode nil
                                  tab-width 2))))
+
+(setq-ns python-shell
+  interpreter "python3"
+  interpreter-args "-i")

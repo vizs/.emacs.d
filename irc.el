@@ -49,11 +49,11 @@
 (defun vz/circe-init ()
   (setq
    vz/circe--old-nick ""
-   buffer-face-mode-face '(:family "Charter" :height 120)
+   buffer-face-mode-face '(:family "Charter" :height 100)
    mode-line-format "    %b")
   (buffer-face-mode)
   (defface circe-my-message-body-face
-    '((t :inherit circe-my-message-face :family "Charter" :height 120))
+    '((t :inherit circe-my-message-face :family "Charter" :height 100))
     "Face for self-say body")
   (dolist (f '(circe-prompt-face circe-originator-face circe-my-message-face))
     (set-face-attribute f nil :inherit 'fixed-pitch)))
