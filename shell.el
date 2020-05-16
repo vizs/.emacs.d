@@ -50,8 +50,10 @@
   "Returns current shell's history as a list"
   (when (file-regular-p "/tmp/shhist")
     (delete-file "/tmp/shhist"))
-  (call-process "mksh" nil nil nil "-ic" "fc -l -n 1 >/tmp/shhist")
-  (split-string (vz/fread "/tmp/shhist") "\n"))
+  (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
+  (mapcar #'(lambda (x)
+              (string-trim-left x "\t"))
+          (split-string (vz/fread "/tmp/shhist") "\n")))
 
 (defun vz/shell-insert-from-hist ()
   "Search for command in history and run it"
