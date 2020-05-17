@@ -60,20 +60,37 @@
    (get-buffer-process (current-buffer))
    (concat (ivy-read "> " (vz/shell-history)) "\n")))
 
+(defun vz/popup-shell ()
+  "Open M-x shell in project's PWD"
+  (interactive)
+  (when (get-buffer "*shell*")
+    (comint-send-string (get-buffer-process "*shell*")
+                        (format "cd %s\n" default-directory))
+    (switch-to-buffer-other-window "*shell*"))
+  (shell))
+
 (define-minor-mode vz/term-mode
   "Minor mode for binding ^D in *term* buffers")
 
+;; TODO: Figure out how to kill buffer when shell process is not alive.
+;;       Right now, process-live-p returns non-nil even after sending
+;;       comint-send-eof
 (defun vz/shell-send-eof ()
   "Wrapper around comint-send-eof. Kills and deletes vz/term-mode--frame
 if vz/term-mode is active"
   (interactive)
   (comint-send-eof)
-  (when (bound-and-true-p vz/term-mode)
+  (when (and (bound-and-true-p vz/term-mode)
+             t) ;; (not (process-live-p vz/term-mode--shell-process)))
     (let ((kill-buffer-query-functions nil))
       (kill-buffer (current-buffer)))
     (delete-frame vz/term-mode--frame)))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
+
+(general-nmap
+  :prefix "SPC"
+  "ps" #'vz/popup-shell)
 
 (general-nmap :keymaps 'comint-mode-map
   "<RET>" #'vz/comint-send-input)
