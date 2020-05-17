@@ -152,12 +152,11 @@ in the same vertical column"
   :group 'evil-mc
   :init-value nil
   :lighter evil-mc-mode-line
-  (cond (evil-mc-mode
+  (if (evil-mc-mode
          (evil-mc-define-vars)
          (evil-mc-initialize-vars)
          (evil-mc-initialize-hooks))
-        (:else
-         (evil-mc-teardown-hooks))))
+      (evil-mc-teardown-hooks)))
 (put 'vz/evil-mc-mode 'permanent-local t)
 
 (define-globalized-minor-mode vz/global-evil-mc-mode
@@ -174,14 +173,7 @@ in the same vertical column"
   (interactive)
   (evil-force-normal-state)
   (when (evil-mc-has-cursors-p)
-	(evil-mc-undo-all-cursors)))
-
-;; BROKEN
-(defun vz/mc--C-p ()
-  (interactive)
-  (when (evil-mc-has-cursors-p)
-	(evil-mc-undo-cursor-at-pos (point))
-	(evil-mc-goto-cursor (evil-mc-find-next-cursor) nil)))
+	  (evil-mc-undo-all-cursors)))
 
 (defun vz/mc--visual-C-x ()
   (interactive)
@@ -191,7 +183,6 @@ in the same vertical column"
 (general-nmap
  :keymaps 'override
  "C-n" #'vz/mc--C-n
- "C-p" #'vz/mc--C-p
  "C-l" #'evil-mc-make-all-cursors
  "C-j" #'evil-mc-make-cursor-move-next-line
  "C-k" #'evil-mc-make-cursor-move-prev-line
@@ -200,5 +191,4 @@ in the same vertical column"
 (general-vmap
  :keymaps 'override
  "C-n" #'vz/mc--C-n
- "C-x" #'vz/mc--visual-C-x
- "C-p" #'vz/mc--C-p)
+ "C-x" #'vz/mc--visual-C-x)

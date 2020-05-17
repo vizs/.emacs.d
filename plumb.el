@@ -37,18 +37,18 @@
     (cond
      ((or (string-empty-p file-name) (string= ext "html"))
       (browse-url-chromium string))
-     ((member ext (append vz/plumb-video-exts
-                             vz/plumb-audio-exts))
+     ((member ext (append vz/plumb-video-exts vz/plumb-audio-exts))
       (vz/plumb-yt string))
      (:else
       (setq-local path vz/plumb-download-url string)
       (vz/plumb--file ext path)
       (delete-file path)))))
 
+;; Checking if string has non-english letters and translating would be nice
 (defun vz/plumb-eval (string)
   (pcase major-mode
     ('python-mode (python-send-string string))
-    ;;('scheme-mode (vz/run-scheme)
+    ;;('scheme-mode (vz/scheme-send-string string))
     ('emacs-lisp-mode (eval (read string)))
     (- (shell-command string))))
 
@@ -56,9 +56,10 @@
 (when (vz/load-pkg "wand")
   (setq wand:*rules*
    (list
-    (wand:create-rule :match "^.*\\([0-9][a-z]+\\)"
+    (wand:create-rule :match "[A-Za-z0-9]+([0-9a-z]+)"
                       :capture :whole
-                      :action #'man)
+                      :action #'(lambda (string)
+                                  (switch-to-buffer-other-window (man string))))
     (wand:create-rule :match "https?://youtube.com"
                       :capture :whole
                       :action #'vz/plumb-yt)
