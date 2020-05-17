@@ -88,7 +88,7 @@
 
 ;; Behaves sort of like acme(1)
 (defun vz/shrink-other-windows ()
-  "Shorten all other windows except the selected window
+  "Shrink all other windows except the selected window
 in the same vertical column"
   (interactive)
   (window-resize (selected-window) (window-max-delta)))
@@ -129,7 +129,7 @@ in the same vertical column"
   (defun vz/sam-eval-command ()
     (interactive)
     (setq vz/sam-initial-dot
-          (if (use-region-p)
+          (if (region-active-p)
               (buffer-substring (region-beginning) (region-end))
             (buffer-string)))
     (when (bufferp "*sam-cmd*")

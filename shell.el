@@ -37,7 +37,7 @@
 (defun vz/comint-send-input (&optional start end)
   "Send region if present, otherwise current line to current buffer's process"
   (interactive "r")
-  (if (use-region-p)
+  (if (region-active-p)
     (comint-send-string
      (get-buffer-process (current-buffer))
      (concat (buffer-substring (or start (region-beginning))
@@ -51,9 +51,7 @@
   (when (file-regular-p "/tmp/shhist")
     (delete-file "/tmp/shhist"))
   (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
-  (mapcar #'(lambda (x)
-              (string-trim-left x "\t"))
-          (split-string (vz/fread "/tmp/shhist") "\n")))
+  (split-string (vz/fread "/tmp/shhist") "\n" nil "\t"))
 
 (defun vz/shell-insert-from-hist ()
   "Search for command in history and run it"

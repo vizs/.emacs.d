@@ -20,6 +20,6 @@
 
 (load-file (concat user-emacs-directory "util.el"))
 (vz/load-files '("pkg.el" "evil.el" "prog.el" "shell.el" "ui.el" "doc.el"
-                 "irc.el"))
+                 "irc.el" "plumb.el"))
 
 (defvar vz/initial-loaded t)
