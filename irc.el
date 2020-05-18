@@ -90,11 +90,6 @@
                "Swoooosh. %s just landed"
                "Brace yourselves. %s just joined the server"
                "%s just joined. Hide your bananas"
-               "%s just arrived. Seems OP - please nerf"
-               "%s just slid into the server"
-               "A %s has spawned in the server"
-               "Big %s showed up!"
-               "Where’s %s? In the server!"
                "%s just showed up. Hold my beer"
                "%s has just arrived. Seems OP - nerf please"
                "Roses are red, violets are blue, %s has joined the chat with you"
@@ -112,55 +107,54 @@
         (new-nick (plist-get args :new-nick)))
     (unless (boundp 'vz/circe--old-nick) (setq-local vz/circe--old-nick ""))
     (pcase type
-      ('say      (vz/circe-draw-msg-generic nick body))
-      ('self-say (vz/circe-draw-msg-generic "me" body 'circe-my-message-body-face))
-      ('join     (vz/circe-draw-msg-generic ">" (vz/circe-join-msg nick)))
-      ('part     (vz/circe-draw-msg-generic "<" (vz/circe-leave-msg nick)))
-      ('action   (vz/circe-draw-msg-generic "*" (concat nick " " body)))
-      ('nick-ch  (vz/circe-draw-msg-generic old-nick (concat "is now " new-nick)))
+      ('say  (vz/circe-draw-msg-generic nick body))
+      ('ssay (vz/circe-draw-msg-generic "me" body 'circe-my-message-body-face))
+      ('join (vz/circe-draw-msg-generic ">" (vz/circe-join-msg nick)))
+      ('part (vz/circe-draw-msg-generic "<" (vz/circe-leave-msg nick)))
+      ('acn  (vz/circe-draw-msg-generic "*" (concat nick " " body)))
+      ('nch  (vz/circe-draw-msg-generic old-nick (concat "is now " new-nick)))
+      ('smsg (vz/circe-draw-msg-generic "***" body 'circe-server-face))
       )))
 
 (setq-ns circe-format
   say                (lambda (&rest args) (vz/circe-handle-msg 'say args))
-  self-say           (lambda (&rest args) (vz/circe-handle-msg 'self-say args))
-  action             (lambda (&rest args) (vz/circe-handle-msg 'action args))
+  self-say           (lambda (&rest args) (vz/circe-handle-msg 'ssay args))
+  action             (lambda (&rest args) (vz/circe-handle-msg 'acn args))
+  server-message     (lambda (&rest args) (vz/circe-handle-msg 'smsg args))
   server-quit        (lambda (&rest args) (vz/circe-handle-msg 'part args))
   server-join        (lambda (&rest args) (vz/circe-handle-msg 'join args))
   server-part        (lambda (&rest args) (vz/circe-handle-msg 'part args))
-  server-nick-change (lambda (&rest args) (vz/circe-handle-msg 'nick-ch args))
+  server-nick-change (lambda (&rest args) (vz/circe-handle-msg 'nch args))
   server-rejoin      (lambda (&rest args) (vz/circe-handle-msg 'join args)))
 
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
 (add-hook 'circe-chat-mode-hook #'vz/circe-init)
 
 ;; N e s t
+(defun vz/circe-get-channels-cond (cond)
+  "Get channels from all server buffer that match the condition cond"
+  (message (prin1-to-string cond))
+  (flatten-list
+   (mapcar #'(lambda (x) (with-current-buffer x (circe-server-channel-buffers)))
+           (seq-filter cond (circe-server-buffers)))))
+
 (defun vz/circe-jump-irc ()
   "Jump to irc channel"
   (interactive)
   (switch-to-buffer-other-window
-   (ivy-read ">"
-             (mapcar #'buffer-name
-                (flatten-list
-                 (mapcar #'(lambda (x) (with-current-buffer x
-                                         (circe-server-channel-buffers)))
-                         (seq-filter #'(lambda (x) (not (string-prefix-p
-                                                         "Discord "
-                                                         (buffer-name x))))
-                                     (circe-server-buffers))))))))
-
+   (ivy-read "> " (mapcar #'buffer-name
+                         (vz/circe-get-channels-cond
+                          #'(lambda (x) (not (string-prefix-p "Discord "
+                                                (buffer-name x)))))))))
 (defun vz/circe-jump-discord ()
   "Jump to discord channel"
   (interactive)
   (switch-to-buffer-other-window
-   (ivy-read ">"
+   (ivy-read "> "
              (mapcar #'buffer-name
-                (flatten-list
-                 (mapcar #'(lambda (x) (with-current-buffer x
-                                         (circe-server-channel-buffers)))
-                         (seq-filter #'(lambda (x) (string-prefix-p
-                                                         "Discord "
-                                                         (buffer-name x)))
-                                     (circe-server-buffers))))))))
+                     (vz/circe-get-channels-cond
+                      #'(lambda (x) (string-prefix-p "Discord "
+                                                     (buffer-name x))))))))
 
 (setq-ns lui
   logging-directory (expand-file-name "~/.cache/irc-log")
