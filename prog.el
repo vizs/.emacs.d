@@ -2,8 +2,9 @@
  indent-tabs-mode t
  tab-width 4)
 
-(dolist (v '(c-basic-offset cperl-basic-offset python-indent))
-  `(defvaralias v ,tab-width))
+(defvar c-basic-offset 4)
+(defvar cperl-basic-offset 4)
+(defvar python-indent 4)
 
 (use-package ivy
   :config

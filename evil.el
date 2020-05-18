@@ -63,14 +63,32 @@
 
 (use-package avy
   :config
+  ;; from u/loskutak-the-ptak
+  (defun vz/avy-search (&optional arg)
+    (interactive "P")
+    (let ((avy-timeout-seconds 100))
+      (call-interactively #'avy-goto-char-timer arg)))
   (general-nmap
-	"gf" #'avy-goto-char
-	"gF" #'avy-goto-char-timer))
+    :prefix "g"
+	  "f" #'avy-goto-char
+	  "F" #'avy-goto-char-timer
+    "/" #'vz/avy-search)
+  (general-define-key
+    :prefix "g"
+    :states '(visual normal)
+    "j" #'avy-goto-line-below
+    "k" #'avy-goto-line-above))
 
+;; TODO: setup hydra for window commands
 (use-package ace-window
   :after avy
-  :init
-  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)))
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l))
+  (general-nmap
+    :prefix "C-w"
+    "o" #'ace-window
+    "O" #'delete-other-windows
+    "x" #'ace-delete-window))
 
 (defun vz/split-window-below-ask ()
   (interactive)
@@ -95,9 +113,6 @@ in the same vertical column"
 
 (general-nmap
   :prefix "C-w"
-  "o" #'ace-window
-  "O" #'delete-other-windows
-  "x" #'ace-delete-window
   "S" #'vz/split-window-below-ask
   "V" #'vz/split-window-right-ask
   "C-h" #'vz/shrink-other-windows
