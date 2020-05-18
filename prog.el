@@ -14,25 +14,31 @@
    :keymaps 'ivy-minibuffer-map
    "C-p" nil
    "C-n" nil
-   "C-j" 'ivy-next-line
-   "C-k" 'ivy-previous-line)
+   "C-s" #'ivy-avy
+   "C-j" #'ivy-next-line
+   "C-k" #'ivy-previous-line)
+  (general-define-key
+   :keymaps 'ivy-switch-buffer-map
+   "C-k" #'ivy-previous-line
+   ;; Shift cannot be bound???
+   "C-M-K" #'ivy-switch-buffer-kill)
   (general-nmap
    :keymaps 'override
-   "/" 'swiper
-   "?" 'swiper-backward))
+   "/" #'swiper
+   "?" #'swiper-backward))
 
 (use-package counsel
   :after ivy
   :config
   (general-nmap
    :prefix "SPC"
-   "df" 'counsel-describe-function
-   "dv" 'counsel-describe-variable
-   "dk" 'counsel-descbinds
-   "dF" 'counsel-describe-face
-   "ff" 'counsel-find-file
-   "j" 'counsel-imenu
-   "b" 'ivy-switch-buffer))
+   "df" #'counsel-describe-function
+   "dv" #'counsel-describe-variable
+   "dk" #'counsel-descbinds
+   "dF" #'counsel-describe-face
+   "ff" #'counsel-find-file
+   "j" #'counsel-imenu
+   "b" #'ivy-switch-buffer))
 
 (use-package company
   :config
@@ -45,15 +51,17 @@
   (general-define-key
    :keymaps 'company-active-map
    "M-n" nil
-   "M-p" nil))
+   "M-p" nil
+   "C-j" #'company-select-next
+   "C-k" #'comapny-select-previous))
 
 (use-package hl-todo
   :config
   (add-hook 'prog-mode-hook #'hl-todo-mode)
   (general-nmap
     :prefix "["
-    "j" 'hl-todo-next
-    "k" 'hl-todo-previous))
+    "j" #'hl-todo-next
+    "k" #'hl-todo-previous))
 
 (use-package go-mode
   :config
@@ -65,11 +73,13 @@
 
 (use-package nix-mode :mode "\\.nix\\'")
 
+(use-package python
+  :config
+  (setq-ns python-shell
+    interpreter "python3"
+    interpreter-args "-i"))
+
 (dolist (h '(racket-mode-hook emacs-lisp-mode-hook
              scheme-mode-hook nix-mode-hook))
   (add-hook h #'(lambda () (setq indent-tabs-mode nil
                                  tab-width 2))))
-
-(setq-ns python-shell
-  interpreter "python3"
-  interpreter-args "-i")
