@@ -4,36 +4,30 @@
 
 (setq
  vz/circe-mynicks '("viz" "_viz_")
- vz/circe-mynicks-re (seq-reduce (lambda (res x)
-                                   (format "%s\\|.*%s.*" res x))
+ vz/circe-mynicks-re (seq-reduce #'(lambda (res x)
+                                     (format "%s\\|.*%s.*" res x))
                                  (cdr vz/circe-mynicks)
                                  (format ".*%s.*" (car vz/circe-mynicks)))
  circe-network-options
  `(("Freenode"
 	  :nick "_viz_"
-	  :tls nil
-	  :port 6667
-	  :channels (:afterauth "#nixhub" "#macs" "#vis-editor" "#unixporn" "#nixos")
-	  :nickserv-nick "_viz_"
+    :port (6667 . 6697)
+	  :channels (:after-auth "#nixhub" "#vis-editor" "#unixporn" "#nixos" "#emacs")
+    :nickserv-nick "_viz_"
 	  :nickserv-password ,(pass-irc "Freenode"))
-   ("Madhouse"
+   ("Discord Madhouse"
 	  :host "irc.astrak.co"
-	  :port 6667
-	  :nick "_viz_"
-	  :channels (:afterauth "#mh-general" "#mh-linux" "#mh-unixporn"
-                          "#mh-memes" "#mh-scripting")
-	  :nickserv-nick "_viz_"
-	  :nickserv-password ,(pass-irc "MadHouse"))
+	  :user "viz"
+	  :channels ("#general" "#linux" "#unixporn" "#memes" "#scripting")
+	  :pass ,(pass-discord 446727370964205585))
    ("Discord Nixhub"
 	  :host "localhost"
-    :reduce-lurker-spam t
 	  :user "viz"
 	  :port 6667
 	  :channels ("#home" "#man" "#programming" "#devnull" "#music")
 	  :pass ,(pass-discord 361910177961738242))
    ("Discord Frens"
 	  :host "localhost"
-    :reduce-lurker-spam t
 	  :user "viz"
 	  :port 6667
 	  :channel ("#general" "#commands")
@@ -85,11 +79,25 @@
   
 ;; I'm quite fond of the old discord join messages
 (defun vz/circe-join-msg (nick)
-  (let ((msg '("%s has come hear to chew bubblegum and damn they are all out of gum"
-               "%s has joined the party"
-               "A %s has spawned in the channel"
+  (let ((msg '("%s joined your party"
+               "%s joined. You must construct additional pylons"
+               "Ermagherd. %s is here"
+               "Welcome, %s. Stay awhile and listen"
+               "Welcome, %s. We were expecting you ( ͡° ͜ʖ ͡°)"
+               "Welcome, %s. We hope you brought pizza"
+               "Welcome %s. Leave your weapons by the door"
+               "A wild %s appeared"
+               "Swoooosh. %s just landed"
+               "Brace yourselves. %s just joined the server"
+               "%s just joined. Hide your bananas"
+               "%s just arrived. Seems OP - please nerf"
+               "%s just slid into the server"
+               "A %s has spawned in the server"
+               "Big %s showed up!"
+               "Where’s %s? In the server!"
+               "%s just showed up. Hold my beer"
                "%s has just arrived. Seems OP - nerf please"
-               "Roses are red, violets are blue, %s has joined the channel with you"
+               "Roses are red, violets are blue, %s has joined the chat with you"
                )))
     (format (vz/random-choice msg) nick)))
 
@@ -125,6 +133,34 @@
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
 (add-hook 'circe-chat-mode-hook #'vz/circe-init)
 
+;; N e s t
+(defun vz/circe-jump-irc ()
+  "Jump to irc channel"
+  (interactive)
+  (switch-to-buffer-other-window
+   (ivy-read ">"
+             (mapcar #'buffer-name
+                (flatten-list
+                 (mapcar #'(lambda (x) (with-current-buffer x
+                                         (circe-server-channel-buffers)))
+                         (seq-filter #'(lambda (x) (not (string-prefix-p
+                                                         "Discord "
+                                                         (buffer-name x))))
+                                     (circe-server-buffers))))))))
+
+(defun vz/circe-jump-discord ()
+  "Jump to discord channel"
+  (interactive)
+  (switch-to-buffer-other-window
+   (ivy-read ">"
+             (mapcar #'buffer-name
+                (flatten-list
+                 (mapcar #'(lambda (x) (with-current-buffer x
+                                         (circe-server-channel-buffers)))
+                         (seq-filter #'(lambda (x) (string-prefix-p
+                                                         "Discord "
+                                                         (buffer-name x)))
+                                     (circe-server-buffers))))))))
 
 (setq-ns lui
   logging-directory (expand-file-name "~/.cache/irc-log")
