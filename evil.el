@@ -64,8 +64,8 @@
 (use-package avy
   :config
   (general-nmap
-	"C-f" 'avy-goto-char
-	"C-S-f" 'avy-goto-char-timer))
+	"gf" #'avy-goto-char
+	"gF" #'avy-goto-char-timer))
 
 (use-package ace-window
   :after avy
@@ -104,41 +104,58 @@ in the same vertical column"
   "s" #'split-window-below
   "v" #'split-window-right)
 
-;; TODO
-(unless (vz/load-pkg "sam") ;; (when (vz/load-pkg "sam")
+(when (vz/load-pkg "sam")
+  (defvar vz/sam-minor-mode-map (make-keymap) "vz/sam-minor-mode keymap")
+
   (define-minor-mode vz/sam-minor-mode
-    "Minor mode for vz/sam commands"
-    :init-value nil)
+    "Minor mode for *sam-cmd* buffer"
+    :init-value nil
+    :keymap vz/sam-minor-mode-map)
 
-  (defvar vz/sam-initial-dot nil)
+  ;; Yoinked from sam-eval-command
+  (defun vz/sam--eval-command ()
+    (when (bufferp (get-buffer "*sam-cmd*"))
+      (dolist (str (split-string (with-current-buffer "*sam-cmd*"
+                                   (buffer-string)) "\n"))
+        (let ((cmd (condition-case nil
+                       (let ((case-fold-search nil))
+                         (setq sam-command-in-progress
+                               (concat sam-command-in-progress str))
+                         (sam-compile-command sam-command-in-progress))
+                         (error (setq sam-command-in-progress nil)
+                                nil))))
+          (if cmd
+              (progn (sam-edit-mode)
+                     (setq sam-command-in-progress nil)
+                     (sam-eval-command cmd)
+                     (and sam-please-go-away (progn (sam-leave-edit-mode))))
+            (setq sam-command-in-progress
+                  (concat sam-command-in-progress "\n")))))))
+  
+  (defun vz/sam-eval-command ()
+    (interactive)
+    (when (region-active-p)
+        (sam-set-dot (region-beginning) (region-end)))
+    (when (bufferp (get-buffer "*sam-cmd*"))
+      (with-current-buffer "*sam-cmd*" (erase-buffer)))
+    (let ((cmd-buf (get-buffer-create "*sam-cmd*"))
+          (win (split-window-below)))
+      (set-window-buffer win cmd-buf)
+      (select-window win)
+      (vz/sam-minor-mode 1)))
 
-  (defun vz/sam--quit-win ()
+  (defun vz/sam-quit-win ()
+    (interactive)
     (when (string= (buffer-name (current-buffer)) "*sam-cmd*")
       (window--delete (selected-window))
       (vz/sam--eval-command)))
 
   (general-nmap
+    "C-S-e" #'vz/sam-eval-command)
+
+  (general-nmap
     :keymaps 'vz/sam-minor-mode-map
-    "q" 'vz/sam--quit-win)
-
-  (defun vz/sam--eval-command ()
-    (let ((sam-cmd (with-current-buffer "*sam-cmd*"
-                     (buffer-string))))
-      ))
-
-  (defun vz/sam-eval-command ()
-    (interactive)
-    (setq vz/sam-initial-dot
-          (if (region-active-p)
-              (buffer-substring (region-beginning) (region-end))
-            (buffer-string)))
-    (when (bufferp "*sam-cmd*")
-      (with-current-buffer "*sam-cmd*" (erase-buffer)))
-    (let ((cmd-buf (get-buffer-create "*sam-cmd*"))
-          (win (split-window-above)))
-      (set-window-buffer win cmd-buf)
-      (select-window win)
-      (vz/sam-minor-mode))))
+    "Q" #'vz/sam-quit-win))
 
 ;; Multiple cursor implementation akin to vis'
 ;; TODO: * C-p in visual and normal mode
