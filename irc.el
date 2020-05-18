@@ -133,7 +133,6 @@
 ;; N e s t
 (defun vz/circe-get-channels-cond (cond)
   "Get channels from all server buffer that match the condition cond"
-  (message (prin1-to-string cond))
   (flatten-list
    (mapcar #'(lambda (x) (with-current-buffer x (circe-server-channel-buffers)))
            (seq-filter cond (circe-server-buffers)))))
@@ -150,11 +149,15 @@
   "Jump to discord channel"
   (interactive)
   (switch-to-buffer-other-window
-   (ivy-read "> "
-             (mapcar #'buffer-name
-                     (vz/circe-get-channels-cond
-                      #'(lambda (x) (string-prefix-p "Discord "
-                                                     (buffer-name x))))))))
+   (ivy-read "> " (mapcar #'buffer-name
+                          (vz/circe-get-channels-cond
+                           #'(lambda (x) (string-prefix-p "Discord "
+                                                (buffer-name x))))))))
+
+(general-nmap
+  :prefix "SPC I"
+  "i" #'vz/circe-jump-irc
+  "d" #'vz/circe-jump-discord)
 
 (setq-ns lui
   logging-directory (expand-file-name "~/.cache/irc-log")
