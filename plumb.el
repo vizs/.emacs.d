@@ -1,7 +1,7 @@
-(setq
- vz/plumb-video-exts '("mp4" "mkv" "webm" "gif")
- vz/plumb-audio-exts '("mp3" "flac" "ogg")
- vz/plumb-img-exts '("png" "jpg" "jpeg" "JPEG" "JPG"))
+(setq-ns vz/plumb
+ video-exts '("mp4" "mkv" "webm" "gif")
+ audio-exts '("mp3" "flac" "ogg")
+ img-exts '("png" "jpg" "jpeg" "JPEG" "JPG"))
 
 (defun vz/plumb-download-url (url)
   "Download the given url and return the place in which it is stored"
