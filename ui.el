@@ -31,7 +31,7 @@
 (show-paren-mode t)
 
 ;; Modeline
-(dolist (m '(line-number-mode column-number-mode))
+(dolist (m '(display-time-mode display-battery-mode))
   (funcall m t))
 
 (defun vz/mode-line-file-state ()
@@ -56,11 +56,17 @@
         'face face))
 
 (setq-default
+ battery-update-interval 240
  mode-line-format `((:eval (vz/mode-line-evil-state))
                     "%b"
                     (:eval (vz/mode-line-file-state))
-                    (:eval (vz/mode-line-fill 'mode-line 10))
-                    "« %l    "))
+                    (:eval (vz/mode-line-fill 'mode-line 19))
+                    "« "
+                    (:eval (format-time-string "[%H:%M] "))
+                    "["
+                    (:eval (battery-format "%b%p"
+                                           (funcall battery-status-function)))
+                    "%%]"))
 
 ;; How to be sane when you're working with multiple windows
 (use-package beacon
