@@ -1,6 +1,3 @@
-;; NOTE: * you can see if you are using comint-mode if you check INSIDE_EMACS
-;;       * man is significantly faster than woman
-
 ;; TODO: * Find out how to add functions to executable list thing
 ;;       * Find out how to expand directory aliases
 
@@ -38,39 +35,47 @@
   "Send region if present, otherwise current line to current buffer's process"
   (interactive "r")
   (if (region-active-p)
-    (comint-send-string
-     (get-buffer-process (current-buffer))
-     (concat (buffer-substring (or start (region-beginning))
-                               (or end (region-end))) "\n"))
-  (comint-send-input))
+      (comint-send-string
+       (get-buffer-process (current-buffer))
+       (concat (buffer-substring (or start (region-beginning))
+                                 (or end (region-end))) "\n"))
+    (comint-send-input))
   (when (evil-visual-state-p)
     (evil-exit-visual-state)))
 
 (defun vz/shell-history ()
   "Returns current shell's history as a list"
-  (when (file-regular-p "/tmp/shhist")
-    (delete-file "/tmp/shhist"))
   (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
   (split-string (vz/fread "/tmp/shhist") "\n" nil "\t"))
 
 (defun vz/shell-insert-from-hist ()
   "Search for command in history and run it"
   (interactive)
-  (let ((input (comint-get-old-input-default)))
-    (unless (string-empty-p input)
+  (let* ((input (concat (comint-get-old-input-default) " "))
+         (cmd (ivy-read "> " (vz/shell-history) :initial-input input)))
+    (unless (string= input " ")
       (comint-delete-input))
+    (comint-send-string (get-buffer-process (current-buffer)) cmd)))
+
+(defun vz/shell-jump-to-dir ()
+  "Jump to directory alias"
+  (interactive)
+  (comint-delete-input)
+  (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
+  (let ((dir (ivy-read ">" (split-string (vz/fread "/tmp/diralias") "\n"))))
     (comint-send-string
      (get-buffer-process (current-buffer))
-     (concat (ivy-read "> " (vz/shell-history) :initial-input input) "\n"))))
+     (format "cd ~%s\n" (car (split-string dir "="))))))
 
 (defun vz/popup-shell ()
   "Open M-x shell in project's PWD"
   (interactive)
-  (when (get-buffer "*shell*")
-    (comint-send-string (get-buffer-process "*shell*")
-                        (format "cd %s\n" default-directory))
-    (switch-to-buffer-other-window "*shell*"))
-  (shell))
+  (let ((shell-process (get-buffer-process "*shell*")))
+    (if (and (get-buffer "*shell*") shell-process)
+        (progn
+          (comint-send-string shell-process (format "cd %s\n" default-directory))
+          (switch-to-buffer-other-window "*shell*"))
+      (shell))))
 
 (define-minor-mode vz/term-mode
   "Minor mode for binding ^D in *term* buffers")
@@ -81,14 +86,13 @@
     (kill-buffer (process-buffer process))
     (delete-frame vz/term-mode--frame)))
 
-(defun vz/term-mode-kill-dead ()
-  "Remove all dead buffers"
+(defun vz/kill-dead-term ()
+  "Remove all dead *term* buffers"
   (interactive)
-  (dolist (buf
-           (seq-filter
-            #'(lambda (buf) (and (string-prefix-p "*term-" (buffer-name buf))
-                                 (not (get-buffer-process buf))))
-            (buffer-list)))
+  (dolist (buf (seq-filter #'(lambda (buf)
+                               (and (string-prefix-p "*term-" (buffer-name buf))
+                                    (not (get-buffer-process buf))))
+                           (buffer-list)))
     (kill-buffer buf)))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
@@ -97,7 +101,8 @@
   :prefix "SPC"
   "ps" #'vz/popup-shell)
 
-(general-nmap :keymaps 'comint-mode-map
+(general-nmap
+  :keymaps 'comint-mode-map
   "<RET>" #'vz/comint-send-input)
 
 (general-nmap
@@ -124,7 +129,8 @@
   "C-z" #'comint-stop-subjob
   "C-l" #'comint-clear-buffer
   "C-/" #'vz/shell-insert-from-hist
-  "C-d" #'comint-send-eof)
+  "C-d" #'comint-send-eof
+  "C-j" #'vz/shell-jump-to-dir)
 
 (general-vmap
   :keymaps 'comint-mode-map
