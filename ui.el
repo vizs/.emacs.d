@@ -80,8 +80,8 @@
 (custom-set-faces
  '(italic         ((t :slant italic)))
  '(bold           ((t :weight bold)))
- '(variable-pitch ((t :family "Charter" :height 120)))
- '(fixed-pitch    ((t :family "Verily Serif Mono")))
+ '(variable-pitch ((t :family "Charter" :height 100)))
+ '(fixed-pitch    ((t :family "Verily Serif Mono" :height 90)))
  '(org-quote      ((t :inherit italic)))
  '(fixed-pitch-serif ((t :inherit fixed-pitch))))
 

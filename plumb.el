@@ -32,7 +32,7 @@
 
 (defun vz/plumb-url (string)
   (let* ((file-name (replace-regexp-in-string "^.*/" "" string))
-         (ext (replace-regexp-in-string "^.*\\." file-name))
+         (ext (replace-regexp-in-string "^.*\\." "" file-name))
          (path nil))
     (cond
      ((or (string-empty-p file-name) (string= ext "html"))
@@ -41,7 +41,7 @@
       (vz/plumb-yt string))
      (:else
       (setq-local path vz/plumb-download-url string)
-      (vz/plumb--file ext path)
+      (vz/plumb-file ext path)
       (delete-file path)))))
 
 ;; Checking if string has non-english letters and translating would be nice
@@ -72,6 +72,7 @@
     (wand:create-rule :match "file://"
                       :capture :after
                       :action #'vz/plumb-file)
+    ;; TODO: also match /file:column:line
     (wand:create-rule :match "\\..+$"
                       :capture :whole
                       :action #'vz/plumb-file)

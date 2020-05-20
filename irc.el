@@ -141,10 +141,12 @@
   "Jump to irc channel"
   (interactive)
   (switch-to-buffer-other-window
-   (ivy-read "> " (mapcar #'buffer-name
-                         (vz/circe-get-channels-cond
-                          #'(lambda (x) (not (string-prefix-p "Discord "
-                                                (buffer-name x)))))))))
+   (ivy-read
+    "> "
+    (mapcar #'buffer-name
+        (vz/circe-get-channels-cond
+         #'(lambda (x) (not(string-prefix-p "Discord " (buffer-name x)))))))))
+
 (defun vz/circe-jump-discord ()
   "Jump to discord channel"
   (interactive)
@@ -152,7 +154,7 @@
    (ivy-read "> " (mapcar #'buffer-name
                           (vz/circe-get-channels-cond
                            #'(lambda (x) (string-prefix-p "Discord "
-                                                (buffer-name x))))))))
+                                                          (buffer-name x)))))))
 
 (general-nmap
   :prefix "SPC I"

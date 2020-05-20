@@ -14,47 +14,61 @@ it to pdf. If file i unsaved, it will not save it."
 	;; TODO: Consider using an emacs' plugin instead of zathura
 	(call-process "zathura" nil 0 nil pdf)))
 
+;; enable completion for blocks
+(require 'org-tempo)
+
 (setq-ns org
- hide-emphasis-markers t
+ add-colon-after-tag-completion t
+ default-notes-file (expand-file-name "~/doc/org/notes.org")
+ directory (expand-file-name "~/doc/org")
+ ;; file-apps
+         
+ ;; indentation
+ indent-indentation-per-level 1
+ indent-mode-turns-on-hiding-stars t
+ indent-mode-turns-off-org-adapt-indentation nil
+
+ ;; style
+ hide-emphasis-markers nil
+ ;; hide-leading-stars t ; indent mode also hides stars
  fontify-emphasized-text t
  fontify-done-headline t
  fontify-quote-and-verse-blocks t
  fontify-whole-heading-line t
- src-fontify-natively t)
+ src-fontify-natively nil)
 
-(use-package org-bullets
-  :config
-  (setq org-bullets-bullet-list '(" ")))
+(defun vz/org-mode-style ()
+  (dolist (f '(org-table org-link org-code org-block
+               org-date org-special-keyword org-verbatim))
+    (set-face-attribute f nil :inherit 'fixed-pitch))
 
-(dolist (f '(org-table org-link org-code org-block
-             org-date org-special-keyword org-verbatim))
-  (set-face-attribute f nil :inherit 'fixed-pitch))
+  (dolist (f org-level-faces)
+    (custom-set-faces
+     `(,f ((t :weight bold)))))
 
-(dolist (f org-level-faces)
-  (custom-set-faces
-   `(,f ((t :weight bold)))))
-
-(let* ((height1 (+ (face-attribute 'variable-pitch :height) 40))
-       (height2 (- height1 20))
-       (height3 (- height1 60)))
-  (custom-set-faces
-   `(org-level-1 ((t :height ,height1 :weight bold)))
-   `(org-level-2 ((t :height ,height2 :weight bold)))
-   `(org-quote   ((t :family "IBM Plex Serif" :slant italic :height ,height1)))
-   `(org-block-begin-line ((t :height ,height3 :weight bold)))
-   '(org-block-end-line ((t :inherit org-block-begin-line)))))
+  (let* ((height1 (+ 100 40))
+         (height2 (- height1 20))
+         (height3 (- height1 60)))
+    (custom-set-faces
+     `(org-level-1 ((t :height ,height1 :weight bold)))
+     `(org-level-2 ((t :height ,height2 :weight bold)))
+     `(org-quote   ((t :family "IBM Plex Serif" :slant italic)))
+     `(org-block-begin-line ((t :height ,height3 :weight bold)))
+     '(org-block-end-line ((t :inherit org-block-begin-line))))))
 
 (defun vz/org-mode-init ()
-  (variable-pitch-mode t)
-  (org-bullets-mode t)
   (org-indent-mode t)
-  (setq line-spacing 0.01))
+  (setq line-spacing 0.01)
+  (setq buffer-face-mode-face '(:family "Charter" :height 100))
+  (buffer-face-mode)
+  (vz/org-mode-style))
 
-(add-hook 'org-mode-hook 'vz/org-mode-init)
+(add-hook 'org-mode-hook #'vz/org-mode-init)
 
 (general-nmap
   :keymaps 'org-mode-map
   :prefix "SPC"
+  "j" #'counsel-org-goto-all
   "et" #'org-latex-export-to-latex
   "t" #'org-todo
   "sT" #'org-babel-tangle)

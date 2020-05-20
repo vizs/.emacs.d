@@ -49,12 +49,11 @@
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
   "Set variables with pre as their `namespace'"
-  (let ((ns (prin1-to-string ns)))
-    (dolist (x (seq-partition args 2))
-      (set (intern (format "%s-%s" ns (car x))) (cadr x)))))
+  (dolist (x (seq-partition args 2))
+    (set (intern (format "%s-%s" ns (car x))) (cadr x))))
 
 (defun vz/random-choice (list)
-  (nth (random 0 (1- (length list))) list))
+  (nth (random (1- (length list))) list))
 
 (defun vz/get-file-or-buffer ()
   "Return buffer corresponding to buffer-name or file-name

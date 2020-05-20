@@ -57,12 +57,15 @@
       (comint-delete-input))
     (comint-send-string (get-buffer-process (current-buffer)) cmd)))
 
+(defun vz/shell-get-dir-alias ()
+  (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
+  (split-string (vz/fread "/tmp/diralias") "\n"))
+
 (defun vz/shell-jump-to-dir ()
   "Jump to directory alias"
   (interactive)
   (comint-delete-input)
-  (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
-  (let ((dir (ivy-read ">" (split-string (vz/fread "/tmp/diralias") "\n"))))
+  (let ((dir (ivy-read "> " (vz/shell-get-dir-alias))))
     (comint-send-string
      (get-buffer-process (current-buffer))
      (format "cd ~%s\n" (car (split-string dir "="))))))
@@ -120,8 +123,8 @@
 
 (general-nmap
   :keymaps 'shell-mode-map
-  :prefix "["
-  "/" #'vz/shell-insert-from-hist)
+  "SPC j" #'vz/shell-jump-to-dir
+  "[/" #'vz/shell-insert-from-hist)
 
 (general-imap
   :keymaps 'shell-mode-map
