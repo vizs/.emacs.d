@@ -91,6 +91,10 @@
     interpreter "python3"
     interpreter-args "-i"))
 
+(use-package scheme
+  :config
+  (setq scheme-program-name "csi"))
+
 (dolist (h '(racket-mode-hook emacs-lisp-mode-hook
              scheme-mode-hook nix-mode-hook))
   (add-hook h #'(lambda () (setq indent-tabs-mode nil tab-width 2))))

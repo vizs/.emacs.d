@@ -37,6 +37,11 @@ it to pdf. If file i unsaved, it will not save it."
  fontify-whole-heading-line t
  src-fontify-natively nil)
 
+(use-package org-bullets
+  :config
+  (setq org-bullets-bullet-list '(""))
+  (add-hook 'org-mode-hook #'org-bullets-mode))
+
 (defun vz/org-mode-style ()
   (dolist (f '(org-table org-link org-code org-block
                org-date org-special-keyword org-verbatim))
@@ -58,6 +63,7 @@ it to pdf. If file i unsaved, it will not save it."
 
 (defun vz/org-mode-init ()
   (org-indent-mode t)
+  (org-num-mode t)
   (setq line-spacing 0.01)
   (setq buffer-face-mode-face '(:family "Charter" :height 100))
   (buffer-face-mode)

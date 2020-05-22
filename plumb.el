@@ -25,10 +25,11 @@
     (`(or ,@vz/img-exts) (vz/plumb-img path))
     ("pdf" (vz/plumb-pdf path))))
 
-(defun vz/plumb-file (string)
+(defun vz/plumb-file (string &optional line)
   (if (bound-and-true-p vz/term-mode)
       (vz/plumb--file (replace-regexp-in-string "^.*\\." string) string)
-    (find-file string)))
+    (progn (find-file string)
+           (when line (goto-line line)))))
 
 (defun vz/plumb-url (string)
   (let* ((file-name (replace-regexp-in-string "^.*/" "" string))
@@ -72,7 +73,12 @@
     (wand:create-rule :match "file://"
                       :capture :after
                       :action #'vz/plumb-file)
-    ;; TODO: also match /file:column:line
+    (wand:create-rule :match ".*:[0-9]+$"
+                      :capture :whole
+                      :action #'(lambda (string)
+                                  (let ((f (split-string string ":")))
+                                    (vz/plumb-file (car f)
+                                                (string-to-number (cadr f))))))
     (wand:create-rule :match "\\..+$"
                       :capture :whole
                       :action #'vz/plumb-file)

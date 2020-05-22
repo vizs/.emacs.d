@@ -83,11 +83,19 @@
 (define-minor-mode vz/term-mode
   "Minor mode for binding ^D in *term* buffers")
 
+(defvar vz/term-mode--frame nil
+  "Frame variable that *term* buffer uses")
+
+(make-variable-buffer-local 'vz/term-mode--frame)
+
 (defun vz/term-mode-sentinel (process output)
   "Process sentinel to auto kill associated buffer and frame in term-mode"
   (unless (process-live-p process)
-    (kill-buffer (process-buffer process))
-    (delete-frame vz/term-mode--frame)))
+    (let* ((buf (process-buffer process))
+           (frame (alist-get 'vz/term-mode--frame (buffer-local-variables buf))))
+      (kill-buffer buf)
+      (when (frame-live-p frame)
+          (delete-frame frame)))))
 
 (defun vz/kill-dead-term ()
   "Remove all dead *term* buffers"
