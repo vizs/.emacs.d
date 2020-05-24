@@ -76,6 +76,7 @@
   (general-define-key
     :prefix "g"
     :states '(visual normal)
+    :keymaps 'override
     "j" #'avy-goto-line-below
     "k" #'avy-goto-line-above))
 

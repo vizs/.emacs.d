@@ -10,7 +10,7 @@
 it to pdf. If file i unsaved, it will not save it."
   (interactive)
   (let ((pdf (concat (file-name-sans-extension (buffer-file-name)) ".pdf")))
-	(unless (file-exists-p pdf) vz/make-pdf)
+	(unless (file-exists-p pdf) (vz/make-pdf))
 	;; TODO: Consider using an emacs' plugin instead of zathura
 	(call-process "zathura" nil 0 nil pdf)))
 
@@ -26,7 +26,8 @@ it to pdf. If file i unsaved, it will not save it."
  ;; indentation
  indent-indentation-per-level 1
  indent-mode-turns-on-hiding-stars t
- indent-mode-turns-off-org-adapt-indentation nil
+ src-preserve-indentation t
+ ;; indent-mode-turns-off-org-adapt-indentation nil
 
  ;; style
  hide-emphasis-markers nil
@@ -39,7 +40,7 @@ it to pdf. If file i unsaved, it will not save it."
 
 (use-package org-bullets
   :config
-  (setq org-bullets-bullet-list '(""))
+  (setq org-bullets-bullet-list '(" "))
   (add-hook 'org-mode-hook #'org-bullets-mode))
 
 (defun vz/org-mode-style ()
@@ -78,6 +79,7 @@ it to pdf. If file i unsaved, it will not save it."
   "et" #'org-latex-export-to-latex
   "t" #'org-todo
   "sT" #'org-babel-tangle)
+
 (general-nmap
   :prefix "SPC"
   :keymaps '(org-mode-map latex-mode-map)

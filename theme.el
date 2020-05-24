@@ -91,6 +91,7 @@
    `(avy-lead-face-1                  ((t :background ,bg :foreground ,re)))
    `(avy-lead-face-2                  ((t :background ,bg :foreground ,re)))
    `(org-todo                         ((t :background ,bg :foreground ,re)))
+   `(org-table                        ((t :background ,bg :foreground ,fg)))
    `(org-document-title               ((t :background ,bg :foreground ,yw)))
    `(org-document-info                ((t :background ,bg :foreground ,yw)))
    `(makefile-space                   ((t :background ,yw :foreground ,bg)))

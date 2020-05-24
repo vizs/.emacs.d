@@ -5,9 +5,8 @@
 
 ;; Disable colours in shell-mode
 (setf ansi-color-for-comint-mode 'filter)
-(setq-default
- shell-font-lock-keywords nil
- comint-buffer-maximum-size 2000)
+(setq-default shell-font-lock-keywords nil
+              comint-buffer-maximum-size 2000)
 
 ;; from http://0x0.st/Hroa
 (defun shell-sync-dir-with-prompt (string)
@@ -35,10 +34,12 @@
   "Send region if present, otherwise current line to current buffer's process"
   (interactive "r")
   (if (region-active-p)
+      (let ((cmd (buffer-substring (or start (region-beginning))
+                                   (or end (region-end)))))
       (comint-send-string
        (get-buffer-process (current-buffer))
-       (concat (buffer-substring (or start (region-beginning))
-                                 (or end (region-end))) "\n"))
+       (concat cmd "\n"))
+      (comint-add-to-input-history cmd))
     (comint-send-input))
   (when (evil-visual-state-p)
     (evil-exit-visual-state)))
@@ -51,11 +52,14 @@
 (defun vz/shell-insert-from-hist ()
   "Search for command in history and run it"
   (interactive)
-  (let* ((input (concat (comint-get-old-input-default) " "))
-         (cmd (ivy-read "> " (vz/shell-history) :initial-input input)))
-    (unless (string= input " ")
-      (comint-delete-input))
-    (comint-send-string (get-buffer-process (current-buffer)) cmd)))
+  (let ((proc (get-buffer-process (current-buffer))))
+    (when (string= (car (process-command proc)) explicit-shell-file-name)
+      (let* ((input (concat (comint-get-old-input-default) " "))
+             (cmd (ivy-read "> " (vz/shell-history) :initial-input input)))
+        (unless (string= input " ")
+          (comint-delete-input))
+        (comint-send-string proc (concat cmd "\n"))
+        (comint-add-to-input-history cmd)))))
 
 (defun vz/shell-get-dir-alias ()
   (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
@@ -64,19 +68,21 @@
 (defun vz/shell-jump-to-dir ()
   "Jump to directory alias"
   (interactive)
-  (comint-delete-input)
-  (let ((dir (ivy-read "> " (vz/shell-get-dir-alias))))
-    (comint-send-string
-     (get-buffer-process (current-buffer))
-     (format "cd ~%s\n" (car (split-string dir "="))))))
+  (let ((proc (get-buffer-process (current-buffer))))
+    (when (string= (car (process-command proc)) explicit-shell-file-name)
+      (comint-delete-input)
+      (let* ((dir (ivy-read "> " (vz/shell-get-dir-alias)))
+             (cmd (format "cd ~%s\n" (car (split-string dir "=")))))
+        (comint-send-string proc cmd)
+        (comint-add-to-input-history cmd)))))
 
 (defun vz/popup-shell ()
   "Open M-x shell in project's PWD"
   (interactive)
-  (let ((shell-process (get-buffer-process "*shell*")))
-    (if (and (get-buffer "*shell*") shell-process)
+  (let ((process (get-buffer-process "*shell*")))
+    (if (and (get-buffer "*shell*") process)
         (progn
-          (comint-send-string shell-process (format "cd %s\n" default-directory))
+          (comint-send-string process (format "cd %s\n" default-directory))
           (switch-to-buffer-other-window "*shell*"))
       (shell))))
 
@@ -91,11 +97,11 @@
 (defun vz/term-mode-sentinel (process output)
   "Process sentinel to auto kill associated buffer and frame in term-mode"
   (unless (process-live-p process)
-    (let* ((buf (process-buffer process))
-           (frame (alist-get 'vz/term-mode--frame (buffer-local-variables buf))))
-      (kill-buffer buf)
-      (when (frame-live-p frame)
-          (delete-frame frame)))))
+    (let* ((b (process-buffer process))
+           (f (alist-get 'vz/term-mode--frame (buffer-local-variables b))))
+      (kill-buffer b)
+      (when (frame-live-p f)
+          (delete-frame f)))))
 
 (defun vz/kill-dead-term ()
   "Remove all dead *term* buffers"
