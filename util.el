@@ -1,3 +1,6 @@
+(defun ~ (file)
+  (expand-file-name (format "%s/%s" (getenv "HOME") file)))
+
 (defun vz/conf-path (file)
   "Get path to file in user-emacs-directory"
   (expand-file-name (concat user-emacs-directory file)))
@@ -50,7 +53,8 @@
 (defmacro setq-ns (ns &rest args)
   "Set variables with pre as their `namespace'"
   (dolist (x (seq-partition args 2))
-    (set (intern (format "%s-%s" ns (car x))) (cadr x))))
+    (eval `(setq ,(intern (format "%s-%s" ns (car x)))
+                 ,(cadr x)))))
 
 (defun vz/random-choice (list)
   (nth (random (1- (length list))) list))

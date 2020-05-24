@@ -2,12 +2,14 @@
 
 (use-package circe)
 
-(setq
- vz/circe-mynicks '("viz" "_viz_")
- vz/circe-mynicks-re (seq-reduce #'(lambda (res x)
-                                     (format "%s\\|.*%s.*" res x))
-                                 (cdr vz/circe-mynicks)
-                                 (format ".*%s.*" (car vz/circe-mynicks)))
+(setq-ns vz/circe
+ mynicks '("viz" "_viz_")
+ mynicks-re (seq-reduce #'(lambda (res x)
+                            (format "%s\\|.*%s.*" res x))
+                        (cdr vz/circe-mynicks)
+                        (format ".*%s.*" (car vz/circe-mynicks))))
+
+(setq-ns circe
  circe-network-options
  `(("Freenode"
 	  :nick "_viz_"
@@ -31,11 +33,8 @@
 	  :user "viz"
 	  :port 6667
 	  :channel ("#general" "#commands")
-	  :pass ,(pass-discord 702578317081182258))
-   ))
-
-(setq-ns circe
- ;; reduce-lurker-spam t
+	  :pass ,(pass-discord 702578317081182258)))
+ ; reduce-lurker-spam t
  use-cycle-completion t
  highlight-nick-type 'message
  server-buffer-name "{network}:{host}")

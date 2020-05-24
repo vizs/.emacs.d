@@ -2,7 +2,7 @@
   "Compile org/tex document to pdf"
   (interactive)
   (pcase major-mode
-   ('org-mode (org-latex-export-to-pdf))
+   ('org-mode   (org-latex-export-to-pdf))
    ('latex-mode (call-process "pdflatex" nil 0 nil "buf"))))
 
 (defun vz/preview-doc ()
@@ -21,22 +21,44 @@ it to pdf. If file i unsaved, it will not save it."
  add-colon-after-tag-completion t
  default-notes-file (expand-file-name "~/doc/org/notes.org")
  directory (expand-file-name "~/doc/org")
- ;; file-apps
+ ; file-apps
          
  ;; indentation
  indent-indentation-per-level 1
  indent-mode-turns-on-hiding-stars t
  src-preserve-indentation t
- ;; indent-mode-turns-off-org-adapt-indentation nil
+ ; indent-mode-turns-off-org-adapt-indentation nil
 
  ;; style
  hide-emphasis-markers nil
- ;; hide-leading-stars t ; indent mode also hides stars
+ ; hide-leading-stars t ; indent mode also hides stars
  fontify-emphasized-text t
  fontify-done-headline t
  fontify-quote-and-verse-blocks t
  fontify-whole-heading-line t
- src-fontify-natively nil)
+ src-fontify-natively nil
+ capture-templates
+ `(("E" "Emacs dump" entry
+    (file ,(vz/conf-path "org/dump.org"))
+     "* TODO %?\n" :prepend t)
+   ("A" "Anime dump" entry
+    (file "anime.org")
+    "* TODO %?\nAdded on: %T\n" :prepend t)
+   ("e" "Emacs notes" entry
+    (file+headline ,(~ "doc/notes.org") "Emacs")
+    "* %?")
+   ("c" "Chemistry notes" entry
+    (file+headline ,(~ "doc/school/g12/notes.org") "Chemistry")
+    "* %?")
+   ("s" "CS notes" entry
+    (file+headline ,(~ "doc/school/g12/notes.org") "CS")
+    "* %?")
+   ("p" "Physics notes" entry
+    (file+headline ,(~ "doc/school/g12/notes.org") "Physics")
+    "* %?")
+   ("m" "Maths notes" entry
+    (file+headline ,(~ "doc/school/g12/notes.org") "Maths")
+    "* %?")))
 
 (use-package org-bullets
   :config
@@ -71,6 +93,9 @@ it to pdf. If file i unsaved, it will not save it."
   (vz/org-mode-style))
 
 (add-hook 'org-mode-hook #'vz/org-mode-init)
+
+(general-nmap
+  "SPC Oc" #'org-capture)
 
 (general-nmap
   :keymaps 'org-mode-map

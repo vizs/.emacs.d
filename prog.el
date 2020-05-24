@@ -39,6 +39,7 @@
   (setq-ns counsel
    find-file-at-point t)
   (general-nmap
+    :keymaps 'override
     :prefix "SPC"
     ;; potentially useful counsel commands:
     ;; #'counsel-search

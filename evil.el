@@ -27,6 +27,9 @@
   (general-nmap
    "gc" #'comment-line
    "C-e" #'eval-last-sexp)
+  (general-vmap
+    :keymaps 'override
+    "TAB" #'indent-for-tab-command)
   (general-nmap
 	  :prefix "SPC" "rc" #'vz/reload-config))
 
