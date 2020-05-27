@@ -17,6 +17,8 @@ it to pdf. If file i unsaved, it will not save it."
 ;; enable completion for blocks
 (require 'org-tempo)
 
+;; TODO: setup org-protocol
+
 (setq-ns org
  add-colon-after-tag-completion t
  default-notes-file (expand-file-name "~/doc/org/notes.org")
@@ -38,12 +40,15 @@ it to pdf. If file i unsaved, it will not save it."
  fontify-whole-heading-line t
  src-fontify-natively nil
  capture-templates
- `(("E" "Emacs dump" entry
-    (file ,(vz/conf-path "org/dump.org"))
-     "* TODO %?\n" :prepend t)
-   ("A" "Anime dump" entry
-    (file "anime.org")
-    "* TODO %?\nAdded on: %T\n" :prepend t)
+ `(("d" "Dump links and book names or whatever" entry
+    (file "dump.org")
+    "* TODO %?
+
+%:link
+:PROPERTIES:
+:type: %^{Type|anime|emacs|article|music|manga|book|misc}
+:added: %T
+:END:" :prepend t :kill-buffer t)
    ("e" "Emacs notes" entry
     (file+headline ,(~ "doc/notes.org") "Emacs")
     "* %?")
@@ -66,7 +71,7 @@ it to pdf. If file i unsaved, it will not save it."
   (add-hook 'org-mode-hook #'org-bullets-mode))
 
 (defun vz/org-mode-style ()
-  (dolist (f '(org-table org-link org-code org-block
+  (dolist (f '(org-table org-link org-code org-block org-drawer
                org-date org-special-keyword org-verbatim))
     (set-face-attribute f nil :inherit 'fixed-pitch))
 

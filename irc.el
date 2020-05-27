@@ -4,13 +4,16 @@
 
 (setq-ns vz/circe
  mynicks '("viz" "_viz_")
+ ;; TODO: clean this up
  mynicks-re (seq-reduce #'(lambda (res x)
-                            (format "%s\\|.*%s.*" res x))
+                            (format "%s\\|[ @]%s[,: ]\\|[ @]%s$" res x x))
                         (cdr vz/circe-mynicks)
-                        (format ".*%s.*" (car vz/circe-mynicks))))
+                        (format "[ @]%s[,: ]\\|[ @]%s$"
+                                (car vz/circe-mynicks)
+                                (car vz/circe-mynicks))))
 
 (setq-ns circe
- circe-network-options
+ network-options
  `(("Freenode"
 	  :nick "_viz_"
     :port (6667 . 6697)
@@ -43,7 +46,7 @@
   (setq
    vz/circe--old-nick ""
    buffer-face-mode-face '(:family "Charter" :height 100)
-   mode-line-format "    %b")
+   mode-line-format nil)
   (buffer-face-mode)
   (defface circe-my-message-body-face
     '((t :inherit circe-my-message-face :family "Charter" :height 100))
@@ -120,6 +123,7 @@
   self-say           (lambda (&rest args) (vz/circe-handle-msg 'ssay args))
   action             (lambda (&rest args) (vz/circe-handle-msg 'acn args))
   server-message     (lambda (&rest args) (vz/circe-handle-msg 'smsg args))
+  server-notice      (lambda (&rest args) (vz/circe-handle-msg 'smsg args))
   server-quit        (lambda (&rest args) (vz/circe-handle-msg 'part args))
   server-join        (lambda (&rest args) (vz/circe-handle-msg 'join args))
   server-part        (lambda (&rest args) (vz/circe-handle-msg 'part args))
@@ -129,7 +133,6 @@
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
 (add-hook 'circe-chat-mode-hook #'vz/circe-init)
 
-;; N e s t
 (defun vz/circe-get-channels-cond (cond)
   "Get channels from all server buffer that match the condition cond"
   (flatten-list
@@ -144,7 +147,7 @@
     "> "
     (mapcar #'buffer-name
         (vz/circe-get-channels-cond
-         #'(lambda (x) (not(string-prefix-p "Discord " (buffer-name x)))))))))
+         #'(lambda (x) (not (string-prefix-p "Discord " (buffer-name x)))))))))
 
 (defun vz/circe-jump-discord ()
   "Jump to discord channel"

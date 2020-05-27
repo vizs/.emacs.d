@@ -73,7 +73,7 @@
   :config
   (beacon-mode 1)
   (setq-ns beacon-blink-when
-    window-scrolls nil
+    window-scrolls t
     point-moves-horizontally nil
     point-moves-vertically nil))
 

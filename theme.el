@@ -94,6 +94,8 @@
    `(org-table                        ((t :background ,bg :foreground ,fg)))
    `(org-document-title               ((t :background ,bg :foreground ,yw)))
    `(org-document-info                ((t :background ,bg :foreground ,yw)))
+   `(org-drawer                       ((t :background ,bg :foreground ,lf)))
+   `(org-date                         ((t :background ,bg :foreground ,lf)))
    `(makefile-space                   ((t :background ,yw :foreground ,bg)))
    `(racket-selfeval-face             ((t :background ,bg :foreground ,fg)))
    `(racket-keyword-argument-face     ((t :background ,bg :foreground ,fg)))

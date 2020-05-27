@@ -42,8 +42,8 @@
     :keymaps 'override
     :prefix "SPC"
     ;; potentially useful counsel commands:
-    ;; #'counsel-search
-    ;; #'counsel-switch-to-shell-buffer
+    ; #'counsel-search
+    ; #'counsel-switch-to-shell-buffer
     "df" #'counsel-describe-function
     "dv" #'counsel-describe-variable
     "dk" #'counsel-descbinds
@@ -84,7 +84,8 @@
   :config
   (add-hook 'racket-mode-hook #'racket-unicode-input-method-enable))
 
-(use-package nix-mode :mode "\\.nix\\'")
+(use-package nix-mode
+  :mode "\\.nix\\'")
 
 (use-package python
   :config

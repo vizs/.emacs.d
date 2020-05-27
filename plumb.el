@@ -12,6 +12,7 @@
   (start-process "plumb-yt" nil "mpv" string))
 
 ;; TODO: * Open in emacs if file size isn't large
+;;       * change to async processes
 (defun vz/plumb-img (path)
   (call-process "meh" nil nil 0 path))
 
@@ -27,7 +28,7 @@
 
 (defun vz/plumb-file (string &optional line)
   (if (bound-and-true-p vz/term-mode)
-      (vz/plumb--file (replace-regexp-in-string "^.*\\." string) string)
+      (vz/plumb--file (replace-regexp-in-string "^.*\\." "" string) string)
     (progn (find-file string)
            (when line (goto-line line)))))
 

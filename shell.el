@@ -25,6 +25,7 @@
   `(add-hook 'comint-output-filter-functions ,h))
   (shell-dirtrack-mode nil)
   (setq-local
+   comint-prompt-read-only t
    inhibit-field-text-motion t
    comint-process-echoes t) ;; Disables duplicates
   (setq Man-notify-method 'quiet)
@@ -36,10 +37,9 @@
   (if (region-active-p)
       (let ((cmd (buffer-substring (or start (region-beginning))
                                    (or end (region-end)))))
-      (comint-send-string
-       (get-buffer-process (current-buffer))
-       (concat cmd "\n"))
-      (comint-add-to-input-history cmd))
+        (comint-send-string (get-buffer-process (current-buffer))
+                            (concat cmd "\n"))
+        (comint-add-to-input-history cmd))
     (comint-send-input))
   (when (evil-visual-state-p)
     (evil-exit-visual-state)))
@@ -54,9 +54,9 @@
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
     (when (string= (car (process-command proc)) explicit-shell-file-name)
-      (let* ((input (concat (comint-get-old-input-default) " "))
+      (let* ((input (concat "^" (comint-get-old-input-default)))
              (cmd (ivy-read "> " (vz/shell-history) :initial-input input)))
-        (unless (string= input " ")
+        (unless (string= input "^")
           (comint-delete-input))
         (comint-send-string proc (concat cmd "\n"))
         (comint-add-to-input-history cmd)))))
@@ -106,11 +106,15 @@
 (defun vz/kill-dead-term ()
   "Remove all dead *term* buffers"
   (interactive)
-  (dolist (buf (seq-filter #'(lambda (buf)
-                               (and (string-prefix-p "*term-" (buffer-name buf))
-                                    (not (get-buffer-process buf))))
-                           (buffer-list)))
-    (kill-buffer buf)))
+  (let ((kill-buffer-query-functions nil))
+    (dolist (buf (seq-filter
+                  #'(lambda (buf)
+                      (with-current-buffer buf
+                        (and (string-prefix-p "*term-" (buffer-name buf))
+                             (or (not (frame-live-p vz/term-mode--frame))
+                                 (not (get-buffer-process buf))))))
+                  (buffer-list)))
+      (kill-buffer buf))))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
