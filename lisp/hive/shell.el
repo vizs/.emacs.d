@@ -52,15 +52,48 @@
         (comint-send-string proc cmd)
         (comint-add-to-input-history cmd)))))
 
+(defvar vz/popup-shells nil
+  "List of all shell buffers opened by vz/popup-shell")
+
+(defun vz/popup-shell--add (buffer)
+  "Add BUFFER to vz/popup-shells and a process sentinel"
+  (add-to-list 'vz/popup-shells buffer)
+  (set-process-sentinel (get-buffer-process buffer)
+                        #'(lambda (process output)
+                            (unless (process-live-p process)
+                              (let ((buf (process-buffer process)))
+                                (setq vz/popup-shells (remove buf vz/popup-shells))
+                                (kill-buffer buf))))))
+
+(defun vz/popup-shell--switch (buffer cwd)
+  "Switch to CWD in BUFFER"
+  (switch-to-buffer-other-window buffer)
+  (let ((input (comint-get-old-input-default))
+        (process (get-buffer-process buffer)))
+    (comint-delete-input)
+    (comint-send-string process (format "cd %s\n" cwd))
+    (unless (string= input "$ ")
+      (comint-send-string process input))))
+
 (defun vz/popup-shell ()
-  "Open M-x shell in project's PWD"
+  "Try to find ``free'' buffers that have the CWD as `default-directory' and switch
+to it. If nothing is found, create a new buffer"
   (interactive)
-  (let ((process (get-buffer-process "*shell*")))
-    (if (and (get-buffer "*shell*") process)
-        (progn
-          (comint-send-string process (format "cd %s\n" default-directory))
-          (switch-to-buffer-other-window "*shell*"))
-      (shell))))
+  (if (null vz/popup-shells)
+      (vz/popup-shell--add (shell))
+    (let* ((free-buffers (seq-filter #'(lambda (buffer) (and (null (process-running-child-p
+                                                                    (get-buffer-process buffer)))
+                                                             (null (get-buffer-window buffer t))))
+                                     vz/popup-shells))
+           (cwd default-directory)
+           (cwd-buffers (seq-filter #'(lambda (buffer) (with-current-buffer buffer
+                                                         (string= default-directory cwd)))
+                                    free-buffers)))
+      (cond
+       ((not (null cwd-buffers)) (vz/popup-shell--switch (car cwd-buffers) cwd))
+       ((and (null cwd-buffers) (not (null free-buffers)))
+        (vz/popup-shell--switch (car free-buffers) cwd))
+       (:else (vz/popup-shell--add (shell (format "%s*" (make-temp-name "*shell-")))))))))
 
 (define-minor-mode vz/term-mode
   "Minor mode for binding ^D in *term* buffers")
@@ -93,6 +126,9 @@
       (kill-buffer buf))))
 
 (general-nmap
+  "SPC ps" #'vz/popup-shell)
+
+(general-nmap
   :keymaps 'shell-mode-map
   "SPC j" #'vz/shell-jump-to-dir
   "[/"    #'vz/shell-insert-from-hist)
@@ -111,7 +147,7 @@
     `(add-hook 'comint-output-filter-functions ,h))
   (shell-dirtrack-mode nil)
   (setq-local
-   comint-prompt-read-only t
+   ;; comint-prompt-read-only t
    inhibit-field-text-motion t
    comint-process-echoes t)
   (setq Man-notify-method 'quiet)
