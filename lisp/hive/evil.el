@@ -84,12 +84,14 @@ in the same vertical column"
 
 (use-package evil-collection
   :after evil
+  :defer t
   :config
   (evil-collection-init)
   (setq evil-want-keybinding t))
 
 (use-package evil-numbers
   :after evil
+  :defer t
   :config
   (general-imap
     "C-a" #'evil-numbers/inc-at-pt
@@ -101,6 +103,7 @@ in the same vertical column"
        :fork (:host github :repo "vizs/sam.el")))
 (use-package sam
   :after evil
+  :defer t
   :config
   (defvar vz/sam-minor-mode-map (make-keymap))
   (define-minor-mode vz/sam-minor-mode
@@ -156,6 +159,7 @@ in the same vertical column"
 ;; Very ugly right now
 (use-package evil-mc
   :after evil
+  :defer t
   :config
   (define-minor-mode vz/evil-mc-mode
     "Toggle evil-mc-mode in a single buffer without any keybinds"

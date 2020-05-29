@@ -168,10 +168,12 @@ Create file-buffer if it such no buffer/file exists"
                                (mapcar #'buffer-name (buffer-list))))))
       (or (get-buffer buf-name) (find-file-noselect buf-name)))))
 (use-package counsel
+  :defer t
   :after ivy
   :config
   (setq counsel-find-file-at-point t))
 (use-package beacon
+  :defer t
   :config
   (beacon-mode 1)
   (setq-ns beacon-blink-when

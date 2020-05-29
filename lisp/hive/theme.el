@@ -110,7 +110,7 @@
    `(mode-line-highlight              ((t :background ,bu :foreground ,fg)))
    `(mode-line-inactive               ((t :background ,bu :foreground ,lf)))
    `(comint-highlight-prompt          ((t :backgorund ,bg :foreground ,lf)))
-   `(hl-todo                          ((t :background ,bg :foregroung ,lf :bold nil)))
+   `(hl-todo                          ((t :background ,bg :foreground ,lf :bold nil)))
    `(lui-irc-colors-bg-0-face         ((t :background ,bg)))
    `(lui-irc-colors-bg-1-face         ((t :background ,bg)))
    `(lui-irc-colors-bg-2-face         ((t :background ,bg)))

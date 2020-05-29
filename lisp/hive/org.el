@@ -81,9 +81,6 @@
 (add-hook 'org-mode-hook #'vz/org-mode-init)
 
 (general-nmap
-  "SPC Oc" #'org-capture)
-
-(general-nmap
   :keymaps 'org-mode-map
   :prefix "SPC"
   "j"   #'counsel-org-goto-all

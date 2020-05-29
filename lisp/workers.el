@@ -47,6 +47,7 @@
 (vz/use-package org nil
   :straight (:type built-in)
   :init
+  (general-nmap "SPC Oc" #'org-capture)
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
     :config
@@ -70,6 +71,7 @@
        (format "%s:%d" (pass "misc/discord") ,serv))))
 
 (use-package comint
+  :defer t
   :straight (:type built-in)
   :config
   (defun vz/comint-send-input (&optional start end)
@@ -100,6 +102,7 @@
     "<RET>" #'vz/comint-send-input))
 
 (vz/use-package shell nil
+  :defer t
   :straight (:type built-in)
   :init
   (defun vz/cd-selbuf (path)
@@ -113,6 +116,7 @@
 ;;              :repo "cmpitg/wand"))
 
 (use-package show-paren
+  :defer t
   :hook (prog-mode . show-paren-mode)
   :straight (:type built-in)
   :config
@@ -121,6 +125,7 @@
     when-point-inside-paren t))
 
 (use-package company
+  :defer t
   :hook (prog-mode . company-mode)
   :config
   (setq-ns company
@@ -136,6 +141,7 @@
    "C-k" #'comapny-select-previous))
 
 (use-package hl-todo
+  :defer t
   :hook (prog-mode . hl-todo-mode)
   :config
   (setq hl-todo-highlight-punctuation ":")
@@ -145,15 +151,19 @@
     "k" #'hl-todo-previous))
 
 (use-package go-mode
+  :defer t
   :hook (before-save . gofmt-before-save))
 
 (use-package racket-mode
+  :defer t
   :hook (racket-mode . racket-unicode-input-method-enable))
 
 (use-package nix-mode
+  :defer t
   :mode "\\.nix\\'")
 
 (use-package python
+  :defer t
   :straight (:type built-in)
   :config
   (setq-ns python-shell
@@ -161,6 +171,7 @@
     interpreter-args "-i"))
 
 (use-package scheme
+  :defer t
   :straight (:type built-in)
   :config
   (setq scheme-program-name "csi"))
