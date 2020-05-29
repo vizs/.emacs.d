@@ -1,6 +1,6 @@
-;; Dangling parenthesis are present for making my life in the future easier
+;; -*- lexical-binding: t; -*-
 
-(use-package circe)
+;; Dangling parenthesis are present for making my life in the future easier
 
 (setq-ns vz/circe
  mynicks '("viz" "_viz_")

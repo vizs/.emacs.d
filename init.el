@@ -1,25 +1,13 @@
-(setq
- vz/initial-loaded nil
- vz/ircdiscord-process nil
- use-dialog-box nil
- backup-by-copying t
- backup-directory-alist '((".*" . "~/.cache/emacs-bkups/"))
- delete-old-versions t
- keep-new-versions 5
- keep-old-versions 2
- version-control t
- auto-save-file-transforms '((".*" "~/.cache/emacs-autosave/" t))
- auto-save-list-file-prefix "~/.cache/emacs-autosave/"
- create-lockfiles nil
- cursor-in-non-selected-windows nil
- custom-file "/dev/null"
- ;; frame-title-format '("emacs: " (:eval ...))
- gc-cons-threshold 50000000
- x-select-enable-clipboard nil)
-(defalias 'yes-or-no-p 'y-or-n-p)
+;; -*- lexical-binding: t; -*-
 
-(load-file (concat user-emacs-directory "util.el"))
-(vz/load-files '("pkg.el" "evil.el" "shell.el" "prog.el" "ui.el" "doc.el"
-                 "irc.el" "plumb.el"))
+(when (< emacs-major-version 27)
+  (load-file (expand-file-name "early-init.el" user-emacs-directory)))
+
+(load-file (expand-file-name "lisp/queen.el" user-emacs-directory))
+(load-file (expand-file-name "lisp/workers.el" user-emacs-directory))
+(load-file (expand-file-name "lisp/hive/theme.el" user-emacs-directory))
+
+(unless (boundp 'vz/initial-loaded)
+  (vz/disable-bold-italic))
 
 (defvar vz/initial-loaded t)

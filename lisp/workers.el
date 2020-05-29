@@ -1,0 +1,174 @@
+;; -*- lexical-binding: t; -*-
+
+(defun vz/reload-config ()
+  "Reload init.el"
+  (interactive)
+  (load user-init-file nil 'nomessage)
+  (redraw-display)
+  (force-mode-line-update t))
+
+(defun vz/fread (path)
+  "Read file and return the contents"
+  (with-temp-buffer
+    (insert-file-contents-literally path)
+    (buffer-string)))
+
+(defun vz/eval-file (path stdin args)
+  "Evaluate elisp file in path"
+  (eval (ignore-errors (read-from-whole-string (vz/fread path)))))
+
+(defun vz/disable-bold-italic ()
+  "Disable bold and italic for everything except bold and italic face"
+  (dolist (f (face-list))
+    (set-face-attribute f nil
+                        :weight 'normal
+                        :slant 'normal
+                        :underline nil))
+  (custom-set-faces
+   '(italic ((t :slant italic)))
+   '(bold   ((t :weight bold)))))
+
+(defun vz/windows-in-direction (direction &optional windows)
+  "Get all windows in direction relative to selected window"
+  (let ((win (window-in-direction direction
+                                  (or (car windows) (selected-window)))))
+    (if win
+        (vz/windows-in-direction direction (cons win windows))
+      windows)))
+
+(defun vz/pick (cond seq)
+  "Pick the first item in SEQ that returns t when given as an
+argument to COND"
+  (when seq
+    (if (funcall cond (car seq))
+        (car seq)
+      (vz/pick cond (cdr seq)))))
+
+(vz/use-package evil nil
+  :init
+  (setq-ns evil-want
+    keybinding nil
+    C-d-scroll t
+    C-u-scroll t
+    Y-yank-to-eol t))
+
+(vz/use-package org nil
+  :straight (:type built-in)
+  :init
+  (use-package org-bullets
+    :hook (org-mode . org-bullets-mode)
+    :config
+    (setq org-bullets-bullet-list '(" "))))
+
+(vz/use-package circe "irc"
+  :init
+  (defun pass (passwd)
+    "Get password"
+    (replace-regexp-in-string "\n$" ""
+	                            (shell-command-to-string (format "pass get %s" passwd))))
+
+  (defun pass-irc (serv)
+    `(lambda (_) (pass (format "irc/%s" ,serv))))
+
+  (defun pass-discord (serv)
+    `(lambda (_)
+       (unless (or vz/ircdiscord-process (process-live-p vz/ircdiscord-process))
+         (setq-default vz/ircdiscord-process
+                       (start-process "ircdiscord" nil "ircdiscord")))
+       (format "%s:%d" (pass "misc/discord") ,serv))))
+
+(use-package comint
+  :straight (:type built-in)
+  :config
+  (defun vz/comint-send-input (&optional start end)
+    "Send region if present, otherwise current line to current buffer's process"
+    (interactive "r")
+    (if (region-active-p)
+        (let ((cmd (buffer-substring (or start (region-beginning))
+                                     (or end (region-end)))))
+          (comint-send-string (get-buffer-process (current-buffer))
+                              (concat cmd "\n"))
+          (comint-add-to-input-history cmd))
+      (comint-send-input))
+    (when (evil-visual-state-p)
+      (evil-exit-visual-state)))
+  (general-nmap
+    :keymaps 'comint-mode-map
+    "<RET>" #'vz/comint-send-input
+    "[w"    #'comint-write-output
+    "[d"    #'comint-delete-output
+    "[j"    #'comint-next-prompt
+    "[k"    #'comint-previous-prompt
+    "[c"    #'comint-clear-buffer)
+  (general-imap
+    :keymaps 'comint-mode-map
+    "<S-RET>" #'comint-accumulate)
+  (general-vmap
+    :keymaps 'comint-mode-map
+    "<RET>" #'vz/comint-send-input))
+
+(vz/use-package shell nil
+  :straight (:type built-in)
+  :init
+  (defun vz/cd-selbuf (path)
+    "Change working directory of selected buffer"
+    (with-current-buffer
+        (window-buffer (selected-window))
+      (setq default-directory path))))
+
+;; (vz/use-package wand "plumb"
+;;   :straight (:type git :host github
+;;              :repo "cmpitg/wand"))
+
+(use-package show-paren
+  :hook (prog-mode . show-paren-mode)
+  :straight (:type built-in)
+  :config
+  (setq-ns show-paren
+    delay 0
+    when-point-inside-paren t))
+
+(use-package company
+  :hook (prog-mode . company-mode)
+  :config
+  (setq-ns company
+   require-match nil
+   idle-delay 0.2
+   tooltip-limit 10
+   minimum-prefix-length 2)
+  (general-define-key
+   :keymaps 'company-active-map
+   "M-n" nil
+   "M-p" nil
+   "C-j" #'company-select-next
+   "C-k" #'comapny-select-previous))
+
+(use-package hl-todo
+  :hook (prog-mode . hl-todo-mode)
+  :config
+  (setq hl-todo-highlight-punctuation ":")
+  (general-nmap
+    :prefix "["
+    "j" #'hl-todo-next
+    "k" #'hl-todo-previous))
+
+(use-package go-mode
+  :hook (before-save . gofmt-before-save))
+
+(use-package racket-mode
+  :hook (racket-mode . racket-unicode-input-method-enable))
+
+(use-package nix-mode
+  :mode "\\.nix\\'")
+
+(use-package python
+  :straight (:type built-in)
+  :config
+  (setq-ns python-shell
+    interpreter "python3"
+    interpreter-args "-i"))
+
+(use-package scheme
+  :straight (:type built-in)
+  :config
+  (setq scheme-program-name "csi"))

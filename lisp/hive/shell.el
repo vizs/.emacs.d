@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
 ;; Disable colours in shell-mode
@@ -16,30 +18,6 @@
                 (setq cwd (concat cwd "/"))))
         (replace-match "" t t string 0))
     string))
-
-(defun vz/shell-mode-init ()
-  (dolist (h '(comint-truncate-buffer comint-watch-for-password-prompt))
-  `(add-hook 'comint-output-filter-functions ,h))
-  (shell-dirtrack-mode nil)
-  (setq-local
-   comint-prompt-read-only t
-   inhibit-field-text-motion t
-   comint-process-echoes t)
-  (setq Man-notify-method 'quiet)
-  (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt))
-
-(defun vz/comint-send-input (&optional start end)
-  "Send region if present, otherwise current line to current buffer's process"
-  (interactive "r")
-  (if (region-active-p)
-      (let ((cmd (buffer-substring (or start (region-beginning))
-                                   (or end (region-end)))))
-        (comint-send-string (get-buffer-process (current-buffer))
-                            (concat cmd "\n"))
-        (comint-add-to-input-history cmd))
-    (comint-send-input))
-  (when (evil-visual-state-p)
-    (evil-exit-visual-state)))
 
 (defun vz/shell-history ()
   "Returns current shell's history as a list"
@@ -114,33 +92,10 @@
                   (buffer-list)))
       (kill-buffer buf))))
 
-(add-hook 'shell-mode-hook #'vz/shell-mode-init)
-
-(general-nmap
-  :prefix "SPC"
-  "ps" #'vz/popup-shell)
-
-(general-nmap
-  :keymaps 'comint-mode-map
-  "<RET>" #'vz/comint-send-input)
-
-(general-nmap
-  :keymaps 'comint-mode-map
-  :prefix "["
-  "w" #'comint-write-output
-  "d" #'comint-delete-output
-  "j" #'comint-next-prompt
-  "k" #'comint-previous-prompt
-  "c" #'comint-clear-buffer)
-
-(general-imap
-  :keymaps 'comint-mode-map
-  "<S-return>" #'comint-accumulate)
-
 (general-nmap
   :keymaps 'shell-mode-map
   "SPC j" #'vz/shell-jump-to-dir
-  "[/" #'vz/shell-insert-from-hist)
+  "[/"    #'vz/shell-insert-from-hist)
 
 (general-imap
   :keymaps 'shell-mode-map
@@ -151,6 +106,15 @@
   "C-d" #'comint-send-eof
   "C-j" #'vz/shell-jump-to-dir)
 
-(general-vmap
-  :keymaps 'comint-mode-map
-  "<RET>" #'vz/comint-send-input)
+(defun vz/shell-mode-init ()
+  (dolist (h '(comint-truncate-buffer comint-watch-for-password-prompt))
+    `(add-hook 'comint-output-filter-functions ,h))
+  (shell-dirtrack-mode nil)
+  (setq-local
+   comint-prompt-read-only t
+   inhibit-field-text-motion t
+   comint-process-echoes t)
+  (setq Man-notify-method 'quiet)
+  (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt))
+
+(add-hook 'shell-mode-hook #'vz/shell-mode-init)

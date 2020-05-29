@@ -1,20 +1,6 @@
-(defun vz/make-pdf ()
-  "Compile org/tex document to pdf"
-  (interactive)
-  (pcase major-mode
-   ('org-mode   (org-latex-export-to-pdf))
-   ('latex-mode (call-process "pdflatex" nil 0 nil "buf"))))
+;; -*- lexical-binding: t; -*-
 
-(defun vz/preview-doc ()
-  "Preview org or latex document. If it is an org-mode document, then compiles
-it to pdf. If file i unsaved, it will not save it."
-  (interactive)
-  (let ((pdf (concat (file-name-sans-extension (buffer-file-name)) ".pdf")))
-	(unless (file-exists-p pdf) (vz/make-pdf))
-	;; TODO: Consider using an emacs' plugin instead of zathura
-	(call-process "zathura" nil 0 nil pdf)))
-
-;; enable completion for blocks
+;; Enable structure template completion
 (require 'org-tempo)
 
 ;; TODO: setup org-protocol
@@ -65,15 +51,9 @@ it to pdf. If file i unsaved, it will not save it."
     (file+headline ,(~ "doc/school/g12/notes.org") "Maths")
     "* %?")))
 
-(use-package org-bullets
-  :config
-  (setq org-bullets-bullet-list '(" "))
-  (add-hook 'org-mode-hook #'org-bullets-mode))
-
 (defun vz/org-mode-style ()
-  (dolist (f '(org-table org-link org-code org-block org-drawer
-               org-date org-special-keyword org-verbatim))
-    (set-face-attribute f nil :inherit 'fixed-pitch))
+  (vz/set-monospace-faces '(org-table org-link org-code org-block org-drawer
+                            org-date org-special-keyword org-verbatim))
 
   (dolist (f org-level-faces)
     (custom-set-faces
@@ -93,7 +73,7 @@ it to pdf. If file i unsaved, it will not save it."
   (org-indent-mode t)
   (org-num-mode t)
   (setq line-spacing 0.01)
-  (setq buffer-face-mode-face '(:family "Charter" :height 100))
+  (setq buffer-face-mode-face `(:family ,vz/monospace-font :height 100))
   (buffer-face-mode)
   (vz/org-mode-style))
 
@@ -105,13 +85,7 @@ it to pdf. If file i unsaved, it will not save it."
 (general-nmap
   :keymaps 'org-mode-map
   :prefix "SPC"
-  "j" #'counsel-org-goto-all
-  "et" #'org-latex-export-to-latex
-  "t" #'org-todo
-  "sT" #'org-babel-tangle)
-
-(general-nmap
-  :prefix "SPC"
-  :keymaps '(org-mode-map latex-mode-map)
-  "pp" #'vz/preview-doc
-  "ep" #'vz/make-pdf)
+  "j"   #'counsel-org-goto-all
+  "et"  #'org-latex-export-to-latex
+  "t"   #'org-todo
+  "sT"  #'org-babel-tangle)

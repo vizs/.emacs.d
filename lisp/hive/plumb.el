@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 (setq-ns vz/plumb
  video-exts '("mp4" "mkv" "webm" "gif")
  audio-exts '("mp3" "flac" "ogg")
@@ -6,18 +8,16 @@
 (defun vz/plumb-download-url (url)
   "Download the given url and return the place in which it is stored"
   (let ((file-name (make-temp-name "/tmp/plumb.")))
-    (call-process "curl" nil nil 0 "-O" file-name url)))
+    (async-shell-command (format "curl-O%s %s" file-name url))))
 
 (defun vz/plumb-yt (string)
-  (start-process "plumb-yt" nil "mpv" string))
+  (async-shell-command (format "mpv %s" string)))
 
-;; TODO: * Open in emacs if file size isn't large
-;;       * change to async processes
 (defun vz/plumb-img (path)
-  (call-process "meh" nil nil 0 path))
+  (async-shell-command (format "meh %s" path)))
 
 (defun vz/plumb-pdf (path)
-  (call-process "zathura" nil nil 0 path))
+  (async-shell-command (format "zathura %s" path)))
 
 ;; Maybe consider mime types too?
 (defun vz/plumb--file (ext path)
@@ -37,16 +37,13 @@
          (ext (replace-regexp-in-string "^.*\\." "" file-name))
          (path nil))
     (cond
-     ((or (string-empty-p file-name) (string= ext "html"))
-      (browse-url-chromium string))
      ((member ext (append vz/plumb-video-exts vz/plumb-audio-exts))
       (vz/plumb-yt string))
      (:else
-      (setq-local path vz/plumb-download-url string)
-      (vz/plumb-file ext path)
-      (delete-file path)))))
+      (browse-url-chromium string)))))
 
 ;; Checking if string has non-english letters and translating would be nice
+;; TODO: Look into using eval-in-repl
 (defun vz/plumb-eval (string)
   (pcase major-mode
     ('python-mode (python-send-string string))
@@ -55,8 +52,7 @@
     (- (shell-command string))))
 
 ;; When using use-package, it errors -- void variable wand-helper:maybe-... 
-(when (vz/load-pkg "wand")
-  (setq wand:*rules*
+(setq wand:*rules*
    (list
     (wand:create-rule :match "[A-Za-z0-9]+([0-9a-z]+)"
                       :capture :whole
@@ -90,13 +86,13 @@
                       :capture :whole
                       :action #'vz/plumb-eval)
     ))
-  (defun vz/plumb ()
-    (interactive)
-    (wand:execute (if (region-active-p)
-                      (buffer-substring-no-properties (region-beginning)
-                                                      (region-end))
-                    (ivy-thing-at-point))))
-  (general-define-key
-   :states '("normal" "visual")
-   :keymaps 'override
-   "|" 'vz/plumb))
+(defun vz/plumb ()
+  (interactive)
+  (wand:execute (if (region-active-p)
+                    (buffer-substring-no-properties (region-beginning)
+                                                    (region-end))
+                  (ivy-thing-at-point))))
+(general-define-key
+ :states '(normal visual)
+ :keymaps 'override
+ "|" 'vz/plumb)
