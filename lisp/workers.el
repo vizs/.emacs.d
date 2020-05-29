@@ -36,14 +36,6 @@
         (vz/windows-in-direction direction (cons win windows))
       windows)))
 
-(defun vz/pick (cond seq)
-  "Pick the first item in SEQ that returns t when given as an
-argument to COND"
-  (when seq
-    (if (funcall cond (car seq))
-        (car seq)
-      (vz/pick cond (cdr seq)))))
-
 (vz/use-package evil nil
   :init
   (setq-ns evil-want
@@ -102,7 +94,7 @@ argument to COND"
     "[c"    #'comint-clear-buffer)
   (general-imap
     :keymaps 'comint-mode-map
-    "<S-RET>" #'comint-accumulate)
+    "<S-return>" #'comint-accumulate)
   (general-vmap
     :keymaps 'comint-mode-map
     "<RET>" #'vz/comint-send-input))

@@ -25,6 +25,7 @@
  fontify-quote-and-verse-blocks t
  fontify-whole-heading-line t
  src-fontify-natively nil
+
  capture-templates
  `(("d" "Dump links and book names or whatever" entry
     (file "dump.org")
@@ -73,7 +74,7 @@
   (org-indent-mode t)
   (org-num-mode t)
   (setq line-spacing 0.01)
-  (setq buffer-face-mode-face `(:family ,vz/monospace-font :height 100))
+  (setq buffer-face-mode-face `(:family ,vz/variable-font :height 100))
   (buffer-face-mode)
   (vz/org-mode-style))
 

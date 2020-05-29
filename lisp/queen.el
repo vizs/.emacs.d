@@ -18,6 +18,7 @@
       custom-file "/dev/null"
       gc-cons-threshold 16777216 ;; 16M
       x-select-enable-clipboard nil)
+(defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
@@ -118,6 +119,22 @@
 (use-package ivy
   :after general
   :config
+  ;; This was moved to ivy-hydra.el
+  (unless (fboundp 'ivy-minibuffer-grow)
+    (defun ivy-minibuffer-grow ()
+      "Grow the minibuffer window by 1 line."
+      (interactive)
+      (setq-local max-mini-window-height
+                  (cl-incf ivy-height)))
+
+    (defun ivy-minibuffer-shrink ()
+      "Shrink the minibuffer window by 1 line."
+      (interactive)
+      (when (> ivy-height 2)
+        (setq-local max-mini-window-height
+                    (cl-decf ivy-height))
+        (window-resize nil -1))))
+
   (setq ivy-use-virtual-buffers t)
   (ivy-mode 1)
 

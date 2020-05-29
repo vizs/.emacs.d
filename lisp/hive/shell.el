@@ -56,7 +56,7 @@
   "List of all shell buffers opened by vz/popup-shell")
 
 (defun vz/popup-shell--add (buffer)
-  "Add BUFFER to vz/popup-shells and a process sentinel"
+  "Add BUFFER to vz/popup-shells and add a process sentinel"
   (add-to-list 'vz/popup-shells buffer)
   (set-process-sentinel (get-buffer-process buffer)
                         #'(lambda (process output)

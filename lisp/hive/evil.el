@@ -45,6 +45,8 @@ in the same vertical column"
 (setq general-override-states '(insert emacs hybrid normal visual
                                 motion operator replace))
 (general-evil-setup)
+(general-imap
+  "C-S-v"   #'(lambda () (interactive) (evil-paste-after 1 ?+)))
 (general-nmap
   :keymaps 'override
   "gc"      #'comment-line
@@ -78,7 +80,7 @@ in the same vertical column"
   ">"   #'vz/evil-shift-right
   "<"   #'vz/evil-shift-left
   "gj"  #'avy-goto-line-below
-  "gk"  #'avy-goto-line-after)
+  "gk"  #'avy-goto-line-above)
 
 (use-package evil-collection
   :after evil

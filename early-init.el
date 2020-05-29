@@ -11,3 +11,4 @@
   (set-scroll-bar-mode nil))
 
 (advice-add #'x-apply-session-resources :override #'ignore)
+(advice-add #'package--ensure-init-file :override #'ignore)
