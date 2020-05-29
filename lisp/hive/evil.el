@@ -190,10 +190,10 @@ in the same vertical column"
 
   (general-nmap
     :keymaps 'override
-    "C-n" #'vz/mc--C-n
-    "C-l" #'evil-mc-make-all-cursors
-    "C-j" #'evil-mc-make-cursor-move-next-line
-    "C-k" #'evil-mc-make-cursor-move-prev-line
+    "C-n"      #'vz/mc--C-n
+    "C-l"      #'evil-mc-make-all-cursors
+    "C-j"      #'evil-mc-make-cursor-move-next-line
+    "C-k"      #'evil-mc-make-cursor-move-prev-line
     "<escape>" #'vz/mc--remove)
 
   (general-vmap

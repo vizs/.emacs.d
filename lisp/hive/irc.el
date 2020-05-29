@@ -15,28 +15,28 @@
 (setq-ns circe
  network-options
  `(("Freenode"
-	  :nick "_viz_"
+    :nick "_viz_"
     :port (6667 . 6697)
-	  :channels (:after-auth "#nixhub" "#vis-editor" "#unixporn" "#nixos" "#emacs")
+    :channels (:after-auth "#nixhub" "#vis-editor" "#unixporn" "#nixos" "#emacs")
     :nickserv-nick "_viz_"
-	  :nickserv-password ,(pass-irc "Freenode"))
+    :nickserv-password ,(pass-irc "Freenode"))
    ("Discord Madhouse"
-	  :host "irc.astrak.co"
-	  :user "viz"
-	  :channels ("#general" "#linux" "#unixporn" "#memes" "#scripting")
-	  :pass ,(pass-discord 446727370964205585))
+    :host "irc.astrak.co"
+    :user "viz"
+    :channels ("#general" "#linux" "#unixporn" "#memes" "#scripting")
+    :pass ,(pass-discord 446727370964205585))
    ("Discord Nixhub"
-	  :host "localhost"
-	  :user "viz"
-	  :port 6667
-	  :channels ("#home" "#man" "#programming" "#devnull" "#music")
-	  :pass ,(pass-discord 361910177961738242))
+    :host "localhost"
+    :user "viz"
+    :port 6667
+    :channels ("#home" "#man" "#programming" "#devnull" "#music")
+    :pass ,(pass-discord 361910177961738242))
    ("Discord Frens"
-	  :host "localhost"
-	  :user "viz"
-	  :port 6667
-	  :channel ("#general" "#commands")
-	  :pass ,(pass-discord 702578317081182258)))
+    :host "localhost"
+    :user "viz"
+    :port 6667
+    :channel ("#general" "#commands")
+    :pass ,(pass-discord 702578317081182258)))
  ; reduce-lurker-spam t
  use-cycle-completion t
  highlight-nick-type 'message

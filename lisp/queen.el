@@ -105,6 +105,9 @@
 (add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
                                                     vz/monospace-font)))
 
+;; Fringe width
+(fringe-mode '(2 . 2))
+
 ;; Quality of life improvements
 (use-package general)
 (use-package avy)
