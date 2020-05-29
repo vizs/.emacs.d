@@ -1,0 +1,12 @@
+* viz's emacs config
+I use straight.el instead of package.el because it is a lot more convenient to use
+than using package.el and a mix of ~load~.
+** Conventions used
+| Functions                       | vz/asdf                |
+| Functions that return a boolean | vz/verb?               |
+| Variables                       | vz/asdf                |
+| Minor mode                      | vz/asdf-minor-mode     |
+| Minor mode map                  | vz/asdf-minor-mode-map |
+** On org-mode
+I currently use org-mode to take notes for school but plan to use it for agenda
+and schedules.
