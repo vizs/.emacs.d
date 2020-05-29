@@ -1,6 +1,3 @@
-;; TODO: * Find out how to add functions to executable list thing
-;;       * Find out how to expand directory aliases
-
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
 ;; Disable colours in shell-mode
@@ -27,7 +24,7 @@
   (setq-local
    comint-prompt-read-only t
    inhibit-field-text-motion t
-   comint-process-echoes t) ;; Disables duplicates
+   comint-process-echoes t)
   (setq Man-notify-method 'quiet)
   (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt))
 
@@ -53,7 +50,7 @@
   "Search for command in history and run it"
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
-    (when (string= (car (process-command proc)) explicit-shell-file-name)
+    (unless (process-running-child-p proc)
       (let* ((input (comint-get-old-input-default))
              (init-input (unless (string-empty-p input) (concat "^" input)))
              (cmd (ivy-read "> " (vz/shell-history) :initial-input init-input)))
@@ -70,7 +67,7 @@
   "Jump to directory alias"
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
-    (when (string= (car (process-command proc)) explicit-shell-file-name)
+    (unless (process-running-child-p proc)
       (comint-delete-input)
       (let* ((dir (ivy-read "> " (vz/shell-get-dir-alias)))
              (cmd (format "cd ~%s\n" (car (split-string dir "=")))))
