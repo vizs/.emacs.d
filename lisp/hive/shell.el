@@ -65,15 +65,16 @@
                                 (setq vz/popup-shells (remove buf vz/popup-shells))
                                 (kill-buffer buf))))))
 
-(defun vz/popup-shell--switch (buffer cwd)
+(defun vz/popup-shell--switch (buffer cwd &optional dont-cd?)
   "Switch to CWD in BUFFER"
   (switch-to-buffer-other-window buffer)
-  (let ((input (comint-get-old-input-default))
-        (process (get-buffer-process buffer)))
-    (comint-delete-input)
-    (comint-send-string process (format "cd %s\n" cwd))
-    (unless (string= input "$ ")
-      (comint-send-string process input))))
+  (unless dont-cd?
+    (let ((input (comint-get-old-input-default))
+          (process (get-buffer-process buffer)))
+      (comint-delete-input)
+      (comint-send-string process (format "cd %s\n" cwd))
+      (unless (string= input "$ ")
+        (comint-send-string process input)))))
 
 (defun vz/popup-shell ()
   "Try to find ``free'' buffers that have the CWD as `default-directory' and switch
@@ -81,19 +82,24 @@ to it. If nothing is found, create a new buffer"
   (interactive)
   (if (null vz/popup-shells)
       (vz/popup-shell--add (shell))
-    (let* ((free-buffers (seq-filter #'(lambda (buffer) (and (null (process-running-child-p
-                                                                    (get-buffer-process buffer)))
-                                                             (null (get-buffer-window buffer t))))
+    (let* ((free-buffers (seq-filter #'(lambda (buffer)
+                                         (and (null (process-running-child-p
+                                                     (get-buffer-process buffer)))
+                                              (null (get-buffer-window buffer t))))
                                      vz/popup-shells))
            (cwd default-directory)
-           (cwd-buffers (seq-filter #'(lambda (buffer) (with-current-buffer buffer
-                                                         (string= default-directory cwd)))
+           (cwd-buffers (seq-filter #'(lambda (buffer)
+                                        (with-current-buffer buffer
+                                          (string= default-directory cwd)))
                                     free-buffers)))
       (cond
-       ((not (null cwd-buffers)) (vz/popup-shell--switch (car cwd-buffers) cwd))
-       ((and (null cwd-buffers) (not (null free-buffers)))
+       (cwd-buffers
+        (vz/popup-shell--switch (car cwd-buffers) cwd t))
+       ((and (null cwd-buffers) free-buffers)
         (vz/popup-shell--switch (car free-buffers) cwd))
-       (:else (vz/popup-shell--add (shell (format "%s*" (make-temp-name "*shell-")))))))))
+       (:else
+        (vz/popup-shell--add (shell (format "%s*"
+                                            (make-temp-name "*shell-")))))))))
 
 (define-minor-mode vz/term-mode
   "Minor mode for binding ^D in *term* buffers")
@@ -143,8 +149,8 @@ to it. If nothing is found, create a new buffer"
   "C-j" #'vz/shell-jump-to-dir)
 
 (defun vz/shell-mode-init ()
-  (dolist (h '(comint-truncate-buffer comint-watch-for-password-prompt))
-    `(add-hook 'comint-output-filter-functions ,h))
+  (add-hook 'comint-output-filter-function #'comint-truncate-buffer)
+  (add-hook 'comint-output-filter-function #'comint-watch-for-password-prompt)
   (shell-dirtrack-mode nil)
   (setq-local
    ;; comint-prompt-read-only t

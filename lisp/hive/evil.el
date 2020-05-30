@@ -41,9 +41,15 @@ in the same vertical column"
   (interactive)
   (window-resize (selected-window) (window-max-delta)))
 
-;; Setup general
-(setq general-override-states '(insert emacs hybrid normal visual
-                                motion operator replace))
+;; TODO: Look into removing evil-collection eventually
+;;       Removing evil-collection makes general-override-map impossible to use?
+(use-package evil-collection
+ :after evil
+ :config
+ (setq evil-want-keybinding t)
+ (evil-collection-init))
+
+;; Setup general and keybinds
 (general-evil-setup)
 (general-imap
   "C-S-v"   #'(lambda () (interactive) (evil-paste-after 1 ?+)))
@@ -54,7 +60,11 @@ in the same vertical column"
   "/"       #'swiper
   "?"       #'swiper-backward
   "SPC rc"  #'vz/reload-config
-  "SPC df"  #'counsel-describe-function
+  "SPC pb"  #'previous-buffer
+  "SPC nb"  #'next-buffer
+  "SPC SPC" #'counsel-M-x
+  "SPC df"  #'vz/describe-function
+  "SPC d."  #'vz/goto-definition
   "SPC dv"  #'counsel-describe-variable
   "SPC dk"  #'counsel-descbinds
   "SPC dF"  #'counsel-describe-face
@@ -82,20 +92,21 @@ in the same vertical column"
   "gj"  #'avy-goto-line-below
   "gk"  #'avy-goto-line-above)
 
-(use-package evil-collection
-  :after evil
-  :defer t
-  :config
-  (evil-collection-init)
-  (setq evil-want-keybinding t))
-
 (use-package evil-numbers
   :after evil
-  :defer t
   :config
   (general-imap
     "C-a" #'evil-numbers/inc-at-pt
     "C-x" #'evil-numbers/dec-at-pt))
+
+(use-package link-hint
+  :after avy
+  :config
+  (general-nmap
+    :keymaps 'override
+    :prefix "SPC"
+    "lo" #'link-hint-open-link
+    "lc" #'link-hint-copy-link))
 
 (straight-use-package
  '(sam :type git :host github
@@ -103,7 +114,6 @@ in the same vertical column"
        :fork (:host github :repo "vizs/sam.el")))
 (use-package sam
   :after evil
-  :defer t
   :config
   (defvar vz/sam-minor-mode-map (make-keymap))
   (define-minor-mode vz/sam-minor-mode
@@ -159,17 +169,16 @@ in the same vertical column"
 ;; Very ugly right now
 (use-package evil-mc
   :after evil
-  :defer t
   :config
   (define-minor-mode vz/evil-mc-mode
     "Toggle evil-mc-mode in a single buffer without any keybinds"
     :group 'evil-mc
     :init-value nil
     :lighter evil-mc-mode-line
-    (if (evil-mc-mode
+    (if evil-mc-mode
          (evil-mc-define-vars)
          (evil-mc-initialize-vars)
-         (evil-mc-initialize-hooks))
+         (evil-mc-initialize-hooks)
         (evil-mc-teardown-hooks)))
   (put 'vz/evil-mc-mode 'permanent-local t)
 

@@ -84,6 +84,6 @@
   :keymaps 'org-mode-map
   :prefix "SPC"
   "j"   #'counsel-org-goto-all
-  "et"  #'org-latex-export-to-latex
+  "oel" #'org-latex-export-to-latex
   "t"   #'org-todo
-  "sT"  #'org-babel-tangle)
+  "ost" #'org-babel-tangle)

@@ -159,7 +159,7 @@
                                                           (buffer-name x))))))))
 
 (general-nmap
-  :prefix "SPC I"
+  :prefix "SPC i"
   "i" #'vz/circe-jump-irc
   "d" #'vz/circe-jump-discord)
 

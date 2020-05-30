@@ -46,14 +46,22 @@
 
 (vz/use-package org nil
   :straight (:type built-in)
+  :defer t
+  :general (:keymaps 'override :states 'normal
+            "SPC oc" #'org-capture)
   :init
-  (general-nmap "SPC Oc" #'org-capture)
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
+    :defer t
     :config
     (setq org-bullets-bullet-list '(" "))))
 
 (vz/use-package circe "irc"
+  :defer t
+  :functions (vz/circe-jump-irc vz/circe-jump-discord)
+  :general (:keymaps 'override :states 'normal :prefix "SPC i"
+            "i" #'vz/circe-jump-irc
+            "d" #'vz/circe-jump-discord)
   :init
   (defun pass (passwd)
     "Get password"
@@ -150,13 +158,31 @@
     "j" #'hl-todo-next
     "k" #'hl-todo-previous))
 
+;; TODO: Is there a cleaner way to do this other than adding a hook?
+;; NOTE: They are buffer-local variables already.
 (use-package go-mode
   :defer t
-  :hook (before-save . gofmt-before-save))
+  :hook (before-save . gofmt-before-save)
+  :config
+  (add-hook 'go-mode-hook
+            #'(lambda ()
+                (setq-local vz/describe-function-func #'godef-describe
+                            vz/goto-definition-func #'godef-jump))))
 
 (use-package racket-mode
   :defer t
-  :hook (racket-mode . racket-unicode-input-method-enable))
+  :hook (racket-mode . racket-unicode-input-method-enable)
+  :config
+  (add-hook 'racket-mode-hook
+            #'(lambda ()
+                (setq-local
+                 vz/describe-function-func #'racket-repl-describe
+                 vz/goto-definition-func #'racket-repl-visit-definition)))
+  :general (:states 'normal :keymaps 'racket-mode-map
+    "C-e" #'racket-send-last-sexp)
+  :general (:states 'normal :prefix "SPC" :keymaps 'racket-mode-map
+    "rsr" #'racket-send-region
+    "rsd" #'racket-send-definition))
 
 (use-package nix-mode
   :defer t
@@ -165,7 +191,17 @@
 (use-package python
   :defer t
   :straight (:type built-in)
+  :hook (python-mode . run-python)
+  :general (:states 'normal :prefix "SPC" :keymaps 'python-mode-map
+    "rsr" #'python-shell-send-region
+    "rsd" #'python-shell-send-defun
+    "rsf" #'python-shell-send-buffer
+    "rsF" #'python-shell-send-file)
   :config
+  (add-hook 'python-mode-hook
+            #'(lambda ()
+                (setq-local
+                 vz/describe-function-func #'python-describe-at-point)))
   (setq-ns python-shell
     interpreter "python3"
     interpreter-args "-i"))

@@ -2,6 +2,8 @@
 
 (setq vz/monospace-font "Verily Serif Mono"
       vz/variable-font "Charter"
+      vz/describe-function-func #'describe-function
+      vz/goto-definition-func   #'xref-find-definitions
       vz/ircdiscord-process nil
       vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
       use-dialog-box nil
@@ -45,6 +47,17 @@
   (when (member major-mode vz/functional-major-modes)
     (setq indent-tabs-mode nil
           tab-width 2)))
+
+(make-variable-buffer-local 'vz/describe-function-func)
+(make-variable-buffer-local 'vz/goto-definition-func)
+
+(defun vz/describe-function (&rest args)
+  (interactive)
+  (command-execute vz/describe-function-func))
+
+(defun vz/goto-definition (&rest args)
+  (interactive)
+  (command-execute vz/goto-definition-func))
 
 ;; Bootstrap straight
 (defvar bootstrap-version)
@@ -110,7 +123,10 @@
 (fringe-mode '(2 . 2))
 
 ;; Quality of life improvements
-(use-package general)
+(use-package general
+  :init
+  (setq general-override-states '(insert emacs hybrid normal visual motion
+                                         operator replace)))
 (use-package avy)
 (use-package ace-window
   :after avy
@@ -142,6 +158,7 @@
    :keymaps 'ivy-minibuffer-map
    "C-p" nil
    "C-n" nil
+   "<escape>" #'minibuffer-keyboard-quit
    "<C-up>"   #'ivy-minibuffer-grow
    "<C-down>" #'ivy-minibuffer-shrink
    "C-s"      #'ivy-avy
@@ -168,10 +185,10 @@ Create file-buffer if it such no buffer/file exists"
                                (mapcar #'buffer-name (buffer-list))))))
       (or (get-buffer buf-name) (find-file-noselect buf-name)))))
 (use-package counsel
-  :defer t
   :after ivy
   :config
-  (setq counsel-find-file-at-point t))
+  (setq-default counsel-find-file-at-point t
+                vz/describe-function-func #'counsel-describe-function))
 (use-package beacon
   :defer t
   :config
