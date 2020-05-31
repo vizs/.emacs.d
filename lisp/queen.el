@@ -4,9 +4,6 @@
  vz/monospace-font "Verily Serif Mono"
  vz/variable-font "Charter"
 
- vz/describe-function-func #'describe-function
- vz/goto-definition-func   #'xref-find-definitions
- vz/jump-func              #'imenu
  vz/ircdiscord-process nil
  vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
 
@@ -92,10 +89,6 @@
     (setq indent-tabs-mode nil
           tab-width 2)))
 
-(make-variable-buffer-local 'vz/describe-function-func)
-(make-variable-buffer-local 'vz/goto-definition-func)
-(make-variable-buffer-local 'vz/jump-func)
-
 ;; Indentation
 (setq-default indent-tabs-mode t
               tab-width 4)
@@ -136,14 +129,35 @@
   :init
   (setq general-override-states '(insert emacs hybrid normal visual motion
                                   operator replace)))
+
 (use-package avy)
 (use-package ace-window
   :after avy
-  :config
-  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)))
+  :custom (aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)))
+
 (use-package ivy
   :after general
+  :custom (ivy-use-virtual-buffers t)
+  :general (:keymaps 'ivy-minibuffer-map
+    "C-p" nil
+    "C-n" nil
+    "<escape>" #'minibuffer-keyboard-quit
+    "<C-up>"   #'ivy-minibuffer-grow
+    "<C-down>" #'ivy-minibuffer-shrink
+    "C-s"      #'ivy-avy
+    "C-j"      #'ivy-next-line
+    "C-k"      #'ivy-previous-line
+    "C-p"      #'ivy-minibuffer-grow
+    "C-n"      #'ivy-minibuffer-shrink
+    "C-u"      #'ivy-scroll-down-command
+    "C-d"      #'ivy-scroll-up-command)
+  :general (:keymaps 'ivy-switch-buffer-map
+    "C-k" #'ivy-previous-line
+    ;; Shift cannot be bound???
+    "C-M-K" #'ivy-switch-buffer-kill)
   :config
+  (require 'ivy-avy)
+
   ;; This was moved to ivy-hydra.el
   (unless (fboundp 'ivy-minibuffer-grow)
     (defun ivy-minibuffer-grow ()
@@ -160,46 +174,25 @@
                     (cl-decf ivy-height))
         (window-resize nil -1))))
 
-  (setq ivy-use-virtual-buffers t)
-  (ivy-mode 1)
-  (require 'ivy-avy)
-
-  (general-define-key
-   :keymaps 'ivy-minibuffer-map
-   "C-p" nil
-   "C-n" nil
-   "<escape>" #'minibuffer-keyboard-quit
-   "<C-up>"   #'ivy-minibuffer-grow
-   "<C-down>" #'ivy-minibuffer-shrink
-   "C-s"      #'ivy-avy
-   "C-j"      #'ivy-next-line
-   "C-k"      #'ivy-previous-line
-   "C-p"      #'ivy-minibuffer-grow
-   "C-n"      #'ivy-minibuffer-shrink
-   "C-u"      #'ivy-scroll-down-command
-   "C-d"      #'ivy-scroll-up-command)
-
-  (general-define-key
-   :keymaps 'ivy-switch-buffer-map
-   "C-k" #'ivy-previous-line
-   ;; Shift cannot be bound???
-   "C-M-K" #'ivy-switch-buffer-kill)
-
   (defun vz/get-file-or-buffer ()
-    "Return buffer corresponding to buffer-name or file-name
-Create file-buffer if it such no buffer/file exists"
-    (let ((buf-name (->>
-                     (append (-filter #'file-regular-p
-                                      (directory-files default-directory))
-                             (-map #'buffer-name (buffer-list)))
-                     (ivy-read "> "))))
-      (or (get-buffer buf-name) (find-file-noselect buf-name)))))
+    "Select a list of opened buffers, files in current directory and entries in
+recentf and return the corresponding buffer. Create one if it doesn't exist"
+    (-> (->>
+         (append (-map #'buffer-name (buffer-list))
+                 (-filter #'file-regular-p
+                          (directory-files default-directory))
+                 recentf-list)
+         (-uniq)
+         (ivy-read "> "))
+        (or (get-buffer it)
+            (find-file-noselect it))))
+  (ivy-mode 1))
+
 (use-package counsel
   :after ivy
   :config
-  (setq-default counsel-find-file-at-point t
-                vz/describe-function-func #'counsel-describe-function
-                vz/jump-func #'counsel-imenu))
+  (setq-default counsel-find-file-at-point t))
+
 (use-package beacon
   :config
   (beacon-mode 1)
@@ -207,3 +200,13 @@ Create file-buffer if it such no buffer/file exists"
     window-scrolls t
     point-moves-horizontally nil
     point-moves-vertically nil))
+
+;; Buffer-local commands
+(make-variable-buffer-local 'vz/describe-function-func)
+(make-variable-buffer-local 'vz/goto-definition-func)
+(make-variable-buffer-local 'vz/jump-func)
+
+(setq
+ vz/describe-function-func #'counsel-describe-function
+ vz/goto-definition-func   #'xref-find-definitions
+ vz/jump-func              #'counsel-imenu)
