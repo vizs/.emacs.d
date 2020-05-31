@@ -52,6 +52,7 @@
   cache-autoloads t)
 
 ;; Emacs Lisp enhancers
+(use-package s)
 (use-package dash)
 (use-package fn
   :config

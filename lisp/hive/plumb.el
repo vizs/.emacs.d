@@ -72,10 +72,12 @@
                       :action #'vz/plumb-file)
     (wand:create-rule :match ".*:[0-9]+$"
                       :capture :whole
-                      :action (fn
-                               (let ((f (split-string <> ":")))
-                                 (vz/plumb-file (car f)
-                                                (string-to-number (cadr f))))))
+                      :action (fn:
+                               -->
+                               (s-split <> ":")
+                               (vz/plumb-file
+                                (car it)
+                                (string-to-number (cadr it))))
     (wand:create-rule :match "\\..+$"
                       :capture :whole
                       :action #'vz/plumb-file)
@@ -86,6 +88,7 @@
                       :capture :whole
                       :action #'vz/plumb-eval)
     ))
+
 (defun vz/plumb ()
   (interactive)
   (wand:execute (if (region-active-p)

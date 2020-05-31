@@ -155,7 +155,7 @@ in the same vertical column"
 
   (defun vz/sam-quit-win ()
     (interactive)
-    (when (string= (buffer-name (current-buffer)) "*sam-cmd*")
+    (when (s-equals? (buffer-name (current-buffer)) "*sam-cmd*")
       (window--delete (selected-window))
       (vz/sam--eval-command)))
 
@@ -216,4 +216,7 @@ in the same vertical column"
     "C-n" #'vz/mc--C-n
     "C-x" #'vz/mc--visual-C-x))
 
+(setq-ns evil
+  insert-state-message nil
+  normal-state-message nil)
 (evil-mode t)

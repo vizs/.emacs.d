@@ -36,6 +36,21 @@
         (vz/windows-in-direction direction (cons win windows))
       windows)))
 
+(use-package prescient
+  :config
+  (setq-ns prescient
+    history-length 150
+    filter-method '(literal regexp initialism fuzzy)
+    save-file (~ ".cache/emacs-prescient.el"))
+  (prescient-persist-mode))
+
+(use-package ivy-prescient
+  :after prescient
+  :config
+  (setq-ns ivy-prescient-enable
+    sorting nil)
+  (ivy-prescient-mode t))
+
 (vz/use-package evil nil
   :init
   (setq-ns evil-want
@@ -152,6 +167,11 @@
    "C-j" #'company-select-next
    "C-k" #'comapny-select-previous))
 
+(use-package company-prescient
+  :defer t
+  :after company
+  :hook (prog-mode . company-prescient-mode))
+
 (use-package hl-todo
   :defer t
   :hook (prog-mode . hl-todo-mode)
@@ -161,6 +181,27 @@
     :prefix "["
     "j" #'hl-todo-next
     "k" #'hl-todo-previous))
+
+(use-package ws-butler
+  :config (ws-butler-global-mode))
+
+(use-package edit-indirect
+  :defer t
+  :functions (vz/edit-indirect-paragraph)
+  :general
+  (:keymaps 'override :prefix "SPC" :states '(normal visual)
+    "nr" #'edit-indirect-region
+    "np" #'vz/edit-indirect-paragraph)
+  (:keymaps 'edit-indirect-mode-map :states 'normal
+    "q" #'edit-indirect-commit
+    "Q" #'edit-indirect-abort)
+  :config
+  (setq edit-indirect-guess-mode-function
+        (fn: funcall (with-current-buffer <> major-mode)))
+  (defun vz/edit-indirect-paragraph ()
+    (interactive)
+    (mark-paragraph)
+    (command-execute #'edit-indirect-region)))
 
 ;; TODO: Is there a cleaner way to do this other than adding a hook?
 ;; NOTE: They are buffer-local variables already.
@@ -213,21 +254,3 @@
   :straight (:type built-in)
   :config
   (setq scheme-program-name "csi"))
-
-(use-package edit-indirect
-  :defer t
-  :functions (vz/edit-indirect-paragraph)
-  :general
-  (:keymaps 'override :prefix "SPC" :states '(normal visual)
-    "nr" #'edit-indirect-region
-    "np" #'vz/edit-indirect-paragraph)
-  (:keymaps 'edit-indirect-mode-map :states 'normal
-    "q" #'edit-indirect-commit
-    "Q" #'edit-indirect-abort)
-  :config
-  (setq edit-indirect-guess-mode-function
-        (fn: funcall (with-current-buffer <> major-mode)))
-  (defun vz/edit-indirect-paragraph ()
-    (interactive)
-    (mark-paragraph)
-    (command-execute #'edit-indirect-region)))

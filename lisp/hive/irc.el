@@ -58,25 +58,30 @@
 
 (defun vz/circe-draw-msg-generic (nick body &optional body-face)
   (let* ((nick (cond ((member nick vz/circe-mynicks) "me")
-                     ((string= nick vz/circe--old-nick) "")
+                     ((s-equals? nick vz/circe--old-nick) "")
                      (:else nick)))
          (body-face (cond
-                     ((string= "me" nick) 'circe-my-message-body-face)
+                     ((s-equals? "me" nick) 'circe-my-message-body-face)
                      ((string-match-p vz/circe-mynicks-re body) 'circe-highlight-nick-face)
                      ((null body-face) 'default)
                      (:else body-face)))
          (lnick (length nick))
          (lbody (length body))
-         (spaces (propertize (make-string 9 ? ) 'face 'circe-originator-face)))
+         (spaces (propertize (s-repeat 9 " ") 'face 'circe-originator-face)))
     (unless (string-empty-p nick)
       (setq-local vz/circe--old-nick nick))
     (concat
      (propertize
-      (if (> lnick 8)
-          (concat (substring nick 0 7) "… ")
-        (concat (make-string (- 8 lnick) ? ) nick " "))
-      'face (if (string= nick "me") 'circe-my-message-face
-                                    'circe-originator-face))
+      (concat
+       (s-pad-left 8 " "
+                   (if (> lnick 8)
+                       (concat (substring nick 0 7) "…")
+                     nick))
+       " ")
+      'face
+      (if (s-equals? nick "me")
+          'circe-my-message-face
+        'circe-originator-face))
      (propertize body 'face body-face))))
 
 (defun vz/circe-draw-prompt ()
@@ -105,9 +110,9 @@
   (format "%s has left" nick))
 
 (defun vz/circe-handle-msg (type args)
-  (let ((nick (plist-get args :nick))
-        (body (plist-get args :body))
-        (reason (plist-get args :reason))
+  (let ((nick     (plist-get args :nick))
+        (body     (plist-get args :body))
+        (reason   (plist-get args :reason))
         (old-nick (plist-get args :old-nick))
         (new-nick (plist-get args :new-nick)))
     (unless (boundp 'vz/circe--old-nick) (setq-local vz/circe--old-nick ""))
@@ -139,19 +144,18 @@
 
 (defun vz/circe-get-channels-cond (cond)
   "Get channels from all server buffer that match the condition cond"
-  (-flatten
-   (-map
-    (fn: with-current-buffer <> (circe-server-channel-buffers))
-    (-filter cond (circe-server-buffers)))))
+  (->>
+   (-filter cond (circe-server-buffers))
+   (-map (fn: with-current-buffer <> (circe-server-channel-buffers)))
+   (-flatten)))
 
 (defun vz/circe-jump-irc ()
   "Jump to irc channel"
   (interactive)
   (->>
-   (-map #'buffer-name (vz/circe-get-channels-cond
-                        (fn: not
-                             (string-prefix-p "Discord "
-                                              (buffer-name <>)))))
+   (fn: not (s-prefix? "Discord " (buffer-name <>)))
+   (vz/circe-get-channels-cond)
+   (-map #'buffer-name)
    (ivy-read "> ")
    (switch-to-buffer-other-window)))
 
@@ -159,9 +163,9 @@
   "Jump to discord channel"
   (interactive)
   (->>
-   (-map #'buffer-name (vz/circe-get-channels-cond
-                        (fn: string-prefix-p "Discord "
-                             (buffer-name <>))))
+   (fn: s-prefix? "Discord " (buffer-name <>))
+   (vz/circe-get-channels-cond)
+   (-map #'buffer-name)
    (ivy-read "> ")
    (switch-to-buffer-other-window)))
 
@@ -182,7 +186,7 @@
    right-margin-width 5
    left-margin-width 5
    word-wrap t
-   wrap-prefix (propertize (make-string 9 ? ) 'face 'circe-originator-face))
+   wrap-prefix (propertize (s-repeat 9 " ") 'face 'circe-originator-face))
   (setf (cdr (assoc 'continuation fringe-indicator-alist)) nil))
 
 (add-hook 'lui-mode-hook #'vz/lui-init)
