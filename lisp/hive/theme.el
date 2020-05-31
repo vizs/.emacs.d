@@ -153,6 +153,7 @@
    `(circe-prompt-face                ((t :background ,bg :foreground ,lf)))
    `(circe-server-face                ((t :background ,bg :foreground ,lf)))
    `(circe-originator-face            ((t :background ,bg :foreground ,lf)))
+   `(edit-indirect-edited-region      ((t :background ,ac :foregroung ,fg)))
    )
   (setq hl-todo-keyword-faces
         `(("TODO"   . ,re)

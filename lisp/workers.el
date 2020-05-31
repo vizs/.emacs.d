@@ -194,7 +194,7 @@
 (use-package python
   :defer t
   :straight (:type built-in)
-  :hook (python-mode . run-python)
+  ;; :hook (python-mode . run-python)
   :general (:states 'normal :prefix "SPC" :keymaps 'python-mode-map
     "rsr" #'python-shell-send-region
     "rsd" #'python-shell-send-defun
@@ -213,3 +213,21 @@
   :straight (:type built-in)
   :config
   (setq scheme-program-name "csi"))
+
+(use-package edit-indirect
+  :defer t
+  :functions (vz/edit-indirect-paragraph)
+  :general
+  (:keymaps 'override :prefix "SPC" :states '(normal visual)
+    "nr" #'edit-indirect-region
+    "np" #'vz/edit-indirect-paragraph)
+  (:keymaps 'edit-indirect-mode-map :states 'normal
+    "q" #'edit-indirect-commit
+    "Q" #'edit-indirect-abort)
+  :config
+  (setq edit-indirect-guess-mode-function
+        (fn: funcall (with-current-buffer <> major-mode)))
+  (defun vz/edit-indirect-paragraph ()
+    (interactive)
+    (mark-paragraph)
+    (command-execute #'edit-indirect-region)))

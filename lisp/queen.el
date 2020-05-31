@@ -138,7 +138,8 @@
 (use-package ivy
   :after general
   :custom (ivy-use-virtual-buffers t)
-  :general (:keymaps 'ivy-minibuffer-map
+  :general
+  (:keymaps 'ivy-minibuffer-map
     "C-p" nil
     "C-n" nil
     "<escape>" #'minibuffer-keyboard-quit
@@ -151,9 +152,9 @@
     "C-n"      #'ivy-minibuffer-shrink
     "C-u"      #'ivy-scroll-down-command
     "C-d"      #'ivy-scroll-up-command)
-  :general (:keymaps 'ivy-switch-buffer-map
-    "C-k" #'ivy-previous-line
-    ;; Shift cannot be bound???
+  (:keymaps 'ivy-switch-buffer-map
+    "C-k" nil
+    "C-k"   #'ivy-previous-line
     "C-M-K" #'ivy-switch-buffer-kill)
   :config
   (require 'ivy-avy)
@@ -180,12 +181,12 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
     (-> (->>
          (append (-map #'buffer-name (buffer-list))
                  (-filter #'file-regular-p
-                          (directory-files default-directory))
-                 recentf-list)
+                          (directory-files default-directory)))
+                 ;;recentf-list)
          (-uniq)
          (ivy-read "> "))
-        (or (get-buffer it)
-            (find-file-noselect it))))
+        (or (find-file-noselect it)
+            (get-buffer it))))
   (ivy-mode 1))
 
 (use-package counsel
@@ -206,7 +207,7 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 (make-variable-buffer-local 'vz/goto-definition-func)
 (make-variable-buffer-local 'vz/jump-func)
 
-(setq
+(setq-default
  vz/describe-function-func #'counsel-describe-function
  vz/goto-definition-func   #'xref-find-definitions
  vz/jump-func              #'counsel-imenu)
