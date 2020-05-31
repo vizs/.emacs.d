@@ -71,6 +71,7 @@ in the same vertical column"
   "SPC ff"  #'counsel-find-file
   "SPC j"   (fn:! command-execute vz/jump-func)
   "SPC b"   #'ivy-switch-buffer
+  "SPC :"   #'eval-expression
   "C-w C-h" #'vz/shrink-other-windows
   "C-w S"   #'vz/split-window-below-ask
   "C-w V"   #'vz/split-window-right-ask

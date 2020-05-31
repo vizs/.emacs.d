@@ -95,7 +95,9 @@
    `(org-todo                         ((t :background ,bg :foreground ,re)))
    `(org-table                        ((t :background ,bg :foreground ,fg)))
    `(org-block                        ((t :background ,bg :foreground ,fg)))
+   `(org-code                         ((t :background ,bg :foreground ,fg)))
    `(org-headline-done                ((t :background ,bg :foreground ,fg)))
+   `(org-latex-and-related            ((t :background ,bg :foreground ,fg)))
    `(org-document-title               ((t :background ,bg :foreground ,yw)))
    `(org-document-info                ((t :background ,bg :foreground ,yw)))
    `(org-drawer                       ((t :background ,bg :foreground ,lf)))
@@ -154,6 +156,7 @@
    `(circe-server-face                ((t :background ,bg :foreground ,lf)))
    `(circe-originator-face            ((t :background ,bg :foreground ,lf)))
    `(edit-indirect-edited-region      ((t :background ,ac :foregroung ,fg)))
+   `(flyspell-incorrect               ((t :underline (:color ,re :underline wave))))
    )
   (setq hl-todo-keyword-faces
         `(("TODO"   . ,re)

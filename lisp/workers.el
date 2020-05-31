@@ -20,12 +20,11 @@
 (defun vz/disable-bold-italic ()
   "Disable bold and italic for everything except bold and italic face"
   (-each (face-list)
-    (fn
-     (set-face-attribute <> nil
+    (fn:
+     set-face-attribute <> nil
                          :weight 'normal
-                         :slant 'normal
-                         :underline nil)))
-;;(set-face-attribute 'bold   nil :weight 'bold)
+                         :slant 'normal))
+  ;;(set-face-attribute 'bold   nil :weight 'bold)
   (set-face-attribute 'italic nil :slant  'italic))
 
 (defun vz/windows-in-direction (direction &optional windows)
@@ -40,7 +39,7 @@
   :config
   (setq-ns prescient
     history-length 150
-    filter-method '(literal regexp initialism fuzzy)
+    ;filter-method '(literal regexp initialism fuzzy)
     save-file (~ ".cache/emacs-prescient.el"))
   (prescient-persist-mode))
 
@@ -58,6 +57,17 @@
     C-d-scroll t
     C-u-scroll t
     Y-yank-to-eol t))
+
+(use-package flyspell
+  :straight (:type built-in)
+  :hook (org-mode . flyspell-mode)
+  :defer t
+  :init
+  (setq-ns flyspell
+    persistent-highlight t
+    issue-message-flag nil)
+  (setq-ns ispell
+    program-name "hunspell"))
 
 (vz/use-package org nil
   :straight (:type built-in)
@@ -151,6 +161,10 @@
     delay 0
     when-point-inside-paren t))
 
+;; It updates only when you balance the parenthesis
+(use-package aggressive-indent
+  :defer t)
+
 (use-package company
   :defer t
   :hook (prog-mode . company-mode)
@@ -217,6 +231,7 @@
 (use-package racket-mode
   :defer t
   :hook (racket-mode . racket-unicode-input-method-enable)
+  :hook (racket-mode . aggressive-indent-mode)
   :config
   (add-hook 'racket-mode-hook
             (fn: setq-local
@@ -252,5 +267,11 @@
 (use-package scheme
   :defer t
   :straight (:type built-in)
+  :hook (scheme-mode . aggressive-indent-mode)
   :config
   (setq scheme-program-name "csi"))
+
+;;(use-package emacs-lisp
+;;  :defer t
+;;  :straight (:type built-in)
+;;  :hook (emacs-lisp-mode . aggressive-indent-mode))

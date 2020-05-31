@@ -179,15 +179,14 @@
   (defun vz/get-file-or-buffer ()
     "Select a list of opened buffers, files in current directory and entries in
 recentf and return the corresponding buffer. Create one if it doesn't exist"
-    (-> (->>
-         (append (-map #'buffer-name (buffer-list))
-                 (-filter #'file-regular-p
-                          (directory-files default-directory)))
-                 ;;recentf-list)
-         (-uniq)
-         (ivy-read "> "))
-        (or (find-file-noselect it)
-            (get-buffer it))))
+    (let ((buf (->>
+                (append (-map #'buffer-name (buffer-list))
+                        (-filter #'file-regular-p
+                                 (directory-files default-directory))
+                        recentf-list)
+                (-uniq)
+                (ivy-read "> "))))
+      (or (get-buffer buf) (find-file-noselect buf))))
   (ivy-mode 1))
 
 (use-package counsel

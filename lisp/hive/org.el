@@ -18,6 +18,7 @@
  ; indent-mode-turns-off-org-adapt-indentation nil
 
  ;; style
+ highlight-latex-and-related '(latex script)
  hide-emphasis-markers nil
  ; hide-leading-stars t ; indent mode also hides stars
  fontify-emphasized-text t
@@ -53,11 +54,12 @@
 
 (defun vz/org-mode-style ()
   (vz/set-monospace-faces '(org-table org-link org-code org-block org-drawer
-                            org-date org-special-keyword org-verbatim))
+                            org-date org-special-keyword org-verbatim
+                            org-latex-and-related))
   (-each org-level-faces
     (fn: set-face-attribute <> nil :weight 'bold))
 
-  (let* ((height1 (+ 100 40))
+  (let* ((height1 (+ 120 40))
          (height2 (- height1 20))
          (height3 (- height1 60)))
     (set-face-attribute 'org-level-1 nil :height height1)
@@ -73,7 +75,7 @@
   (org-indent-mode t)
   (org-num-mode t)
   (setq line-spacing 0.01
-        buffer-face-mode-face `(:family ,vz/variable-font :height 100))
+        buffer-face-mode-face `(:family ,vz/variable-font :height 120))
   (setq-local vz/jump-func #'counsel-org-goto)
   (buffer-face-mode)
   (vz/org-mode-style))
