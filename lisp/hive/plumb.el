@@ -74,7 +74,7 @@
                       :capture :whole
                       :action (fn:
                                -->
-                               (s-split <> ":")
+                               (s-split ":" <>)
                                (vz/plumb-file
                                 (car it)
                                 (string-to-number (cadr it))))

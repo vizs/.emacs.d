@@ -61,7 +61,7 @@
          (spaces (propertize (s-repeat 9 " ") 'face 'circe-originator-face)))
     (unless (string-empty-p nick)
       (setq-local vz/circe--old-nick nick))
-    (when (eq body-face 'circe-my-message-body-face)
+    (when (eq body-face 'circe-highlight-nick-face)
       (setq-local vz/circe-mentions (cons
                                        (cons body (line-number-at-pos))
                                        vz/circe-mentions)))
@@ -189,7 +189,7 @@
     (-->
      (-map #'car mentions)
      (ivy-read "> " it)
-     (let ((ch (car (s-split ":" it)))
+     (let ((ch  (car (s-split ":" it)))
            (pos (alist-get it mentions nil nil #'s-equals?)))
        (switch-to-buffer-other-window ch)
        (goto-line pos)))))
