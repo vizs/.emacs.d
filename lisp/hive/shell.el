@@ -104,6 +104,33 @@ to it. If nothing is found, create a new buffer"
         (vz/popup-shell--add (shell (format "%s*"
                                             (make-temp-name "*shell-")))))))))
 
+(defun vz/shell--get-prompt (prompts point)
+  "Return all prompts in an alist (prompt-string . point)"
+  (save-excursion
+    (goto-char point)
+    (let ((pt (re-search-forward "^$ " nil t 1)))
+      (if (null pt)
+          prompts
+        (goto-char pt)
+        (vz/shell--get-prompt
+         (cons (format "%s:%d"
+                       (replace-regexp-in-string "\n$" ""
+                                                 (thing-at-point 'line t))
+                       pt)
+               prompts)
+         pt)))))
+
+(defun vz/shell-jump-to-prompt ()
+  "Jump to prompt by selecting it in ivy"
+  (interactive)
+  (-->
+   (vz/shell--get-prompt '() (point-min))
+   (ivy-read "> " it)
+   (split-string it ":")
+   (-last-item it)
+   (string-to-number it)
+   (goto-char it)))
+
 (define-minor-mode vz/term-mode
   "Minor mode for binding ^D in *term* buffers")
 
@@ -127,11 +154,11 @@ to it. If nothing is found, create a new buffer"
   (let ((kill-buffer-query-functions nil))
     (-each
         (-filter
-         (fn
-          (with-current-buffer <>
-            (and (string-prefix-p "*term-" (buffer-name buf))
-                 (or (not (frame-live-p vz/term-mode--frame))
-                     (not (get-buffer-process <>))))))
+         (fn:
+          with-current-buffer <>
+          (and (string-prefix-p "*term-" (buffer-name <>))
+               (or (not (frame-live-p vz/term-mode--frame))
+                   (not (get-buffer-process <>)))))
          (buffer-list))
       (fn: kill-buffer <>))))
 
@@ -159,7 +186,8 @@ to it. If nothing is found, create a new buffer"
   (setq-local
    ;; comint-prompt-read-only t
    inhibit-field-text-motion t
-   comint-process-echoes t)
+   comint-process-echoes t
+   vz/jump-func #'vz/shell-jump-to-prompt)
   (setq Man-notify-method 'quiet)
   (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt))
 
