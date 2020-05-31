@@ -19,14 +19,14 @@
 
 (defun vz/disable-bold-italic ()
   "Disable bold and italic for everything except bold and italic face"
-  (dolist (f (face-list))
-    (set-face-attribute f nil
-                        :weight 'normal
-                        :slant 'normal
-                        :underline nil))
-  (custom-set-faces
-   '(italic ((t :slant italic)))
-   '(bold   ((t :weight bold)))))
+  (-each (face-list)
+    (fn
+     (set-face-attribute <> nil
+                         :weight 'normal
+                         :slant 'normal
+                         :underline nil)))
+  (set-face-attribute 'italic nil :slant  'italic)
+  (set-face-attribute 'bold   nil :weight 'bold))
 
 (defun vz/windows-in-direction (direction &optional windows)
   "Get all windows in direction relative to selected window"
@@ -65,8 +65,9 @@
   :init
   (defun pass (passwd)
     "Get password"
-    (replace-regexp-in-string "\n$" ""
-	                            (shell-command-to-string (format "pass get %s" passwd))))
+    (replace-regexp-in-string
+     "\n$" ""
+	   (shell-command-to-string (format "pass get %s" passwd))))
 
   (defun pass-irc (serv)
     `(lambda (_) (pass (format "irc/%s" ,serv))))
@@ -165,19 +166,18 @@
   :hook (before-save . gofmt-before-save)
   :config
   (add-hook 'go-mode-hook
-            #'(lambda ()
-                (setq-local vz/describe-function-func #'godef-describe
-                            vz/goto-definition-func #'godef-jump))))
+            (fn: setq-local
+                 vz/describe-function-func #'godef-describe
+                 vz/goto-definition-func #'godef-jump)))
 
 (use-package racket-mode
   :defer t
   :hook (racket-mode . racket-unicode-input-method-enable)
   :config
   (add-hook 'racket-mode-hook
-            #'(lambda ()
-                (setq-local
+            (fn: setq-local
                  vz/describe-function-func #'racket-repl-describe
-                 vz/goto-definition-func #'racket-repl-visit-definition)))
+                 vz/goto-definition-func #'racket-repl-visit-definition))
   :general (:states 'normal :keymaps 'racket-mode-map
     "C-e" #'racket-send-last-sexp)
   :general (:states 'normal :prefix "SPC" :keymaps 'racket-mode-map
@@ -199,9 +199,8 @@
     "rsF" #'python-shell-send-file)
   :config
   (add-hook 'python-mode-hook
-            #'(lambda ()
-                (setq-local
-                 vz/describe-function-func #'python-describe-at-point)))
+            (fn: setq-local
+                 vz/describe-function-func #'python-describe-at-point))
   (setq-ns python-shell
     interpreter "python3"
     interpreter-args "-i"))

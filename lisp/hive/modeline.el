@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
-(dolist (m '(display-time-mode display-battery-mode))
-  (funcall m t))
+(-each '(display-time-mode display-battery-mode)
+  (fn: funcall <> t))
 
 (defun vz/mode-line-file-state ()
   (if (buffer-file-name)
@@ -33,6 +33,7 @@
                     "« "
                     (:eval (format-time-string "[%H:%M] "))
                     "["
-                    (:eval (battery-format "%b%p"
-                                           (funcall battery-status-function)))
+                    (:eval (battery-format
+                            "%b%p"
+                            (funcall battery-status-function)))
                     "%%]"))

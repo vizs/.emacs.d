@@ -29,36 +29,6 @@
     (eval `(setq ,(intern (format "%s-%s" ns (car x)))
                  ,(cadr x)))))
 
-(defun ~ (file)
-  (expand-file-name file (getenv "HOME")))
-
-(defun vz/random-choice (list)
-  (nth (random (1- (length list))) list))
-
-(defun vz/set-monospace-faces (faces)
-  (dolist (face faces)
-    (set-face-attribute face nil :family vz/monospace-font)))
-
-(defun vz/set-variable-faces (faces)
-  (dolist (face faces)
-    (set-face-attribute face nil :family vz/variable-font)))
-
-(defun vz/prog-functional-indent-style ()
-  (when (member major-mode vz/functional-major-modes)
-    (setq indent-tabs-mode nil
-          tab-width 2)))
-
-(make-variable-buffer-local 'vz/describe-function-func)
-(make-variable-buffer-local 'vz/goto-definition-func)
-
-(defun vz/describe-function (&rest args)
-  (interactive)
-  (command-execute vz/describe-function-func))
-
-(defun vz/goto-definition (&rest args)
-  (interactive)
-  (command-execute vz/goto-definition-func))
-
 ;; Bootstrap straight
 (defvar bootstrap-version)
 (let ((bootstrap-file (expand-file-name
@@ -79,6 +49,17 @@
   use-package-by-default t
   cache-autoloads t)
 
+;; Emacs Lisp enhancers
+(use-package dash)
+(use-package fn
+  :config
+  (defmacro fn! (&rest body)
+    "Like fn but interactive"
+    `(lambda () (interactive) ,@body))
+  (defmacro fn:! (&rest body)
+    "Like fn: but interactive"
+    `(lambda () (interactive) (,@body))))
+
 (defmacro vz/use-package (name file &rest body)
   `(use-package ,name
      ,@body
@@ -86,6 +67,28 @@
      (load-file (format "%s/lisp/hive/%s.el"
                         user-emacs-directory
                         (or ,file ',name)))))
+
+(defun ~ (file)
+  (expand-file-name file (getenv "HOME")))
+
+(defun vz/random-choice (list)
+  (nth (random (1- (length list))) list))
+
+(defun vz/set-monospace-faces (faces)
+  (-each faces
+    (fn: set-face-attribute <> nil :family vz/monospace-font)))
+
+(defun vz/set-variable-faces (faces)
+  (-each faces
+    (fn: set-face-attribute face <> :family vz/variable-font)))
+
+(defun vz/prog-functional-indent-style ()
+  (when (member major-mode vz/functional-major-modes)
+    (setq indent-tabs-mode nil
+          tab-width 2)))
+
+(make-variable-buffer-local 'vz/describe-function-func)
+(make-variable-buffer-local 'vz/goto-definition-func)
 
 ;; Indentation
 (setq-default indent-tabs-mode t
@@ -103,14 +106,14 @@
   current-absolute t)
 
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
-(add-hook 'view-mode-hook #'(lambda () (display-line-numbers-mode 0)))
+(add-hook 'view-mode-hook (fn: display-line-numbers-mode 0))
 
 (when (>= emacs-major-version 27)
   (setq-ns display-fill-column-indicator
     column 80
     char "|")
   (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-  (add-hook 'view-mode-hook #'(lambda () (display-fill-column-indicator-mode 0))))
+  (add-hook 'view-mode-hook (fn: display-fill-column-indicator-mode 0)))
 
 ;; Modeline
 (load-file (expand-file-name "lisp/hive/modeline.el" user-emacs-directory))
@@ -126,7 +129,7 @@
 (use-package general
   :init
   (setq general-override-states '(insert emacs hybrid normal visual motion
-                                         operator replace)))
+                                  operator replace)))
 (use-package avy)
 (use-package ace-window
   :after avy
@@ -178,11 +181,11 @@
   (defun vz/get-file-or-buffer ()
     "Return buffer corresponding to buffer-name or file-name
 Create file-buffer if it such no buffer/file exists"
-    (let ((buf-name (ivy-read "> "
-                              (append
-                               (seq-filter #'file-regular-p
-                                           (directory-files default-directory))
-                               (mapcar #'buffer-name (buffer-list))))))
+    (let ((buf-name (->>
+                     (append (-filter #'file-regular-p
+                                      (directory-files default-directory))
+                             (-map #'buffer-name (buffer-list)))
+                     (ivy-read "> "))))
       (or (get-buffer buf-name) (find-file-noselect buf-name)))))
 (use-package counsel
   :after ivy

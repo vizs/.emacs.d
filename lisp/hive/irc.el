@@ -5,12 +5,12 @@
 (setq-ns vz/circe
  mynicks '("viz" "_viz_")
  ;; TODO: clean this up
- mynicks-re (seq-reduce #'(lambda (res x)
-                            (format "%s\\|[ @]%s[,: ]\\|[ @]%s$" res x x))
-                        (cdr vz/circe-mynicks)
-                        (format "[ @]%s[,: ]\\|[ @]%s$"
-                                (car vz/circe-mynicks)
-                                (car vz/circe-mynicks))))
+ mynicks-re (-reduce-from
+             (fn: format "%s\\|[ @]%s[,: ]\\|[ @]%s$" <1> <2> <2>)
+             (funcall
+              (fn: format "[ @]%s[,: ]\\|[ @]%s$" <> <>)
+              (car vz/circe-mynicks))
+             (cdr vz/circe-mynicks)))
 
 (setq-ns circe
  network-options
@@ -49,10 +49,12 @@
    mode-line-format nil)
   (buffer-face-mode)
   (defface circe-my-message-body-face
-    '((t :inherit circe-my-message-face :family "Charter" :height 100))
+    `((t :inherit circe-my-message-face :family ,vz/variable-font
+         :height 100))
     "Face for self-say body")
-  (dolist (f '(circe-prompt-face circe-originator-face circe-my-message-face))
-    (set-face-attribute f nil :inherit 'fixed-pitch)))
+  (vz/set-monospace-faces '(circe-prompt-face
+                            circe-originator-face
+                            circe-my-message-face)))
 
 (defun vz/circe-draw-msg-generic (nick body &optional body-face)
   (let* ((nick (cond ((member nick vz/circe-mynicks) "me")
@@ -73,7 +75,8 @@
       (if (> lnick 8)
           (concat (substring nick 0 7) "… ")
         (concat (make-string (- 8 lnick) ? ) nick " "))
-      'face (if (string= nick "me") 'circe-my-message-face 'circe-originator-face))
+      'face (if (string= nick "me") 'circe-my-message-face
+                                    'circe-originator-face))
      (propertize body 'face body-face))))
 
 (defun vz/circe-draw-prompt ()
@@ -119,44 +122,47 @@
       )))
 
 (setq-ns circe-format
-  say                (lambda (&rest args) (vz/circe-handle-msg 'say args))
-  self-say           (lambda (&rest args) (vz/circe-handle-msg 'ssay args))
-  action             (lambda (&rest args) (vz/circe-handle-msg 'acn args))
-  server-message     (lambda (&rest args) (vz/circe-handle-msg 'smsg args))
-  server-notice      (lambda (&rest args) (vz/circe-handle-msg 'smsg args))
-  server-quit        (lambda (&rest args) (vz/circe-handle-msg 'part args))
-  server-join        (lambda (&rest args) (vz/circe-handle-msg 'join args))
-  server-part        (lambda (&rest args) (vz/circe-handle-msg 'part args))
-  server-nick-change (lambda (&rest args) (vz/circe-handle-msg 'nch args))
-  server-rejoin      (lambda (&rest args) (vz/circe-handle-msg 'join args)))
+  say                (fn: vz/circe-handle-msg 'say   <rest>)
+  self-say           (fn: vz/circe-handle-msg 'ssay  <rest>)
+  action             (fn: vz/circe-handle-msg 'acn   <rest>)
+  server-message     (fn: vz/circe-handle-msg 'smsg  <rest>)
+  server-notice      (fn: vz/circe-handle-msg 'smsg  <rest>)
+  server-quit        (fn: vz/circe-handle-msg 'part  <rest>)
+  server-join        (fn: vz/circe-handle-msg 'join  <rest>)
+  server-part        (fn: vz/circe-handle-msg 'part  <rest>)
+  server-nick-change (fn: vz/circe-handle-msg 'nch   <rest>)
+  server-rejoin      (fn: vz/circe-handle-msg 'join  <rest>))
 
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
 (add-hook 'circe-chat-mode-hook #'vz/circe-init)
 
 (defun vz/circe-get-channels-cond (cond)
   "Get channels from all server buffer that match the condition cond"
-  (flatten-list
-   (mapcar #'(lambda (x) (with-current-buffer x (circe-server-channel-buffers)))
-           (seq-filter cond (circe-server-buffers)))))
+  (-flatten
+   (-map
+    (fn: with-current-buffer <> (circe-server-channel-buffers))
+    (-filter cond (circe-server-buffers)))))
 
 (defun vz/circe-jump-irc ()
   "Jump to irc channel"
   (interactive)
-  (switch-to-buffer-other-window
-   (ivy-read
-    "> "
-    (mapcar #'buffer-name
-        (vz/circe-get-channels-cond
-         #'(lambda (x) (not (string-prefix-p "Discord " (buffer-name x)))))))))
+  (->>
+   (-map #'buffer-name (vz/circe-get-channels-cond
+                        (fn: not
+                             (string-prefix-p "Discord "
+                                              (buffer-name <>)))))
+   (ivy-read "> ")
+   (switch-to-buffer-other-window)))
 
 (defun vz/circe-jump-discord ()
   "Jump to discord channel"
   (interactive)
-  (switch-to-buffer-other-window
-   (ivy-read "> " (mapcar #'buffer-name
-                          (vz/circe-get-channels-cond
-                           #'(lambda (x) (string-prefix-p "Discord "
-                                                          (buffer-name x))))))))
+  (->>
+   (-map #'buffer-name (vz/circe-get-channels-cond
+                        (fn: string-prefix-p "Discord "
+                             (buffer-name <>))))
+   (ivy-read "> ")
+   (switch-to-buffer-other-window)))
 
 (general-nmap
   :prefix "SPC i"

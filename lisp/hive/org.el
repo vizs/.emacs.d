@@ -55,10 +55,8 @@
 (defun vz/org-mode-style ()
   (vz/set-monospace-faces '(org-table org-link org-code org-block org-drawer
                             org-date org-special-keyword org-verbatim))
-
-  (dolist (f org-level-faces)
-    (custom-set-faces
-     `(,f ((t :weight bold)))))
+  (-each org-level-faces
+    (fn (custom-set-faces (<> ((t :weight bold))))))
 
   (let* ((height1 (+ 100 40))
          (height2 (- height1 20))

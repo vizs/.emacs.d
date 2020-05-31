@@ -56,8 +56,8 @@
    (list
     (wand:create-rule :match "[A-Za-z0-9]+([0-9a-z]+)"
                       :capture :whole
-                      :action #'(lambda (string)
-                                  (switch-to-buffer-other-window (man string))))
+                      :action (fn:
+                               switch-to-buffer-other-window (man <>)))
     (wand:create-rule :match "https?://youtube.com"
                       :capture :whole
                       :action #'vz/plumb-yt)
@@ -72,9 +72,9 @@
                       :action #'vz/plumb-file)
     (wand:create-rule :match ".*:[0-9]+$"
                       :capture :whole
-                      :action #'(lambda (string)
-                                  (let ((f (split-string string ":")))
-                                    (vz/plumb-file (car f)
+                      :action (fn
+                               (let ((f (split-string <> ":")))
+                                 (vz/plumb-file (car f)
                                                 (string-to-number (cadr f))))))
     (wand:create-rule :match "\\..+$"
                       :capture :whole

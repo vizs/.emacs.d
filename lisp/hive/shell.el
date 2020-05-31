@@ -58,12 +58,13 @@
 (defun vz/popup-shell--add (buffer)
   "Add BUFFER to vz/popup-shells and add a process sentinel"
   (add-to-list 'vz/popup-shells buffer)
-  (set-process-sentinel (get-buffer-process buffer)
-                        #'(lambda (process output)
-                            (unless (process-live-p process)
-                              (let ((buf (process-buffer process)))
-                                (setq vz/popup-shells (remove buf vz/popup-shells))
-                                (kill-buffer buf))))))
+  (set-process-sentinel
+   (get-buffer-process buffer)
+   (fn
+    (unless (process-live-p <>)
+      (let ((buf (process-buffer <>)))
+        (setq vz/popup-shells (remove buf vz/popup-shells))
+        (kill-buffer buf))))))
 
 (defun vz/popup-shell--switch (buffer cwd &optional dont-cd?)
   "Switch to CWD in BUFFER"
@@ -82,16 +83,18 @@ to it. If nothing is found, create a new buffer"
   (interactive)
   (if (null vz/popup-shells)
       (vz/popup-shell--add (shell))
-    (let* ((free-buffers (seq-filter #'(lambda (buffer)
-                                         (and (null (process-running-child-p
-                                                     (get-buffer-process buffer)))
-                                              (null (get-buffer-window buffer t))))
-                                     vz/popup-shells))
+    (let* ((free-buffers (-filter
+                          (fn
+                           (and (null (process-running-child-p
+                                       (get-buffer-process <>)))
+                                (null (get-buffer-window <> t))))
+                          vz/popup-shells))
            (cwd default-directory)
-           (cwd-buffers (seq-filter #'(lambda (buffer)
-                                        (with-current-buffer buffer
-                                          (string= default-directory cwd)))
-                                    free-buffers)))
+           (cwd-buffers (-filter
+                         (fn:
+                          with-current-buffer <>
+                          (string= default-directory cwd))
+                         free-buffers)))
       (cond
        (cwd-buffers
         (vz/popup-shell--switch (car cwd-buffers) cwd t))
@@ -122,14 +125,15 @@ to it. If nothing is found, create a new buffer"
   "Remove all dead *term* buffers"
   (interactive)
   (let ((kill-buffer-query-functions nil))
-    (dolist (buf (seq-filter
-                  #'(lambda (buf)
-                      (with-current-buffer buf
-                        (and (string-prefix-p "*term-" (buffer-name buf))
-                             (or (not (frame-live-p vz/term-mode--frame))
-                                 (not (get-buffer-process buf))))))
-                  (buffer-list)))
-      (kill-buffer buf))))
+    (-each
+        (-filter
+         (fn
+          (with-current-buffer <>
+            (and (string-prefix-p "*term-" (buffer-name buf))
+                 (or (not (frame-live-p vz/term-mode--frame))
+                     (not (get-buffer-process <>))))))
+         (buffer-list))
+      (fn: kill-buffer <>))))
 
 (general-nmap
   "SPC ps" #'vz/popup-shell)

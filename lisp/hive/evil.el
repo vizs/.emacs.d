@@ -52,7 +52,7 @@ in the same vertical column"
 ;; Setup general and keybinds
 (general-evil-setup)
 (general-imap
-  "C-S-v"   #'(lambda () (interactive) (evil-paste-after 1 ?+)))
+  "C-S-v" (fn:! evil-paste-after 1 ?+))
 (general-nmap
   :keymaps 'override
   "gc"      #'comment-line
@@ -63,8 +63,8 @@ in the same vertical column"
   "SPC pb"  #'previous-buffer
   "SPC nb"  #'next-buffer
   "SPC SPC" #'counsel-M-x
-  "SPC df"  #'vz/describe-function
-  "SPC d."  #'vz/goto-definition
+  "SPC df"  (fn:! command-execute vz/describe-function-func)
+  "SPC d."  (fn:! command-execute vz/goto-definition-func)
   "SPC dv"  #'counsel-describe-variable
   "SPC dk"  #'counsel-descbinds
   "SPC dF"  #'counsel-describe-face
