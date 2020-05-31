@@ -30,12 +30,11 @@
  `(("d" "Dump links and book names or whatever" entry
     (file "dump.org")
     "* TODO %?
-
-%:link
 :PROPERTIES:
 :type: %^{Type|anime|emacs|article|music|manga|book|misc}
 :added: %T
-:END:" :prepend t :kill-buffer t)
+:END:
+%:link" :prepend t :kill-buffer t)
    ("e" "Emacs notes" entry
     (file+headline ,(~ "doc/notes.org") "Emacs")
     "* %?")
@@ -56,23 +55,26 @@
   (vz/set-monospace-faces '(org-table org-link org-code org-block org-drawer
                             org-date org-special-keyword org-verbatim))
   (-each org-level-faces
-    (fn (custom-set-faces (<> ((t :weight bold))))))
+    (fn: set-face-attribute <> nil :weight 'bold))
 
   (let* ((height1 (+ 100 40))
          (height2 (- height1 20))
          (height3 (- height1 60)))
-    (custom-set-faces
-     `(org-level-1 ((t :height ,height1 :weight bold)))
-     `(org-level-2 ((t :height ,height2 :weight bold)))
-     `(org-quote   ((t :family "IBM Plex Serif" :slant italic)))
-     `(org-block-begin-line ((t :height ,height3 :weight bold)))
-     '(org-block-end-line ((t :inherit org-block-begin-line))))))
+    (set-face-attribute 'org-level-1 nil :height height1)
+    (set-face-attribute 'org-level-2 nil :height height2)
+    (set-face-attribute 'org-quote nil
+                        :family "IBM Plex Serif" :slant 'italic)
+    (set-face-attribute 'org-block-begin-line nil
+                        :height height3 :weight 'bold)
+    (set-face-attribute 'org-block-end-line nil
+                        :inherit 'org-block-begin-line)))
 
 (defun vz/org-mode-init ()
   (org-indent-mode t)
   (org-num-mode t)
-  (setq line-spacing 0.01)
-  (setq buffer-face-mode-face `(:family ,vz/variable-font :height 100))
+  (setq line-spacing 0.01
+        buffer-face-mode-face `(:family ,vz/variable-font :height 100))
+  (setq-local vz/jump-func #'counsel-org-goto)
   (buffer-face-mode)
   (vz/org-mode-style))
 
@@ -81,7 +83,7 @@
 (general-nmap
   :keymaps 'org-mode-map
   :prefix "SPC"
-  "j"   #'counsel-org-goto-all
   "oel" #'org-latex-export-to-latex
+  "of"  #'org-sparse-tree
   "t"   #'org-todo
   "ost" #'org-babel-tangle)

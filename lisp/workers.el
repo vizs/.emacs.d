@@ -25,8 +25,8 @@
                          :weight 'normal
                          :slant 'normal
                          :underline nil)))
-  (set-face-attribute 'italic nil :slant  'italic)
-  (set-face-attribute 'bold   nil :weight 'bold))
+;;(set-face-attribute 'bold   nil :weight 'bold)
+  (set-face-attribute 'italic nil :slant  'italic))
 
 (defun vz/windows-in-direction (direction &optional windows)
   "Get all windows in direction relative to selected window"
@@ -48,7 +48,7 @@
   :straight (:type built-in)
   :defer t
   :general (:keymaps 'override :states 'normal
-            "SPC oc" #'org-capture)
+    "SPC oc" #'org-capture)
   :init
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
@@ -60,8 +60,8 @@
   :defer t
   :functions (vz/circe-jump-irc vz/circe-jump-discord)
   :general (:keymaps 'override :states 'normal :prefix "SPC i"
-            "i" #'vz/circe-jump-irc
-            "d" #'vz/circe-jump-discord)
+    "i" #'vz/circe-jump-irc
+    "d" #'vz/circe-jump-discord)
   :init
   (defun pass (passwd)
     "Get password"
@@ -95,6 +95,7 @@
       (comint-send-input))
     (when (evil-visual-state-p)
       (evil-exit-visual-state)))
+
   (general-nmap
     :keymaps 'comint-mode-map
     "<RET>" #'vz/comint-send-input
@@ -103,9 +104,11 @@
     "[j"    #'comint-next-prompt
     "[k"    #'comint-previous-prompt
     "[c"    #'comint-clear-buffer)
+
   (general-imap
     :keymaps 'comint-mode-map
     "<S-return>" #'comint-accumulate)
+
   (general-vmap
     :keymaps 'comint-mode-map
     "<RET>" #'vz/comint-send-input))

@@ -129,6 +129,7 @@
   server-notice      (fn: vz/circe-handle-msg 'smsg  <rest>)
   server-quit        (fn: vz/circe-handle-msg 'part  <rest>)
   server-join        (fn: vz/circe-handle-msg 'join  <rest>)
+  server-topic       (fn: vz/circe-handle-msg 'smsg  <rest>)
   server-part        (fn: vz/circe-handle-msg 'part  <rest>)
   server-nick-change (fn: vz/circe-handle-msg 'nch   <rest>)
   server-rejoin      (fn: vz/circe-handle-msg 'join  <rest>))

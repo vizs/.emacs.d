@@ -69,7 +69,7 @@ in the same vertical column"
   "SPC dk"  #'counsel-descbinds
   "SPC dF"  #'counsel-describe-face
   "SPC ff"  #'counsel-find-file
-  "SPC j"   #'counsel-imenu
+  "SPC j"   (fn:! command-execute vz/jump-func)
   "SPC b"   #'ivy-switch-buffer
   "C-w C-h" #'vz/shrink-other-windows
   "C-w S"   #'vz/split-window-below-ask

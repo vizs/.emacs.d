@@ -1,30 +1,35 @@
 ;; -*- lexical-binding: t; -*-
 
-(setq vz/monospace-font "Verily Serif Mono"
-      vz/variable-font "Charter"
-      vz/describe-function-func #'describe-function
-      vz/goto-definition-func   #'xref-find-definitions
-      vz/ircdiscord-process nil
-      vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
-      use-dialog-box nil
-      backup-by-copying t
-      backup-directory-alist '((".*" . "~/.cache/emacs-bkups/"))
-      delete-old-versions t
-      keep-new-versions 5
-      keep-old-versions 2
-      version-control t
-      auto-save-file-transforms '((".*" "~/.cache/emacs-autosave/" t))
-      auto-save-list-file-prefix "~/.cache/emacs-autosave/"
-      create-lockfiles nil
-      cursor-in-non-selected-windows nil
-      custom-file "/dev/null"
-      gc-cons-threshold 16777216 ;; 16M
-      x-select-enable-clipboard nil)
+(setq
+ vz/monospace-font "Verily Serif Mono"
+ vz/variable-font "Charter"
+
+ vz/describe-function-func #'describe-function
+ vz/goto-definition-func   #'xref-find-definitions
+ vz/jump-func              #'imenu
+ vz/ircdiscord-process nil
+ vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
+
+ use-dialog-box nil
+
+ backup-by-copying t
+ backup-directory-alist '((".*" . "~/.cache/emacs-bkups/"))
+ delete-old-versions t
+ keep-new-versions 5
+ keep-old-versions 2
+ version-control t
+ auto-save-file-transforms '((".*" "~/.cache/emacs-autosave/" t))
+ auto-save-list-file-prefix "~/.cache/emacs-autosave/"
+ create-lockfiles nil
+
+ cursor-in-non-selected-windows nil
+ custom-file "/dev/null"
+
+ gc-cons-threshold 16777216 ;; 16M
+ x-select-enable-clipboard nil)
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
-  "Set variables with pre as their `namespace'"
   (dolist (x (seq-partition args 2))
     (eval `(setq ,(intern (format "%s-%s" ns (car x)))
                  ,(cadr x)))))
@@ -80,7 +85,7 @@
 
 (defun vz/set-variable-faces (faces)
   (-each faces
-    (fn: set-face-attribute face <> :family vz/variable-font)))
+    (fn: set-face-attribute <> nil :family vz/variable-font)))
 
 (defun vz/prog-functional-indent-style ()
   (when (member major-mode vz/functional-major-modes)
@@ -89,6 +94,7 @@
 
 (make-variable-buffer-local 'vz/describe-function-func)
 (make-variable-buffer-local 'vz/goto-definition-func)
+(make-variable-buffer-local 'vz/jump-func)
 
 ;; Indentation
 (setq-default indent-tabs-mode t
@@ -156,6 +162,7 @@
 
   (setq ivy-use-virtual-buffers t)
   (ivy-mode 1)
+  (require 'ivy-avy)
 
   (general-define-key
    :keymaps 'ivy-minibuffer-map
@@ -191,7 +198,8 @@ Create file-buffer if it such no buffer/file exists"
   :after ivy
   :config
   (setq-default counsel-find-file-at-point t
-                vz/describe-function-func #'counsel-describe-function))
+                vz/describe-function-func #'counsel-describe-function
+                vz/jump-func #'counsel-imenu))
 (use-package beacon
   :defer t
   :config
