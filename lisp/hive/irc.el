@@ -42,19 +42,10 @@
  highlight-nick-type 'message
  server-buffer-name "{network}:{host}")
 
-(defun vz/circe-init ()
-  (setq
-   vz/circe--old-nick ""
-   buffer-face-mode-face '(:family "Charter" :height 100)
-   mode-line-format nil)
-  (buffer-face-mode)
-  (defface circe-my-message-body-face
-    `((t :inherit circe-my-message-face :family ,vz/variable-font
-         :height 100))
-    "Face for self-say body")
-  (vz/set-monospace-faces '(circe-prompt-face
-                            circe-originator-face
-                            circe-my-message-face)))
+(defvar vz/circe-mentions nil
+  "An alist of messages and line number to jump to")
+
+(make-variable-buffer-local 'vz/circe-mentions)
 
 (defun vz/circe-draw-msg-generic (nick body &optional body-face)
   (let* ((nick (cond ((member nick vz/circe-mynicks) "me")
@@ -70,6 +61,10 @@
          (spaces (propertize (s-repeat 9 " ") 'face 'circe-originator-face)))
     (unless (string-empty-p nick)
       (setq-local vz/circe--old-nick nick))
+    (when (eq body-face 'circe-my-message-body-face)
+      (setq-local vz/circe-mentions (cons
+                                       (cons body (line-number-at-pos))
+                                       vz/circe-mentions)))
     (concat
      (propertize
       (concat
@@ -140,7 +135,6 @@
   server-rejoin      (fn: vz/circe-handle-msg 'join  <rest>))
 
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
-(add-hook 'circe-chat-mode-hook #'vz/circe-init)
 
 (defun vz/circe-get-channels-cond (cond)
   "Get channels from all server buffer that match the condition cond"
@@ -169,6 +163,37 @@
    (ivy-read "> ")
    (switch-to-buffer-other-window)))
 
+(defun vz/circe-jump-to-mention ()
+  "Jump to mention in current circe buffer"
+  (interactive)
+  (-->
+   (-map #'car vz/circe-mentions)
+   (ivy-read "> " it)
+   (alist-get it vz/circe-mentions nil nil #'s-equals?)
+   goto-line))
+
+(defun vz/circe-jump-to-mentions ()
+  "Jump to mentions in all circe buffers"
+  (interactive)
+  (let ((mentions
+         (->>
+          (vz/circe-get-channels-cond (fn t))
+          (-map #'(lambda (b)
+                    (with-current-buffer b
+                      (-map
+                       (fn: cons
+                            (format "%s:%s" (buffer-name b) (car <>))
+                            (cdr <>))
+                       vz/circe-mentions))))
+          (-flatten))))
+    (-->
+     (-map #'car mentions)
+     (ivy-read "> " it)
+     (let ((ch (car (s-split ":" it)))
+           (pos (alist-get it mentions nil nil #'s-equals?)))
+       (switch-to-buffer-other-window ch)
+       (goto-line pos)))))
+
 (general-nmap
   :prefix "SPC i"
   "i" #'vz/circe-jump-irc
@@ -179,6 +204,24 @@
   fill-type nil
   time-stamp-format "%H:%M"
   time-stamp-position 'right-margin)
+
+(defun vz/circe-init ()
+  (setq
+   vz/circe--old-nick ""
+   buffer-face-mode-face '(:family "Charter" :height 100)
+   mode-line-format nil)
+  (setq-local vz/jump-func #'vz/circe-jump-to-mention
+              vz/circe-mentions nil)
+  (buffer-face-mode)
+  (defface circe-my-message-body-face
+    `((t :inherit circe-my-message-face :family ,vz/variable-font
+         :height 100))
+    "Face for self-say body")
+  (vz/set-monospace-faces '(circe-prompt-face
+                            circe-originator-face
+                            circe-my-message-face)))
+
+(add-hook 'circe-chat-mode-hook #'vz/circe-init)
 
 (defun vz/lui-init ()
   (setq
