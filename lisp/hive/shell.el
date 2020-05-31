@@ -114,9 +114,8 @@ to it. If nothing is found, create a new buffer"
         (goto-char pt)
         (vz/shell--get-prompt
          (cons (format "%s:%d"
-                       (replace-regexp-in-string "\n$" ""
-                                                 (thing-at-point 'line t))
-                       pt)
+                       (replace-regexp-in-string
+                        "\n$" "" (thing-at-point 'line t)) pt)
                prompts)
          pt)))))
 
@@ -127,9 +126,12 @@ to it. If nothing is found, create a new buffer"
    (vz/shell--get-prompt '() (point-min))
    (ivy-read "> " it)
    (split-string it ":")
-   (-last-item it)
-   (string-to-number it)
-   (goto-char it)))
+   -last-item
+   string-to-number
+   goto-char)
+  (when (fboundp 'beacon-blink)
+    (let ((beacon-blink-duration 1))
+      (beacon-blink))))
 
 (define-minor-mode vz/term-mode
   "Minor mode for binding ^D in *term* buffers")
