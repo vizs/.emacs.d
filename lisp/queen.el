@@ -201,7 +201,6 @@ Create file-buffer if it such no buffer/file exists"
                 vz/describe-function-func #'counsel-describe-function
                 vz/jump-func #'counsel-imenu))
 (use-package beacon
-  :defer t
   :config
   (beacon-mode 1)
   (setq-ns beacon-blink-when
