@@ -52,9 +52,12 @@
   cache-autoloads t)
 
 ;; Emacs Lisp enhancers
-(use-package s)
 (use-package dash)
+(use-package s)
 (use-package fn
+  :straight (:type git :host github
+             :repo "troyp/fn.el"
+             :fork (:host github :repo "vizs/fn.el"))
   :config
   (defmacro fn! (&rest body)
     "Like fn but interactive"
@@ -115,9 +118,6 @@
   (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
   (add-hook 'view-mode-hook (fn: display-fill-column-indicator-mode 0)))
 
-;; Modeline
-(load-file (expand-file-name "lisp/hive/modeline.el" user-emacs-directory))
-
 ;; Fonts
 (add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
                                                     vz/monospace-font)))
@@ -128,8 +128,8 @@
 ;; Quality of life improvements
 (use-package general
   :init
-  (setq general-override-states '(insert emacs hybrid normal visual motion
-                                  operator replace)))
+  (setq general-override-states '(insert emacs hybrid normal
+                                  visual motion operator replace)))
 
 (use-package avy)
 (use-package ace-window
@@ -179,14 +179,14 @@
   (defun vz/get-file-or-buffer ()
     "Select a list of opened buffers, files in current directory and entries in
 recentf and return the corresponding buffer. Create one if it doesn't exist"
-    (let ((buf (->>
-                (append (-map #'buffer-name (buffer-list))
-                        (-filter #'file-regular-p
-                                 (directory-files default-directory))
-                        recentf-list)
-                (-uniq)
-                (ivy-read "> "))))
-      (or (get-buffer buf) (find-file-noselect buf))))
+    (-->
+     (->>
+      (append (-map    #'buffer-name    (buffer-list))
+              (-filter #'file-regular-p (directory-files default-directory))
+              recentf-list)
+      (-uniq)
+      (ivy-read "> "))
+     (or (get-buffer it) (find-file-noselect it))))
   (ivy-mode 1))
 
 (use-package counsel

@@ -21,11 +21,9 @@
   "Disable bold and italic for everything except bold and italic face"
   (-each (face-list)
     (fn:
-     set-face-attribute <> nil
-                         :weight 'normal
-                         :slant 'normal))
+     set-face-attribute <> nil :weight 'normal :slant 'normal))
   ;;(set-face-attribute 'bold   nil :weight 'bold)
-  (set-face-attribute 'italic nil :slant  'italic))
+  (set-face-attribute 'italic nil :slant 'italic :underline nil))
 
 (defun vz/windows-in-direction (direction &optional windows)
   "Get all windows in direction relative to selected window"
@@ -34,6 +32,8 @@
     (if win
         (vz/windows-in-direction direction (cons win windows))
       windows)))
+
+(load-file (expand-file-name "lisp/hive/modeline.el" user-emacs-directory))
 
 (use-package prescient
   :config
@@ -65,7 +65,8 @@
   :init
   (setq-ns flyspell
     persistent-highlight t
-    issue-message-flag nil)
+    issue-message-flag nil
+    mark-duplication-flag nil)
   (setq-ns ispell
     program-name "hunspell"))
 
@@ -75,6 +76,12 @@
   :general (:keymaps 'override :states 'normal
     "SPC oc" #'org-capture)
   :init
+;;(use-package org-pretty-table
+;;  :hook (org-mode . org-pretty-table-mode)
+;;  :straight (:type git :host github
+;;             :repo "codecoll/org-pretty-table"
+;;             :branch "replace-characters-only-in-table")
+;;  :defer t)
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
     :defer t
@@ -90,19 +97,20 @@
   :init
   (defun pass (passwd)
     "Get password"
-    (replace-regexp-in-string
-     "\n$" ""
-	   (shell-command-to-string (format "pass get %s" passwd))))
+    (->>
+     (format "pass get %s" passwd)
+     (shell-command-to-string)
+     (s-replace-regexp "\n$" "")))
 
   (defun pass-irc (serv)
-    `(lambda (_) (pass (format "irc/%s" ,serv))))
+    (fn: pass (format "irc/%s" serv)))
 
   (defun pass-discord (serv)
-    `(lambda (_)
-       (unless (or vz/ircdiscord-process (process-live-p vz/ircdiscord-process))
-         (setq-default vz/ircdiscord-process
-                       (start-process "ircdiscord" nil "ircdiscord")))
-       (format "%s:%d" (pass "misc/discord") ,serv))))
+    (fn (unless (or vz/ircdiscord-process
+                    (process-live-p vz/ircdiscord-process))
+          (setq-default vz/ircdiscord-process
+                        (start-process "ircdiscord" nil "ircdiscord")))
+        (format "%s:%d" (pass "misc/discord") serv))))
 
 (use-package comint
   :defer t
@@ -148,9 +156,10 @@
         (window-buffer (selected-window))
       (setq default-directory path))))
 
-;; (vz/use-package wand "plumb"
-;;   :straight (:type git :host github
-;;              :repo "cmpitg/wand"))
+(vz/use-package wand "plumb"
+  :straight (:type git :host github
+             :repo "cmpitg/wand"
+             :fork (:repo "vizs/wand")))
 
 (use-package show-paren
   :defer t
