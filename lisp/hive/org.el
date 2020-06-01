@@ -3,6 +3,14 @@
 ;; Enable structure template completion
 (require 'org-tempo)
 
+(tempo-define-template
+ "org-latex-eq*"
+ '("#+begin_export latex" n "\\begin{equation*}" n "\\begin{split}"
+   n r n "\\end{split}" n "\\end{equation*}" n "#+end_export latex" >)
+ "<eq")
+
+(add-to-list 'org-tempo-tags '("<eq" . tempo-template-org-latex-eq*))
+
 ;; TODO: setup org-protocol
 
 (setq-ns org
@@ -18,9 +26,10 @@
  ; indent-mode-turns-off-org-adapt-indentation nil
 
  ;; style
- highlight-latex-and-related '(latex script)
+ highlight-latex-and-related '(latex)
+ hidden-keywords '(title author)
  hide-emphasis-markers nil
- ; hide-leading-stars t ; indent mode also hides stars
+ hide-leading-stars t ; indent mode also hides stars
  fontify-emphasized-text t
  fontify-done-headline t
  fontify-quote-and-verse-blocks t
@@ -53,17 +62,20 @@
     "* %?")))
 
 (defun vz/org-mode-style ()
-  (vz/set-monospace-faces '(org-table org-link org-code org-block org-drawer
-                            org-date org-special-keyword org-verbatim
-                            org-latex-and-related))
+  (let ((faces '(org-table org-link org-code org-block org-drawer
+                 org-date org-special-keyword org-verbatim
+                 org-latex-and-related)))
+    (vz/set-monospace-faces faces)
+    (-each faces (fn: set-face-attribute <> nil :height 105)))
   (-each org-level-faces
     (fn: set-face-attribute <> nil :weight 'bold))
-
   (let* ((height1 (+ 120 40))
+         (height0 (+ height1 20))
          (height2 (- height1 20))
          (height3 (- height1 60)))
     (set-face-attribute 'org-level-1 nil :height height1)
     (set-face-attribute 'org-level-2 nil :height height2)
+    (set-face-attribute 'org-document-title nil :height height0 :weight 'bold)
     (set-face-attribute 'org-quote nil
                         :family "IBM Plex Serif" :slant 'italic)
     (set-face-attribute 'org-block-begin-line nil
@@ -74,9 +86,14 @@
 (defun vz/org-mode-init ()
   (org-indent-mode t)
   (org-num-mode t)
+  (electric-pair-local-mode t)
+  (org-toggle-pretty-entities)
   (setq line-spacing 0.01
         buffer-face-mode-face `(:family ,vz/variable-font :height 120))
-  (setq-local vz/jump-func #'counsel-org-goto)
+  (setq-local vz/jump-func #'counsel-org-goto
+              electric-pair-inhibit-predicate
+              `(lambda (<>) (if (char-equal <> ?<) t
+                              (,electric-pair-inhibit-predicate <>))))
   (buffer-face-mode)
   (vz/org-mode-style))
 

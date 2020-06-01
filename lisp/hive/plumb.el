@@ -77,7 +77,7 @@
                                (s-split ":" <>)
                                (vz/plumb-file
                                 (car it)
-                                (string-to-number (cadr it))))
+                                (string-to-number (cadr it)))))
     (wand:create-rule :match "\\..+$"
                       :capture :whole
                       :action #'vz/plumb-file)

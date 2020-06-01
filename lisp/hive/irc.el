@@ -6,10 +6,10 @@
  mynicks '("viz" "_viz_")
  ;; TODO: clean this up
  mynicks-re (-reduce-from
-             (fn: format "%s\\|[ @]%s[,: ]\\|[ @]%s$" <1> <2> <2>)
-             (funcall
-              (fn: format "[ @]%s[,: ]\\|[ @]%s$" <> <>)
-              (car vz/circe-mynicks))
+             (fn: format "%1$s[ @]%2$s[,: ]\\|[ @]%2$s$"
+                  (if (s-blank? <1>) "" (s-concat <1> "\\|"))
+                  <2>)
+             ""
              (cdr vz/circe-mynicks)))
 
 (setq-ns circe

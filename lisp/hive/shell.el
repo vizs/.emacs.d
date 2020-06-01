@@ -122,10 +122,10 @@ to it. If nothing is found, create a new buffer"
           prompts
         (goto-char pt)
         (vz/shell--get-prompt
-         (cons (-->
+         (cons (->>
                 (thing-at-point 'line t)
-                (replace-regexp-in-string "\n$" "" it)
-                (format "%s:%d" it pt))
+                (s-replace-regexp "\n$" "")
+                (format "%2$s:%1$d" pt))
                prompts)
          pt)))))
 
@@ -142,6 +142,11 @@ to it. If nothing is found, create a new buffer"
   (when (fboundp 'beacon-blink)
     (let ((beacon-blink-duration 1))
       (beacon-blink))))
+
+(defun vz/shell-send-keysequence-to-process (key)
+  "Send keysequence to current running process"
+  (interactive "sPress keysequence:")
+  (comint-send-string (get-buffer-process (current-buffer)) key))
 
 (define-minor-mode vz/term-minor-mode
   "Minor mode for binding ^D in *term* buffers")
@@ -196,6 +201,7 @@ to it. If nothing is found, create a new buffer"
 
 (general-imap
   :keymaps 'shell-mode-map
+  "C-k" #'vz/shell-send-keysequence-to-process
   "C-c" #'comint-interrupt-subjob
   "C-z" #'comint-stop-subjob
   "C-l" #'comint-clear-buffer
