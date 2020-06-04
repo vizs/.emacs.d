@@ -19,19 +19,73 @@
         (replace-match "" t t string 0))
     string))
 
-(defun vz/shell-history ()
-  "Returns current shell's history as a list"
-  (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
-  (split-string (vz/fread "/tmp/shhist") "\n" nil "\t"))
+(defvar vz/shell-history-cache-file (~ ".cache/mksh_history.el")
+  "Path to file to save elisp data about shell history")
+
+(defun vz/shell-history--get ()
+  "Get shell history"
+  (if (f-exists? vz/shell-history-cache-file)
+      (read-from-whole-string (f-read vz/shell-history-cache-file))
+    '()))
+
+(defun vz/shell-history--write (string)
+  "Add last command to `default-directory' entry"
+  (let* ((string  (s-trim (substring-no-properties string)))
+         (history (vz/shell-history--get))
+         (oentry  (asoc-get history default-directory '())))
+    (-->
+     (asoc-put! history default-directory
+                (cons string oentry)
+                t)
+     (f-write (format "%S" it) 'utf-8 vz/shell-history-cache-file))))
+
+(defun vz/shell-history--sort (cwd)
+  "Sort shell-history according to cwd"
+  (-->
+   (vz/shell-history--get)
+   (append (asoc-get it cwd '())
+           (->>
+            it
+            (asoc-filter (fn: not (s-equals? <> cwd)))
+            (asoc-values)
+            (-flatten)))))
+
+(add-hook 'comint-input-filter-functions
+          (fn (when (eq major-mode 'shell-mode)
+                (message "hello")
+                (vz/shell-history--write <>))
+              t))
 
 (defun vz/shell-insert-from-hist ()
+  "Search for command in history and run it"
+  (interactive)
+  (let ((process (get-buffer-process (current-buffer))))
+    (unless (process-running-child-p process)
+      (let* ((input  (comint-get-old-input-default))
+             (iinput (unless (s-blank? input) (concat "^" input)))
+             (cmd    (ivy-read "> "
+                               (vz/shell-history--sort default-directory)
+                               :initial-input iinput)))
+        (unless (s-blank? input)
+          (comint-delete-input))
+        (comint-send-string process (concat cmd "\n"))
+        (comint-add-to-input-history cmd)
+        (vz/term-minor-mode-set-title cmd)))))
+
+(defun vz/shell-mksh-history ()
+  "Returns current shell's history as a list"
+  (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
+  (split-string (f-read "/tmp/shhist") "\n" nil "\t"))
+
+(defun vz/shell-insert-from-mksh-hist ()
   "Search for command in history and run it"
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
     (unless (process-running-child-p proc)
       (let* ((input (comint-get-old-input-default))
              (init-input (unless (string-empty-p input) (concat "^" input)))
-             (cmd (ivy-read "> " (vz/shell-history) :initial-input init-input)))
+             (cmd (ivy-read "> " (vz/shell-mksh-history)
+                            :initial-input init-input)))
         (unless (s-blank? input)
           (comint-delete-input))
         (comint-send-string proc (concat cmd "\n"))
@@ -40,7 +94,7 @@
 
 (defun vz/shell-get-dir-alias ()
   (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
-  (s-split "\n" (vz/fread "/tmp/diralias")))
+  (s-split "\n" (f-read "/tmp/diralias")))
 
 (defun vz/shell-jump-to-dir ()
   "Jump to directory alias"
@@ -160,8 +214,8 @@ to it. If nothing is found, create a new buffer"
   "Process sentinel to auto kill associated buffer and frame in term-mode"
   (unless (process-live-p process)
     (let* ((b (process-buffer process))
-           (f (alist-get 'vz/term-minor-mode--frame
-                         (buffer-local-variables b))))
+           (f (asoc-get (buffer-local-variables b)
+                        'vz/term-minor-mode--frame)))
       (kill-buffer b)
       (when (frame-live-p f)
           (delete-frame f)))))
@@ -206,6 +260,7 @@ to it. If nothing is found, create a new buffer"
   "C-z" #'comint-stop-subjob
   "C-l" #'comint-clear-buffer
   "C-/" #'vz/shell-insert-from-hist
+  "C-?" #'vz/shell-insert-from-mksh-hist
   "C-d" #'comint-send-eof
   "C-j" #'vz/shell-jump-to-dir)
 

@@ -52,6 +52,11 @@
   cache-autoloads t)
 
 ;; Emacs Lisp enhancers
+;; dash | list
+;; s    | string
+;; fn   | lambda
+;; asoc | alist
+;; f    | file
 (use-package dash)
 (use-package s)
 (use-package fn
@@ -65,6 +70,10 @@
   (defmacro fn:! (&rest body)
     "Like fn: but interactive"
     `(lambda () (interactive) (,@body))))
+(use-package asoc
+  :straight (:type git :host github
+             :repo "troyp/asoc.el"))
+(use-package f)
 
 (defmacro vz/use-package (name file &rest body)
   `(use-package ,name
@@ -108,17 +117,17 @@
   numbers-width 0
   current-absolute t)
 
-(add-hook 'prog-mode-hook #'display-line-numbers-mode)
-(add-hook 'view-mode-hook (fn: display-line-numbers-mode 0))
+;; (add-hook 'prog-mode-hook #'display-line-numbers-mode)
+;; (add-hook 'view-mode-hook (fn: display-line-numbers-mode 0))
 
-(when (>= emacs-major-version 27)
-  (setq-ns display-fill-column-indicator
-    column 80
-    char "|")
-  (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-  (add-hook 'view-mode-hook (fn: display-fill-column-indicator-mode 0)))
+;; (when (>= emacs-major-version 27)
+;;   (setq-ns display-fill-column-indicator
+;;     column 80
+;;     char "|")
+;;   (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
+;;   (add-hook 'view-mode-hook (fn: display-fill-column-indicator-mode 0)))
 
-;; Fonts
+;; ;; Fonts
 (add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
                                                     vz/monospace-font)))
 
@@ -149,8 +158,6 @@
     "C-s"      #'ivy-avy
     "C-j"      #'ivy-next-line
     "C-k"      #'ivy-previous-line
-    "C-p"      #'ivy-minibuffer-grow
-    "C-n"      #'ivy-minibuffer-shrink
     "C-u"      #'ivy-scroll-down-command
     "C-d"      #'ivy-scroll-up-command)
   (:keymaps 'ivy-switch-buffer-map
@@ -158,6 +165,11 @@
     "C-k"   #'ivy-previous-line
     "C-M-K" #'ivy-switch-buffer-kill)
   :config
+  (setq-ns ivy
+    count-format ""
+    use-virtual-buffers t
+    wrap t
+    height 15)
   (require 'ivy-avy)
 
   ;; This was moved to ivy-hydra.el
@@ -179,6 +191,8 @@
   (defun vz/get-file-or-buffer ()
     "Select a list of opened buffers, files in current directory and entries in
 recentf and return the corresponding buffer. Create one if it doesn't exist"
+    (unless (boundp 'recentf-list)
+      (recentf-load-list))
     (-->
      (->>
       (append (-map    #'buffer-name    (buffer-list))
