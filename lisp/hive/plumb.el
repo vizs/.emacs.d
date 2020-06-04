@@ -90,12 +90,21 @@
     ))
 
 (defun vz/plumb ()
+  "Plumb the region or thing at point"
   (interactive)
   (wand:execute (if (region-active-p)
                     (buffer-substring-no-properties (region-beginning)
                                                     (region-end))
                   (ivy-thing-at-point))))
+
+(defun vz/plumb-link-select ()
+  "Select link in current buffer and plumb it"
+  (interactive)
+  (wand:execute
+   (plist-get (link-hint--process (link-hint--get-links)) :args)))
+
 (general-define-key
  :states '(normal visual)
  :keymaps 'override
- "|" 'vz/plumb)
+ "|"      #'vz/plumb
+ "SPC lp" #'vz/plumb-link-select)

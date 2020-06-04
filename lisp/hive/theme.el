@@ -157,8 +157,6 @@
    `(circe-originator-face            ((t :background ,bg :foreground ,lf)))
    `(edit-indirect-edited-region      ((t :background ,ac :foregroung ,fg)))
    `(flyspell-incorrect               ((t :underline (:color ,re :style wave))))
-   `(font-lock-regexp-grouping-backslash ((t :weight normal)))
-   `(font-lock-regexp-grouping-construct ((t :weight normal)))
    )
   (setq hl-todo-keyword-faces
         `(("TODO"   . ,re)

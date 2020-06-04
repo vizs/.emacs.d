@@ -6,17 +6,21 @@
 (tempo-define-template
  "org-latex-eq*"
  '("#+begin_export latex" n "\\begin{equation*}" n "\\begin{split}"
-   n r n "\\end{split}" n "\\end{equation*}" n "#+end_export latex" >)
+   n r n "\\end{split}" n "\\end{equation*}" n "#+end_export" >)
  "<eq")
 
 (add-to-list 'org-tempo-tags '("<eq" . tempo-template-org-latex-eq*))
+
+;; Increase the size of LaTeX previews
+(plist-put org-format-latex-options :scale 1.25)
 
 ;; TODO: setup org-protocol
 
 (setq-ns org
  add-colon-after-tag-completion t
- default-notes-file (expand-file-name "~/doc/org/notes.org")
- directory (expand-file-name "~/doc/org")
+ default-notes-file (~ "doc/org/notes.org")
+ directory (~ "doc/org")
+ preview-latex-image-directory (~ ".cache/org-ltximg/")
  ; file-apps
          
  ;; indentation
@@ -28,13 +32,15 @@
  ;; style
  highlight-latex-and-related '(latex)
  hidden-keywords '(title author)
- hide-emphasis-markers nil
+ hide-emphasis-markers t
  hide-leading-stars t ; indent mode also hides stars
  fontify-emphasized-text t
  fontify-done-headline t
  fontify-quote-and-verse-blocks t
  fontify-whole-heading-line t
  src-fontify-natively nil
+
+ preview-latex-default-process 'dvisvgm
 
  capture-templates
  `(("d" "Dump links and book names or whatever" entry
@@ -66,10 +72,10 @@
                  org-date org-special-keyword org-verbatim
                  org-latex-and-related)))
     (vz/set-monospace-faces faces)
-    (-each faces (fn: set-face-attribute <> nil :height 105)))
+    (-each faces (fn: set-face-attribute <> nil :height 102)))
   (-each org-level-faces
     (fn: set-face-attribute <> nil :weight 'bold))
-  (let* ((height1 (+ 120 40))
+  (let* ((height1 (+ (face-attribute buffer-face-mode-face :height) 40))
          (height0 (+ height1 20))
          (height2 (- height1 20))
          (height3 (- height1 60)))
@@ -90,10 +96,13 @@
   (org-toggle-pretty-entities)
   (setq line-spacing 0.01
         buffer-face-mode-face `(:family ,vz/variable-font :height 120))
-  (setq-local vz/jump-func #'counsel-org-goto
-              electric-pair-inhibit-predicate
-              `(lambda (<>) (if (char-equal <> ?<) t
-                              (,electric-pair-inhibit-predicate <>))))
+  (setq-local
+   vz/jump-func (fn! (counsel-org-goto)
+                     (let ((beacon-blink-duration 1))
+                       (beacon-blink)))
+   electric-pair-inhibit-predicate
+                    `(lambda (<>) (if (char-equal <> ?<) t
+                                    (,electric-pair-inhibit-predicate <>))))
   (buffer-face-mode)
   (vz/org-mode-style))
 
@@ -101,8 +110,10 @@
 
 (general-nmap
   :keymaps 'org-mode-map
-  :prefix "SPC"
-  "oel" #'org-latex-export-to-latex
-  "of"  #'org-sparse-tree
-  "t"   #'org-todo
-  "ost" #'org-babel-tangle)
+  :prefix "SPC o"
+  "el" #'org-latex-export-to-latex
+  "lp" #'org-latex-preview
+  "lc" #'org-cdlatex-mode
+  "f"  #'org-sparse-tree
+  "t"  #'org-todo
+  "st" #'org-babel-tangle)

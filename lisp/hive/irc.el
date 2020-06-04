@@ -166,11 +166,10 @@
 (defun vz/circe-jump-to-mention ()
   "Jump to mention in current circe buffer"
   (interactive)
-  (-->
-   (-map #'car vz/circe-mentions)
-   (ivy-read "> " it)
-   (alist-get it vz/circe-mentions nil nil #'s-equals?)
-   goto-line))
+  (->>
+   (ivy-read "> " vz/circe-mentions)
+   (asoc-get vz/circe-mentions)
+   (goto-line)))
 
 (defun vz/circe-jump-to-mentions ()
   "Jump to mentions in all circe buffers"
@@ -187,10 +186,9 @@
                        vz/circe-mentions))))
           (-flatten))))
     (-->
-     (-map #'car mentions)
-     (ivy-read "> " it)
+     (ivy-read "> " mentions)
      (let ((ch  (car (s-split ":" it)))
-           (pos (alist-get it mentions nil nil #'s-equals?)))
+           (pos (asoc-get mentions it )))
        (switch-to-buffer-other-window ch)
        (goto-line pos)))))
 

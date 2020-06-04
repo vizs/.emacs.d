@@ -60,8 +60,9 @@ in the same vertical column"
   "/"       #'swiper
   "?"       #'swiper-backward
   "SPC rc"  #'vz/reload-config
-  "SPC pb"  #'previous-buffer
-  "SPC nb"  #'next-buffer
+  "K"       #'previous-buffer
+  "J"       #'next-buffer
+  "U"       #'universal-argument
   "SPC SPC" #'counsel-M-x
   "SPC df"  (fn:! command-execute vz/describe-function-func)
   "SPC d."  (fn:! command-execute vz/goto-definition-func)
@@ -80,6 +81,7 @@ in the same vertical column"
   "C-w o"   #'ace-window
   "C-w O"   #'delete-other-windows
   "C-w x"   #'ace-delete-window
+  "ga"      #'align-regexp
   "gj"      #'avy-goto-line-below
   "gk"      #'avy-goto-line-above
   "gf"      #'avy-goto-char

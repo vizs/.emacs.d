@@ -54,11 +54,12 @@
 ;; Emacs Lisp enhancers
 ;; dash | list
 ;; s    | string
+;; f    | file
 ;; fn   | lambda
 ;; asoc | alist
-;; f    | file
 (use-package dash)
 (use-package s)
+(use-package f)
 (use-package fn
   :straight (:type git :host github
              :repo "troyp/fn.el"
@@ -73,7 +74,6 @@
 (use-package asoc
   :straight (:type git :host github
              :repo "troyp/asoc.el"))
-(use-package f)
 
 (defmacro vz/use-package (name file &rest body)
   `(use-package ,name
@@ -120,14 +120,14 @@
 ;; (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 ;; (add-hook 'view-mode-hook (fn: display-line-numbers-mode 0))
 
-;; (when (>= emacs-major-version 27)
-;;   (setq-ns display-fill-column-indicator
-;;     column 80
-;;     char "|")
+(when (>= emacs-major-version 27)
+  (setq-ns display-fill-column-indicator
+    column 80
+    char "|"))
 ;;   (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
 ;;   (add-hook 'view-mode-hook (fn: display-fill-column-indicator-mode 0)))
 
-;; ;; Fonts
+;; Fonts
 (add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
                                                     vz/monospace-font)))
 

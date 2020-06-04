@@ -26,14 +26,15 @@
 
 (setq-default
  battery-update-interval 240
- mode-line-format `((:eval (vz/mode-line-evil-state))
-                    "%b"
-                    (:eval (vz/mode-line-file-state))
-                    (:eval (vz/mode-line-fill 'mode-line 19))
-                    "« "
-                    (:eval (format-time-string "[%H:%M] "))
-                    "["
-                    (:eval (battery-format
-                            "%b%p"
-                            (funcall battery-status-function)))
-                    "%%]"))
+ vz/mode-line-format `((:eval (vz/mode-line-evil-state))
+                       "%b"
+                       (:eval (vz/mode-line-file-state))
+                       (:eval (vz/mode-line-fill 'mode-line 19))
+                       "« "
+                       (:eval (format-time-string "[%H:%M] "))
+                       "["
+                       (:eval (battery-format
+                               "%b%p"
+                               (funcall battery-status-function)))
+                       "%%]")
+ mode-line-format vz/mode-line-format)

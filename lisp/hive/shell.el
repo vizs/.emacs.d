@@ -1,4 +1,6 @@
 ;; -*- lexical-binding: t; -*-
+;; TODO: Replace process-running-child-p with something that
+;;       checks if the child, if present, is a mksh one
 
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
@@ -18,6 +20,8 @@
                 (setq cwd (concat cwd "/"))))
         (replace-match "" t t string 0))
     string))
+
+;; TODO: Maybe track command run in nix-shell separately?
 
 (defvar vz/shell-history-cache-file (~ ".cache/mksh_history.el")
   "Path to file to save elisp data about shell history")
@@ -78,7 +82,7 @@
   (split-string (f-read "/tmp/shhist") "\n" nil "\t"))
 
 (defun vz/shell-insert-from-mksh-hist ()
-  "Search for command in history and run it"
+  "Search for command in mksh history and run it"
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
     (unless (process-running-child-p proc)

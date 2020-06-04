@@ -7,22 +7,13 @@
   (redraw-display)
   (force-mode-line-update t))
 
-(defun vz/fread (path)
-  "Read file and return the contents"
-  (with-temp-buffer
-    (insert-file-contents-literally path)
-    (buffer-string)))
-
-(defun vz/eval-file (path stdin args)
-  "Evaluate elisp file in path"
-  (eval (ignore-errors (read-from-whole-string (vz/fread path)))))
-
 (defun vz/disable-bold-italic ()
   "Disable bold and italic for everything except bold and italic face"
   (-each (face-list)
     (fn:
      set-face-attribute <> nil :weight 'normal :slant 'normal))
-  ;;(set-face-attribute 'bold   nil :weight 'bold)
+                               ;;:underline nil))
+  (set-face-attribute 'bold   nil :weight 'bold)
   (set-face-attribute 'italic nil :slant 'italic :underline nil))
 
 (defun vz/windows-in-direction (direction &optional windows)
@@ -34,6 +25,7 @@
       windows)))
 
 (load-file (expand-file-name "lisp/hive/modeline.el" user-emacs-directory))
+(load-file (expand-file-name "lisp/hive/scripting.el" user-emacs-directory))
 
 (use-package prescient
   :config
@@ -70,6 +62,19 @@
   (setq-ns ispell
     program-name "hunspell"))
 
+;; I actually prefer to center /everything/
+(use-package perfect-margin
+  :defer t
+  :custom
+  (perfect-margin-ignore-regexps '())
+  (perfect-margin-ignore-filters '())
+  (perfect-margin-visible-width   90)
+  :general (:states 'normal :keymaps 'override
+    "SPC C" #'perfect-margin-mode))
+
+(straight-use-package 'auctex)
+(straight-use-package 'cdlatex)
+
 (vz/use-package org nil
   :straight (:type built-in)
   :defer t
@@ -86,7 +91,9 @@
     :hook (org-mode . org-bullets-mode)
     :defer t
     :config
-    (setq org-bullets-bullet-list '(" "))))
+    (setq org-bullets-bullet-list '(" ")))
+  (use-package valign
+    :straight (:type git :host github :repo "casouri/valign")))
 
 (vz/use-package circe "irc"
   :defer t
@@ -241,16 +248,15 @@
   :defer t
   :hook (racket-mode . racket-unicode-input-method-enable)
   :hook (racket-mode . aggressive-indent-mode)
+  :general (:states 'normal :prefix "SPC" :keymaps 'racket-mode-map
+    "rsr" #'racket-send-region
+    "rsd" #'racket-send-definition
+    "rse" #'racket-send-last-sexp)
   :config
   (add-hook 'racket-mode-hook
             (fn: setq-local
                  vz/describe-function-func #'racket-repl-describe
-                 vz/goto-definition-func #'racket-repl-visit-definition))
-  :general (:states 'normal :keymaps 'racket-mode-map
-    "C-e" #'racket-send-last-sexp)
-  :general (:states 'normal :prefix "SPC" :keymaps 'racket-mode-map
-    "rsr" #'racket-send-region
-    "rsd" #'racket-send-definition))
+                 vz/goto-definition-func #'racket-repl-visit-definition)))
 
 (use-package nix-mode
   :defer t
