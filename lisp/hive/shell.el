@@ -1,6 +1,4 @@
 ;; -*- lexical-binding: t; -*-
-;; TODO: Replace process-running-child-p with something that
-;;       checks if the child, if present, is a mksh one
 
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
@@ -23,6 +21,14 @@
 
 ;; TODO: Maybe track command run in nix-shell separately?
 
+(defun vz/inside-shell? (&optional buffer)
+  "Is the current ``active'' process a shell?"
+  (let* ((buffer (or buffer (current-buffer)))
+         (child  (process-running-child-p (get-buffer-process buffer))))
+    (or (null child)
+        (s-equals? (asoc-get (process-attributes child) 'comm)
+                   (f-filename explicit-shell-file-name)))))
+
 (defvar vz/shell-history-cache-file (~ ".cache/mksh_history.el")
   "Path to file to save elisp data about shell history")
 
@@ -37,11 +43,12 @@
   (let* ((string  (s-trim (substring-no-properties string)))
          (history (vz/shell-history--get))
          (oentry  (asoc-get history default-directory '())))
-    (-->
-     (asoc-put! history default-directory
-                (cons string oentry)
-                t)
-     (f-write (format "%S" it) 'utf-8 vz/shell-history-cache-file))))
+    (unless (s-blank? string)
+      (-->
+       (asoc-put! history default-directory
+                  (cons string oentry)
+                  t)
+       (f-write (format "%S" it) 'utf-8 vz/shell-history-cache-file)))))
 
 (defun vz/shell-history--sort (cwd)
   "Sort shell-history according to cwd"
@@ -55,8 +62,9 @@
             (-flatten)))))
 
 (add-hook 'comint-input-filter-functions
-          (fn (when (eq major-mode 'shell-mode)
-                (message "hello")
+          (fn (when (and
+                     (eq major-mode 'shell-mode)
+                     (vz/inside-shell?))
                 (vz/shell-history--write <>))
               t))
 
@@ -64,7 +72,7 @@
   "Search for command in history and run it"
   (interactive)
   (let ((process (get-buffer-process (current-buffer))))
-    (unless (process-running-child-p process)
+    (when (vz/inside-shell?)
       (let* ((input  (comint-get-old-input-default))
              (iinput (unless (s-blank? input) (concat "^" input)))
              (cmd    (ivy-read "> "
@@ -85,7 +93,7 @@
   "Search for command in mksh history and run it"
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
-    (unless (process-running-child-p proc)
+    (when (vz/inside-shell?)
       (let* ((input (comint-get-old-input-default))
              (init-input (unless (string-empty-p input) (concat "^" input)))
              (cmd (ivy-read "> " (vz/shell-mksh-history)
@@ -105,7 +113,7 @@
   (interactive)
   (let ((proc (get-buffer-process (current-buffer)))
         (input (comint-get-old-input-default)))
-    (unless (process-running-child-p proc)
+    (when (vz/inside-shell?)
       (comint-delete-input)
       (let ((cmd (->>
                   (vz/shell-get-dir-alias)
@@ -152,8 +160,7 @@ to it. If nothing is found, create a new buffer"
       (vz/popup-shell--add (shell))
     (let* ((free-buffers (-filter
                           (fn
-                           (and (null (process-running-child-p
-                                       (get-buffer-process <>)))
+                           (and (vz/inside-shell? <>)
                                 (null (get-buffer-window <> t))))
                           vz/popup-shells))
            (cwd default-directory)
