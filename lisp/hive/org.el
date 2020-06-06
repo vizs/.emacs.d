@@ -75,7 +75,7 @@
     (-each faces (fn: set-face-attribute <> nil :height 102)))
   (-each org-level-faces
     (fn: set-face-attribute <> nil :weight 'bold))
-  (let* ((height1 (+ (face-attribute buffer-face-mode-face :height) 40))
+  (let* ((height1 (+ 120 40))
          (height0 (+ height1 20))
          (height2 (- height1 20))
          (height3 (- height1 60)))
