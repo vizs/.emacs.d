@@ -1,14 +1,14 @@
 ;; -*- lexical-binding: t; -*-
 
 (defun vz/reload-config ()
-  "Reload init.el"
+  "Reload init.el."
   (interactive)
   (load user-init-file nil 'nomessage)
   (redraw-display)
   (force-mode-line-update t))
 
 (defun vz/disable-bold-italic ()
-  "Disable bold and italic for everything except bold and italic face"
+  "Disable bold and italic for everything except bold and italic face."
   (-each (face-list)
     (fn:
      set-face-attribute <> nil :weight 'normal :slant 'normal))
@@ -17,7 +17,7 @@
   (set-face-attribute 'italic nil :slant 'italic :underline nil))
 
 (defun vz/windows-in-direction (direction &optional windows)
-  "Get all windows in direction relative to selected window"
+  "Get all WINDOWS in DIRECTION relative to selected window."
   (-->
    (or (car windows) (selected-window))
    (window-in-direction direction it)
@@ -62,6 +62,27 @@
 ;;  mark-duplication-flag nil)
   (setq-ns ispell
     program-name "hunspell"))
+
+(use-package flymake
+  :straight (:type built-in)
+  :defer t
+  :hook (sh-mode . flymake-mode)
+  :config
+  (define-fringe-bitmap 'vz/fringe-left-arrow
+    [#b11000000 #b01100000 #b00110000
+     #b00011000 #b00110000 #b01100000
+     #b11000000]
+    nil nil 'center)
+  (setq-ns flymake
+   error-bitmap   '(vz/fringe-left-arrow error)
+   warning-bitmap '(vz/fringe-left-arrow warning)
+   note-bitmap    '(vz/fringe-left-arrow compilation-info)))
+
+(use-package flymake-shellcheck
+  :after flymake
+  :defer t
+  :commands flymake-shellcheck-load
+  :hook (sh-mode . flymake-shellcheck-load))
 
 ;; I actually prefer to center /everything/
 ;; Does not work with vertical splits
@@ -174,6 +195,7 @@
 (use-package aggressive-indent
   :defer t)
 
+;; TODO: Look into using company-quickhelp
 (use-package company
   :defer t
   :hook (prog-mode . company-mode)
@@ -238,7 +260,8 @@
   :hook
   (racket-mode . racket-unicode-input-method-enable)
   (racket-mode . aggressive-indent-mode)
-  :general (:states 'normal :keymaps 'racket-mode-map
+  (racket-mode . racket-xp-mode)
+  :general (:states '(normal visual) :keymaps 'racket-mode-map
     "C-e"     #'racket-send-last-sexp
     "SPC rsr" #'racket-send-region
     "SPC rsd" #'racket-send-definition
@@ -249,6 +272,9 @@
 (use-package nix-mode
   :defer t
   :mode "\\.nix\\'")
+
+;; TODO: Use nix-sandbox for flymake commands
+(use-package nix-sandbox)
 
 (use-package python
   :defer t

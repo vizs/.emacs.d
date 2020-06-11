@@ -30,7 +30,7 @@
    `(show-paren-match-expression      ((t :background ,ac :foreground ,fg)))
    `(show-paren-mismatch              ((t :background ,re :foreground ,fg)))
    `(fill-column-indicator            ((t :background ,ac :foreground ,ac)))
-   `(error                            ((t :background ,ac :foreground ,re)))
+   `(error                            ((t :background ,bg :foreground ,re)))
    `(cursor                           ((t :background ,gr :foreground ,fg)))
    `(beacon-fallback-background       ((t :background ,yw :foregruond ,yw)))
    `(fringe                           ((t :background ,bg :foreground ,yw)))

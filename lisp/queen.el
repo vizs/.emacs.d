@@ -73,14 +73,14 @@
   :config
   (defmacro fn! (&rest body)
     "Like fn but interactive"
-    `(lambda (&rest args)
+    `(lambda ()
        (interactive)
-       (apply (fn ,@body) args)))
+       ,@body))
   (defmacro fn:! (&rest body)
     "Like fn: but interactive"
-    `(lambda (&rest args)
+    `(lambda ()
        (interactive)
-       (apply (fn: ,@body) args))))
+       (,@body))))
 (use-package asoc
   :straight (:type git :host github
              :repo "troyp/asoc.el"))
@@ -142,7 +142,7 @@
                                                     vz/monospace-font)))
 
 ;; Fringe width
-(fringe-mode '(2 . 2))
+(fringe-mode '(5 . 0))
 
 ;; Quality of life improvements
 (use-package general
