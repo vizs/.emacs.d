@@ -270,12 +270,30 @@
   (racket-mode . aggressive-indent-mode)
   (racket-mode . racket-xp-mode)
   :general (:states '(normal visual) :keymaps 'racket-mode-map
-    "C-e"     #'racket-send-last-sexp
+    "C-e"     #'racket-eval-last-sexp
     "SPC rsr" #'racket-send-region
     "SPC rsd" #'racket-send-definition
-    "SPC rse" #'racket-send-last-sexp
-    "SPC df"  #'racket-repl-describe
-    "SPC d."  #'racket-repl-visit-definition))
+    "SPC rse" #'racket-eval-last-sexp
+    "SPC df"  #'racket-xp-describe
+    "SPC d."  #'racket-xp-visit-definition))
+  :config
+  (defun vz/racket--symbol-at-point-or-prompt (ofun &rest args)
+    (-let (((force-prompt-p prompt completions) args))
+      (message (prin1-to-string force-prompt-p))
+      (let ((sap (thing-at-point 'symbol t)))
+        (if (or force-prompt-p (null sap))
+            (let ((s (if completions
+                         (ivy-read prompt completions
+                                   :initial-input sap)
+                       (read-from-minibuffer prompt sap))))
+              (if (or (not s)
+                      (s-blank? (racket--trim (substring-no-properties s))))
+                  nil
+                s))
+          sap))))
+  (advice-add 'racket--symbol-at-point-or-prompt
+              :around #'vz/racket--symbol-at-point-or-prompt))
+
 
 (use-package nix-mode
   :defer t
@@ -298,6 +316,10 @@
   (setq-ns python-shell
     interpreter "python3"
     interpreter-args "-i"))
+
+;; To Lua or not to Lua
+;; TODO
+;; (use-package fennel-mode)
 
 (use-package scheme
   :defer t

@@ -182,20 +182,19 @@
   (require 'ivy-avy)
 
   ;; This was moved to ivy-hydra.el
-  (unless (fboundp 'ivy-minibuffer-grow)
-    (defun ivy-minibuffer-grow ()
-      "Grow the minibuffer window by 1 line."
-      (interactive)
-      (setq-local max-mini-window-height
-                  (cl-incf ivy-height)))
+  (defun ivy-minibuffer-grow ()
+    "Grow the minibuffer window by 1 line."
+    (interactive)
+    (setq-local max-mini-window-height
+                (cl-incf ivy-height)))
 
-    (defun ivy-minibuffer-shrink ()
-      "Shrink the minibuffer window by 1 line."
-      (interactive)
-      (when (> ivy-height 2)
-        (setq-local max-mini-window-height
-                    (cl-decf ivy-height))
-        (window-resize nil -1))))
+  (defun ivy-minibuffer-shrink ()
+    "Shrink the minibuffer window by 1 line."
+    (interactive)
+    (when (> ivy-height 2)
+      (setq-local max-mini-window-height
+                  (cl-decf ivy-height))
+      (window-resize nil -1)))
 
   (defun vz/get-file-or-buffer ()
     "Select a list of opened buffers, files in current directory and entries in
