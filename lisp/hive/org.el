@@ -84,8 +84,7 @@
     (set-face-attribute 'org-level-1 nil :height height1)
     (set-face-attribute 'org-level-2 nil :height height2)
     (set-face-attribute 'org-document-title nil :height height0 :weight 'bold)
-    (set-face-attribute 'org-quote nil
-                        :family "IBM Plex Serif" :slant 'italic)
+    (set-face-attribute 'org-quote nil :slant 'italic)
     (set-face-attribute 'org-block-begin-line nil
                         :height height3 :weight 'bold)
     (set-face-attribute 'org-block-end-line nil

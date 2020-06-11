@@ -123,10 +123,8 @@
   :init
   (defun pass (passwd)
     "Get password"
-    (->>
-     (format "pass get %s" passwd)
-     (shell-command-to-string)
-     (s-replace-regexp "\n$" "")))
+    (s-replace-regexp "\n$" "" (shell-command-to-string
+                                (format "pass get %s" passwd))))
   (defun pass-irc (serv)
     (fn: pass (format "irc/%s" serv)))
   (defun pass-discord (serv)
@@ -250,10 +248,20 @@
 
 (use-package go-mode
   :defer t
-  :hook (before-save . gofmt-before-save)
+  :hook
+  (before-save . gofmt-before-save)
+  (go-mode . flymake-mode)
   :general (:states 'normal :prefix "SPC" :keymaps 'go-mode-map
     "df" #'godef-describe
-    "j" #'godef-jump))
+    "j" #'godef-jump)
+  :config
+  ;; Cleaned up flymake-go
+  (defun vz/flymake-go ()
+    (list "go" (list "fmt"
+                     (flymake-proc-init-create-temp-buffer-copy
+                      'flymake-proc-create-temp-inplace))))
+  (add-to-list 'flymake-allowed-file-name-masks
+               '("\\.go\\'" vz/flymake-go)))
 
 (use-package racket-mode
   :defer t
