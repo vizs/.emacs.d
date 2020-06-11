@@ -206,18 +206,19 @@
 (defun vz/circe-init ()
   (setq
    vz/circe--old-nick ""
-   buffer-face-mode-face '(:family "Charter" :height 100)
+   buffer-face-mode-face '(:family "Charter" :height 120)
    mode-line-format nil)
   (setq-local vz/jump-func #'vz/circe-jump-to-mention
               vz/circe-mentions nil)
   (buffer-face-mode)
   (defface circe-my-message-body-face
     `((t :inherit circe-my-message-face :family ,vz/variable-font
-         :height 100))
+         :height 120))
     "Face for self-say body")
-  (vz/set-monospace-faces '(circe-prompt-face
-                            circe-originator-face
-                            circe-my-message-face)))
+  (let ((faces '(circe-prompt-face circe-originator-face
+                 circe-my-message-face)))
+    (vz/set-monospace-faces faces)
+    (-each faces (fn: set-face-attribute <> nil :height 102))))
 
 (add-hook 'circe-chat-mode-hook #'vz/circe-init)
 

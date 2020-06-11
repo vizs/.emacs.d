@@ -18,11 +18,12 @@
 
 (defun vz/windows-in-direction (direction &optional windows)
   "Get all windows in direction relative to selected window"
-  (let ((win (window-in-direction direction
-                                  (or (car windows) (selected-window)))))
-    (if win
-        (vz/windows-in-direction direction (cons win windows))
-      windows)))
+  (-->
+   (or (car windows) (selected-window))
+   (window-in-direction direction it)
+   (if it
+       (vz/windows-in-direction direction (cons it windows))
+     windows)))
 
 (load-file (expand-file-name "lisp/hive/modeline.el" user-emacs-directory))
 (load-file (expand-file-name "lisp/hive/scripting.el" user-emacs-directory))
@@ -39,7 +40,7 @@
   :after prescient
   :config
   (setq-ns ivy-prescient-enable
-    sorting nil)
+    sorting t)
   (ivy-prescient-mode t))
 
 (vz/use-package evil nil
@@ -57,16 +58,17 @@
   :init
   (setq-ns flyspell
     persistent-highlight t
-    issue-message-flag nil
-    mark-duplication-flag nil)
+    issue-message-flag nil)
+;;  mark-duplication-flag nil)
   (setq-ns ispell
     program-name "hunspell"))
 
 ;; I actually prefer to center /everything/
+;; Does not work with vertical splits
 (use-package perfect-margin
   :defer t
   :custom
-  (perfect-margin-ignore-regexps '())
+  (perfect-margin-ignore-regexps '("^\\*term-[0-9]+\\*"))
   (perfect-margin-ignore-filters '())
   (perfect-margin-visible-width   90)
   :general (:states 'normal :keymaps 'override
@@ -79,21 +81,17 @@
   :straight (:type built-in)
   :defer t
   :general (:keymaps 'override :states 'normal
-    "SPC oc" #'org-capture)
+    "SPC oc" #'org-capture
+    "SPC oj" #'counsel-org-goto-all)
   :init
-;;(use-package org-pretty-table
-;;  :hook (org-mode . org-pretty-table-mode)
-;;  :straight (:type git :host github
-;;             :repo "codecoll/org-pretty-table"
-;;             :branch "replace-characters-only-in-table")
-;;  :defer t)
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
     :defer t
     :config
     (setq org-bullets-bullet-list '(" ")))
   (use-package valign
-    :straight (:type git :host github :repo "casouri/valign")))
+    :straight (:type git :host github :repo "casouri/valign")
+    :config (valign-mode)))
 
 (vz/use-package circe "irc"
   :defer t
@@ -108,10 +106,8 @@
      (format "pass get %s" passwd)
      (shell-command-to-string)
      (s-replace-regexp "\n$" "")))
-
   (defun pass-irc (serv)
     (fn: pass (format "irc/%s" serv)))
-
   (defun pass-discord (serv)
     (fn (unless (or vz/ircdiscord-process
                     (process-live-p vz/ircdiscord-process))
@@ -126,7 +122,7 @@
   (defun vz/comint-send-input (&optional start end)
     "Send region if present, otherwise current line to current buffer's process"
     (interactive "r")
-    (if (region-active-p)
+    (if (use-region-p)
         (let ((cmd (buffer-substring (or start (region-beginning))
                                      (or end (region-end)))))
           (comint-send-string (get-buffer-process (current-buffer))
@@ -135,7 +131,6 @@
       (comint-send-input))
     (when (evil-visual-state-p)
       (evil-exit-visual-state)))
-
   (general-nmap
     :keymaps 'comint-mode-map
     "<RET>" #'vz/comint-send-input
@@ -144,11 +139,9 @@
     "[j"    #'comint-next-prompt
     "[k"    #'comint-previous-prompt
     "[c"    #'comint-clear-buffer)
-
   (general-imap
     :keymaps 'comint-mode-map
     "<S-return>" #'comint-accumulate)
-
   (general-vmap
     :keymaps 'comint-mode-map
     "<RET>" #'vz/comint-send-input))
@@ -233,30 +226,25 @@
     (mark-paragraph)
     (command-execute #'edit-indirect-region)))
 
-;; TODO: Is there a cleaner way to do this other than adding a hook?
-;; NOTE: They are buffer-local variables already.
 (use-package go-mode
   :defer t
   :hook (before-save . gofmt-before-save)
-  :config
-  (add-hook 'go-mode-hook
-            (fn: setq-local
-                 vz/describe-function-func #'godef-describe
-                 vz/goto-definition-func #'godef-jump)))
+  :general (:states 'normal :prefix "SPC" :keymaps 'go-mode-map
+    "df" #'godef-describe
+    "j" #'godef-jump))
 
 (use-package racket-mode
   :defer t
-  :hook (racket-mode . racket-unicode-input-method-enable)
-  :hook (racket-mode . aggressive-indent-mode)
-  :general (:states 'normal :prefix "SPC" :keymaps 'racket-mode-map
-    "rsr" #'racket-send-region
-    "rsd" #'racket-send-definition
-    "rse" #'racket-send-last-sexp)
-  :config
-  (add-hook 'racket-mode-hook
-            (fn: setq-local
-                 vz/describe-function-func #'racket-repl-describe
-                 vz/goto-definition-func #'racket-repl-visit-definition)))
+  :hook
+  (racket-mode . racket-unicode-input-method-enable)
+  (racket-mode . aggressive-indent-mode)
+  :general (:states 'normal :keymaps 'racket-mode-map
+    "C-e"     #'racket-send-last-sexp
+    "SPC rsr" #'racket-send-region
+    "SPC rsd" #'racket-send-definition
+    "SPC rse" #'racket-send-last-sexp
+    "SPC df"  #'racket-repl-describe
+    "SPC d."  #'racket-repl-visit-definition))
 
 (use-package nix-mode
   :defer t
@@ -270,11 +258,9 @@
     "rsr" #'python-shell-send-region
     "rsd" #'python-shell-send-defun
     "rsf" #'python-shell-send-buffer
-    "rsF" #'python-shell-send-file)
+    "rsF" #'python-shell-send-file
+    "df"  #'python-describe-at-point)
   :config
-  (add-hook 'python-mode-hook
-            (fn: setq-local
-                 vz/describe-function-func #'python-describe-at-point))
   (setq-ns python-shell
     interpreter "python3"
     interpreter-args "-i"))
@@ -285,8 +271,3 @@
   :hook (scheme-mode . aggressive-indent-mode)
   :config
   (setq scheme-program-name "csi"))
-
-;;(use-package emacs-lisp
-;;  :defer t
-;;  :straight (:type built-in)
-;;  :hook (emacs-lisp-mode . aggressive-indent-mode))

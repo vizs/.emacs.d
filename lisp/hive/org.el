@@ -14,6 +14,8 @@
 ;; Increase the size of LaTeX previews
 (plist-put org-format-latex-options :scale 1.25)
 
+(setq-default cdlatex-auto-help-delay 0.5)
+
 ;; TODO: setup org-protocol
 
 (setq-ns org
@@ -97,9 +99,6 @@
   (setq line-spacing 0.01
         buffer-face-mode-face `(:family ,vz/variable-font :height 120))
   (setq-local
-   vz/jump-func (fn! (counsel-org-goto)
-                     (let ((beacon-blink-duration 1))
-                       (beacon-blink)))
    electric-pair-inhibit-predicate
                     `(lambda (<>) (if (char-equal <> ?<) t
                                     (,electric-pair-inhibit-predicate <>))))
@@ -110,10 +109,13 @@
 
 (general-nmap
   :keymaps 'org-mode-map
-  :prefix "SPC o"
-  "el" #'org-latex-export-to-latex
-  "lp" #'org-latex-preview
-  "lc" #'org-cdlatex-mode
-  "f"  #'org-sparse-tree
-  "t"  #'org-todo
-  "st" #'org-babel-tangle)
+  :prefix "SPC"
+  "oel" #'org-latex-export-to-latex
+  "olp" #'org-latex-preview
+  "olc" #'org-cdlatex-mode
+  "of"  #'org-sparse-tree
+  "ot"  #'org-todo
+  "ost" #'org-babel-tangle
+  "j"   (fn! (counsel-org-goto)
+             (let ((beacon-blink-duration 1))
+               (beacon-blink))))

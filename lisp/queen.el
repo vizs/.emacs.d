@@ -1,6 +1,6 @@
-;; -*- lexical-binding: t; -*-
+; -*- lexical-binding: t; -*-
 
-(setq
+(setq-default
  vz/monospace-font "Verily Serif Mono"
  vz/variable-font "Charter"
 
@@ -23,7 +23,12 @@
  custom-file "/dev/null"
 
  gc-cons-threshold 16777216 ;; 16M
- x-select-enable-clipboard nil)
+
+ ;; I prefer to use separate default kill register and clipboard separate
+ x-select-enable-clipboard nil
+
+ ;; Follow links in version controlled
+ vc-follow-symlinks t)
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (defmacro setq-ns (ns &rest args)
@@ -49,7 +54,8 @@
 (straight-use-package 'use-package)
 (setq-ns straight
   use-package-by-default t
-  cache-autoloads t)
+  cache-autoloads t
+  vc-git-default-clone-depth 1)
 
 ;; Emacs Lisp enhancers
 ;; dash | list
@@ -67,10 +73,14 @@
   :config
   (defmacro fn! (&rest body)
     "Like fn but interactive"
-    `(lambda () (interactive) ,@body))
+    `(lambda (&rest args)
+       (interactive)
+       (apply (fn ,@body) args)))
   (defmacro fn:! (&rest body)
     "Like fn: but interactive"
-    `(lambda () (interactive) (,@body))))
+    `(lambda (&rest args)
+       (interactive)
+       (apply (fn: ,@body) args))))
 (use-package asoc
   :straight (:type git :host github
              :repo "troyp/asoc.el"))
@@ -147,7 +157,6 @@
 
 (use-package ivy
   :after general
-  :custom (ivy-use-virtual-buffers t)
   :general
   (:keymaps 'ivy-minibuffer-map
     "C-p" nil
@@ -166,7 +175,7 @@
     "C-M-K" #'ivy-switch-buffer-kill)
   :config
   (setq-ns ivy
-    count-format ""
+    count-format "[%d/%d] "
     use-virtual-buffers t
     wrap t
     height 15)
@@ -192,11 +201,12 @@
     "Select a list of opened buffers, files in current directory and entries in
 recentf and return the corresponding buffer. Create one if it doesn't exist"
     (unless (boundp 'recentf-list)
+      (recentf-mode)
       (recentf-load-list))
     (-->
      (->>
-      (append (-map    #'buffer-name    (buffer-list))
-              (-filter #'file-regular-p (directory-files default-directory))
+      (append (-map #'buffer-name (buffer-list))
+              (-filter #'f-file? (directory-files default-directory))
               recentf-list)
       (-uniq)
       (ivy-read "> "))
@@ -206,7 +216,10 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 (use-package counsel
   :after ivy
   :config
-  (setq-default counsel-find-file-at-point t))
+  (setq-default counsel-find-file-at-point t)
+  (defun vz/counsel-M-x-prompt (ofun &rest args)
+    "pls ")
+  (advice-add 'counsel--M-x-prompt :around #'vz/counsel-M-x-prompt))
 
 (use-package beacon
   :config

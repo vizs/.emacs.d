@@ -39,7 +39,7 @@
     '()))
 
 (defun vz/shell-history--write (string)
-  "Add last command to `default-directory' entry"
+  "Add STRING to `default-directory' entry"
   (let* ((string  (s-trim (substring-no-properties string)))
          (history (vz/shell-history--get))
          (oentry  (asoc-get history default-directory '())))
@@ -51,7 +51,7 @@
        (f-write (format "%S" it) 'utf-8 vz/shell-history-cache-file)))))
 
 (defun vz/shell-history--sort (cwd)
-  "Sort shell-history according to cwd"
+  "Sort shell-history according to CWD"
   (-->
    (vz/shell-history--get)
    (append (asoc-get it cwd '())
@@ -77,12 +77,12 @@
              (iinput (unless (s-blank? input) (concat "^" input)))
              (cmd    (ivy-read "> "
                                (vz/shell-history--sort default-directory)
-                               :initial-input iinput)))
+                               :initial-input iinput :sort nil)))
         (unless (s-blank? input)
           (comint-delete-input))
         (comint-send-string process (concat cmd "\n"))
-        (comint-add-to-input-history cmd)
-        (vz/term-minor-mode-set-title cmd)))))
+        (comint-add-to-input-history cmd)))))
+        ;;(vz/term-minor-mode-set-title cmd)))))
 
 (defun vz/shell-mksh-history ()
   "Returns current shell's history as a list"
@@ -97,12 +97,13 @@
       (let* ((input (comint-get-old-input-default))
              (init-input (unless (string-empty-p input) (concat "^" input)))
              (cmd (ivy-read "> " (vz/shell-mksh-history)
-                            :initial-input init-input)))
+                            :initial-input init-input :sort nil)))
         (unless (s-blank? input)
           (comint-delete-input))
         (comint-send-string proc (concat cmd "\n"))
         (comint-add-to-input-history cmd)
-        (vz/term-minor-mode-set-title cmd)))))
+        ;;(vz/term-minor-mode-set-title cmd)
+        (vz/shell-history--write cmd)))))
 
 (defun vz/shell-get-dir-alias ()
   (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
@@ -122,8 +123,8 @@
                   (car)
                   (format "cd ~%s\n"))))
         (comint-send-string proc cmd)
-        (comint-add-to-input-history cmd)
-        (vz/term-minor-mode-set-title cmd))
+        (comint-add-to-input-history cmd))
+        ;;(vz/term-minor-mode-set-title cmd))
       (unless (s-blank? input)
         (comint-send-string proc input)))))
 
@@ -254,7 +255,7 @@ to it. If nothing is found, create a new buffer"
      (set-frame-parameter vz/term-minor-mode--frame 'title)))
   t)
 
-(add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
+;; (add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
 
 (general-nmap
   "SPC ps" #'vz/popup-shell)

@@ -92,7 +92,7 @@
 (defun vz/plumb ()
   "Plumb the region or thing at point"
   (interactive)
-  (wand:execute (if (region-active-p)
+  (wand:execute (if (use-region-p)
                     (buffer-substring-no-properties (region-beginning)
                                                     (region-end))
                   (ivy-thing-at-point))))

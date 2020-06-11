@@ -49,30 +49,27 @@ in the same vertical column"
  (setq evil-want-keybinding t)
  (evil-collection-init))
 
+(use-package evil-easymotion
+  :after evil
+  :config
+  (evilem-default-keybindings "s"))
+
 ;; Setup general and keybinds
 (general-evil-setup)
+
 (general-imap
   "C-S-v" (fn:! evil-paste-after 1 ?+))
+
 (general-nmap
   :keymaps 'override
   "gc"      #'comment-line
-  "C-e"     #'eval-last-sexp
   "/"       #'swiper
   "?"       #'swiper-backward
   "SPC rc"  #'vz/reload-config
+  "SPC b"   #'ivy-switch-buffer
   "K"       #'previous-buffer
   "J"       #'next-buffer
   "U"       #'universal-argument
-  "SPC SPC" #'counsel-M-x
-  "SPC df"  (fn:! command-execute vz/describe-function-func)
-  "SPC d."  (fn:! command-execute vz/goto-definition-func)
-  "SPC dv"  #'counsel-describe-variable
-  "SPC dk"  #'counsel-descbinds
-  "SPC dF"  #'counsel-describe-face
-  "SPC ff"  #'counsel-find-file
-  "SPC j"   (fn:! command-execute vz/jump-func)
-  "SPC b"   #'ivy-switch-buffer
-  "SPC :"   #'eval-expression
   "C-w C-h" #'vz/shrink-other-windows
   "C-w S"   #'vz/split-window-below-ask
   "C-w V"   #'vz/split-window-right-ask
@@ -81,15 +78,29 @@ in the same vertical column"
   "C-w o"   #'ace-window
   "C-w O"   #'delete-other-windows
   "C-w x"   #'ace-delete-window
-  "ga"      #'align-regexp
+  "SPC SPC" #'counsel-M-x)
+
+(general-nmap
+  "C-e"     #'eval-last-sexp
+  "SPC df"  #'counsel-describe-function
+  "SPC d."  #'xref-find-definitions
+  "SPC dv"  #'counsel-describe-variable
+  "SPC dk"  #'counsel-descbinds
+  "SPC dF"  #'counsel-describe-face
+  "SPC ff"  #'counsel-find-file
+  "SPC j"   #'counsel-imenu
+  "SPC :"   #'eval-expression
   "gj"      #'avy-goto-line-below
   "gk"      #'avy-goto-line-above
   "gf"      #'avy-goto-char
+  "ga"      #'align-regexp
   "gF"      #'avy-goto-timer
   "g/"      #'vz/avy-search)
+
 (general-vmap
   :keymaps 'override
   "TAB" #'indent-for-tab-command
+  "gc"  #'comment-region
   ">"   #'vz/evil-shift-right
   "<"   #'vz/evil-shift-left
   "gj"  #'avy-goto-line-below
@@ -146,7 +157,7 @@ in the same vertical column"
 
   (defun vz/sam-eval-command ()
     (interactive)
-    (when (region-active-p)
+    (when (use-region-p)
       (sam-set-dot (region-beginning) (region-end)))
     (when (bufferp (get-buffer "*sam-cmd*"))
       (with-current-buffer "*sam-cmd*" (erase-buffer)))
@@ -170,6 +181,7 @@ in the same vertical column"
     "Q" #'vz/sam-quit-win))
 
 ;; Very ugly right now
+;; TODO: Redo using freeze cursors
 (use-package evil-mc
   :after evil
   :config
