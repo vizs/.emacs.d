@@ -275,7 +275,7 @@
     "SPC rsd" #'racket-send-definition
     "SPC rse" #'racket-eval-last-sexp
     "SPC df"  #'racket-xp-describe
-    "SPC d."  #'racket-xp-visit-definition))
+    "SPC d."  #'racket-xp-visit-definition)
   :config
   (defun vz/racket--symbol-at-point-or-prompt (ofun &rest args)
     (-let (((force-prompt-p prompt completions) args))
@@ -284,10 +284,10 @@
         (if (or force-prompt-p (null sap))
             (let ((s (if completions
                          (ivy-read prompt completions
-                                   :initial-input sap)
+                                   :initial-input sap
+                                   :sort t)
                        (read-from-minibuffer prompt sap))))
-              (if (or (not s)
-                      (s-blank? (racket--trim (substring-no-properties s))))
+              (if (s-blank? (racket--trim (substring-no-properties s)))
                   nil
                 s))
           sap))))
