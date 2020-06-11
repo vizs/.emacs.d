@@ -24,7 +24,7 @@
 
  gc-cons-threshold 16777216 ;; 16M
 
- ;; I prefer to use separate default kill register and clipboard separate
+ ;; I prefer to separate default kill register and clipboard
  x-select-enable-clipboard nil
 
  ;; Follow links in version controlled
@@ -228,13 +228,3 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
     window-scrolls t
     point-moves-horizontally nil
     point-moves-vertically nil))
-
-;; Buffer-local commands
-(make-variable-buffer-local 'vz/describe-function-func)
-(make-variable-buffer-local 'vz/goto-definition-func)
-(make-variable-buffer-local 'vz/jump-func)
-
-(setq-default
- vz/describe-function-func #'counsel-describe-function
- vz/goto-definition-func   #'xref-find-definitions
- vz/jump-func              #'counsel-imenu)
