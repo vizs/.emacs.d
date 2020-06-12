@@ -28,9 +28,35 @@
  x-select-enable-clipboard nil
 
  ;; Follow links in version controlled
- vc-follow-symlinks t)
+ vc-follow-symlinks t
+
+ ;; Indentation
+ indent-tabs-mode t
+ tab-width 4)
+
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+;; Automatically chmod +x file if it has a shebang
+(add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
+
+;; Auto-revert buffer if file is modified
+(global-auto-revert-mode)
+
+;; Indentation
+(defvar c-basic-offset 4)
+(defvar cperl-basic-offset 4)
+(defvar python-indent 4)
+
+(add-hook 'prog-mode-hook #'vz/prog-functional-indent-style)
+
+;; Fonts
+(add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
+                                                    vz/monospace-font)))
+
+;; Display > instead of $ at the visual end of truncated line
+(set-display-table-slot standard-display-table 'truncation ?>)
+
+;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
   (dolist (x (seq-partition args 2))
     (eval `(setq ,(intern (format "%s-%s" ns (car x)))
@@ -111,38 +137,6 @@
   (when (member major-mode vz/functional-major-modes)
     (setq indent-tabs-mode nil
           tab-width 2)))
-
-;; Indentation
-(setq-default indent-tabs-mode t
-              tab-width 4)
-(defvar c-basic-offset 4)
-(defvar cperl-basic-offset 4)
-(defvar python-indent 4)
-
-(add-hook 'prog-mode-hook #'vz/prog-functional-indent-style)
-
-;; Line numbers and column indicator
-(setq-ns display-line
-  numbers-type 'relative
-  numbers-width 0
-  current-absolute t)
-
-;; (add-hook 'prog-mode-hook #'display-line-numbers-mode)
-;; (add-hook 'view-mode-hook (fn: display-line-numbers-mode 0))
-
-(when (>= emacs-major-version 27)
-  (setq-ns display-fill-column-indicator
-    column 80
-    char "|"))
-;;   (add-hook 'prog-mode-hook #'display-fill-column-indicator-mode)
-;;   (add-hook 'view-mode-hook (fn: display-fill-column-indicator-mode 0)))
-
-;; Fonts
-(add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
-                                                    vz/monospace-font)))
-
-;; Fringe width
-(fringe-mode '(5 . 0))
 
 ;; Quality of life improvements
 (use-package general

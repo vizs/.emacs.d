@@ -51,6 +51,16 @@
     C-u-scroll t
     Y-yank-to-eol t))
 
+(use-package fringe
+  :straight (:type built-in)
+  :config
+  ;; Remove the ugly left and right curly arrow for continued lines
+  (setq
+   fringe-indicator-alist (asoc-put! fringe-indicator-alist
+                                     'continuation
+                                     '(nil nil)))
+  (fringe-mode '(5 . 0)))
+
 (use-package flyspell
   :straight (:type built-in)
   :hook (org-mode . flyspell-mode)
@@ -137,6 +147,19 @@
 (use-package comint
   :defer t
   :straight (:type built-in)
+  :functions (vz/comint-send-input)
+  :general
+   (:keymaps 'comint-mode-map :states 'normal
+    "<RET>" #'vz/comint-send-input
+    "[w"    #'comint-write-output
+    "[d"    #'comint-delete-output
+    "[j"    #'comint-next-prompt
+    "[k"    #'comint-previous-prompt
+    "[c"    #'comint-clear-buffer)
+  (:keymaps 'comint-mode-map :states 'insert
+    "<S-return>" #'comint-accumulate)
+  (:states 'visual :keymaps 'comint-mode-map
+    "<RET>" #'vz/comint-send-input)
   :config
   (defun vz/comint-send-input (&optional start end)
     "Send region if present, otherwise current line to current buffer's process"
@@ -149,31 +172,11 @@
           (comint-add-to-input-history cmd))
       (comint-send-input))
     (when (evil-visual-state-p)
-      (evil-exit-visual-state)))
-  (general-nmap
-    :keymaps 'comint-mode-map
-    "<RET>" #'vz/comint-send-input
-    "[w"    #'comint-write-output
-    "[d"    #'comint-delete-output
-    "[j"    #'comint-next-prompt
-    "[k"    #'comint-previous-prompt
-    "[c"    #'comint-clear-buffer)
-  (general-imap
-    :keymaps 'comint-mode-map
-    "<S-return>" #'comint-accumulate)
-  (general-vmap
-    :keymaps 'comint-mode-map
-    "<RET>" #'vz/comint-send-input))
+      (evil-exit-visual-state))))
 
 (vz/use-package shell nil
   :defer t
-  :straight (:type built-in)
-  :init
-  (defun vz/cd-selbuf (path)
-    "Change working directory of selected buffer"
-    (with-current-buffer
-        (window-buffer (selected-window))
-      (setq default-directory path))))
+  :straight (:type built-in))
 
 (vz/use-package wand "plumb"
   :straight (:type git :host github
@@ -207,8 +210,8 @@
    :keymaps 'company-active-map
    "M-n" nil
    "M-p" nil
-   "C-j" #'company-select-next
-   "C-k" #'comapny-select-previous))
+   "C-j" (fn! (company-complete-common-or-cycle 1))
+   "C-k" (fn! (company-complete-common-or-cycle -1))))
 
 (use-package company-prescient
   :defer t
@@ -260,8 +263,10 @@
     (list "go" (list "fmt"
                      (flymake-proc-init-create-temp-buffer-copy
                       'flymake-proc-create-temp-inplace))))
-  (add-to-list 'flymake-allowed-file-name-masks
-               '("\\.go\\'" vz/flymake-go)))
+  (add-hook 'go-mode-hook
+            (fn (add-to-list 'flymake-proc-allowed-file-name-masks
+                             '("\\.go\\'" vz/flymake-go)))
+            nil t))
 
 (use-package racket-mode
   :defer t
@@ -293,7 +298,6 @@
           sap))))
   (advice-add 'racket--symbol-at-point-or-prompt
               :around #'vz/racket--symbol-at-point-or-prompt))
-
 
 (use-package nix-mode
   :defer t
