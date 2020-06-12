@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+;; TODO: Add advice around org-capture-abort and friends to auto-kill frame
+;;       if launched via `org-capture' script
+
 ;; Enable structure template completion
 (require 'org-tempo)
 
@@ -116,5 +119,4 @@
   "ot"  #'org-todo
   "ost" #'org-babel-tangle
   "j"   (fn! (counsel-org-goto)
-             (let ((beacon-blink-duration 1))
-               (beacon-blink))))
+             (vz/beacon-highlight)))

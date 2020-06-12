@@ -147,7 +147,14 @@
 (use-package avy)
 (use-package ace-window
   :after avy
-  :custom (aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)))
+  :custom (aw-keys )
+  :config
+  ;; More noticable this way
+  (set-face-attribute 'aw-leading-char-face nil :height 150)
+  (setq-ns aw
+    keys '(?a ?s ?d ?f ?h ?j ?k ?l)
+    ;; Only consider the windows in the active frame
+    scope 'frame))
 
 (use-package ivy
   :after general
@@ -220,4 +227,8 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
   (setq-ns beacon-blink-when
     window-scrolls t
     point-moves-horizontally nil
-    point-moves-vertically nil))
+    point-moves-vertically nil)
+  (defun vz/beacon-highlight ()
+    "`beacon-blink' for one second to capture attention"
+    (let ((beacon-blink-duration 1))
+      (beacon-blink))))

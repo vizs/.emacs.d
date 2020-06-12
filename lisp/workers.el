@@ -55,7 +55,7 @@
   :straight (:type built-in)
   :config
   ;; Remove the ugly left and right curly arrow for continued lines
-  (setq
+  (setq-default
    fringe-indicator-alist (asoc-put! fringe-indicator-alist
                                      'continuation
                                      '(nil nil)))

@@ -19,7 +19,7 @@
         (replace-match "" t t string 0))
     string))
 
-;; TODO: Maybe track command run in nix-shell separately?
+;; TODO: Maybe we shouldn't consider nix-shell shells?
 
 (defun vz/inside-shell? (&optional buffer)
   "Is the current ``active'' process a shell?"
@@ -28,6 +28,8 @@
     (or (null child)
         (s-equals? (asoc-get (process-attributes child) 'comm)
                    (f-filename explicit-shell-file-name)))))
+
+;; TODO: Maybe track command run in nix-shell separately?
 
 (defvar vz/shell-history-cache-file (~ ".cache/mksh_history.el")
   "Path to file to save elisp data about shell history")
@@ -205,14 +207,14 @@ to it. If nothing is found, create a new buffer"
    (-last-item)
    (string-to-number)
    (goto-char))
-  (when (fboundp 'beacon-blink)
-    (let ((beacon-blink-duration 1))
-      (beacon-blink))))
+  (vz/beacon-highlight))
 
 (defun vz/shell-send-keysequence-to-process (key)
   "Send keysequence to current running process"
   (interactive "sPress keysequence:")
   (comint-send-string (get-buffer-process (current-buffer)) key))
+
+;; TODO: Auto-kill buffer by adding a function to `delete-frame-functions'
 
 (define-minor-mode vz/term-minor-mode
   "Minor mode for binding ^D in *term* buffers")
@@ -252,8 +254,7 @@ to it. If nothing is found, create a new buffer"
     (->>
      (s-trim-right string)
      (format "term: %s")
-     (set-frame-parameter vz/term-minor-mode--frame 'title)))
-  t)
+     (set-frame-parameter vz/term-minor-mode--frame 'title))))
 
 ;; (add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
 
@@ -277,15 +278,15 @@ to it. If nothing is found, create a new buffer"
   "C-j" #'vz/shell-jump-to-dir)
 
 (defun vz/shell-mode-init ()
+  (shell-dirtrack-mode nil)
   (add-hook 'comint-output-filter-function #'comint-truncate-buffer)
   (add-hook 'comint-output-filter-function #'comint-watch-for-password-prompt)
-  (shell-dirtrack-mode nil)
   (setq-local
    ;; comint-prompt-read-only t
    inhibit-field-text-motion t
    comint-process-echoes t
    vz/jump-func #'vz/shell-jump-to-prompt)
-  (setq Man-notify-method 'quiet)
-  (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt))
+   (setq Man-notify-method 'quiet)
+  (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt nil t))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
