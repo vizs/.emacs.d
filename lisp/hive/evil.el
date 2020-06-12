@@ -58,13 +58,16 @@ in the same vertical column"
 (general-evil-setup)
 
 (general-imap
-  "C-S-v" (fn:! evil-paste-after 1 ?+))
+  "C-S-v" (fn:! evil-paste-after 1 ?+)
+  "C-k" nil)
+
+(define-key global-map (kbd "C-k") nil)
 
 (general-nmap
   :keymaps 'override
   "gc"      #'comment-line
-  "/"       #'swiper
-  "?"       #'swiper-backward
+  "/"       #'swiper-isearch
+  "?"       #'swiper-isearch-backward
   "SPC rc"  #'vz/reload-config
   "SPC b"   #'ivy-switch-buffer
   "K"       #'previous-buffer
@@ -108,17 +111,14 @@ in the same vertical column"
 
 (use-package evil-numbers
   :after evil
-  :config
-  (general-imap
+  :general (:states 'insert
     "C-a" #'evil-numbers/inc-at-pt
     "C-x" #'evil-numbers/dec-at-pt))
 
 (use-package link-hint
   :after avy
-  :config
-  (general-nmap
-    :keymaps 'override
-    :prefix "SPC"
+  :general
+  (:keymaps 'override :states 'normal :prefix "SPC"
     "lo" #'link-hint-open-link
     "lc" #'link-hint-copy-link))
 
