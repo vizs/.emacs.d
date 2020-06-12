@@ -1,17 +1,26 @@
 ;; -*- lexical-binding: t; -*-
 
 ;; Don't leave visual mode
-(defun vz/evil-shift-left ()
-  (interactive)
-  (evil-shift-left (region-beginning) (region-end))
-  (evil-normal-state)
-  (evil-visual-restore))
+(dolist (d '(left right))
+  (vz/format-sexp
+   (defun vz/evil-shift-%1$s ()
+     "Shift %1$s and don't leave visual mode when doing so"
+	   (interactive)
+	   (evil-shift-%1$s (region-beginning) (region-end))
+	   (evil-normal-state)
+	   (evil-visual-restore))
+   d))
 
-(defun vz/evil-shift-right ()
-  (interactive)
-  (evil-shift-right (region-beginning) (region-end))
-  (evil-normal-state)
-  (evil-visual-restore))
+(dolist (d '(below right))
+  (vz/format-sexp
+   (defun vz/split-window-%1$s-ask ()
+     "Ask for buffer/file before splitting in direction %1$s"
+     (interactive)
+     (let ((buf (vz/get-file-or-buffer))
+           (win (split-window-%1$s)))
+       (set-window-buffer win buf)
+       (select-window win)))
+   d))
 
 ;; Avy functions
 ;; from u/loskutak-the-ptak
@@ -19,20 +28,6 @@
   (interactive "P")
   (let ((avy-timeout-seconds 120))
     (call-interactively #'avy-goto-char-timer arg)))
-
-(defun vz/split-window-below-ask ()
-  (interactive)
-  (let ((buf (vz/get-file-or-buffer))
-        (win (split-window-below)))
-    (set-window-buffer win buf)
-    (select-window win)))
-
-(defun vz/split-window-right-ask ()
-  (interactive)
-  (let ((buf (vz/get-file-or-buffer))
-        (win (split-window-right)))
-    (set-window-buffer win buf)
-    (select-window win)))
 
 ;; Behaves sort of like acme(1)
 (defun vz/shrink-other-windows ()

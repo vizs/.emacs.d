@@ -62,6 +62,11 @@
     (eval `(setq ,(intern (format "%s-%s" ns (car x)))
                  ,(cadr x)))))
 
+;; from u/b3n
+;; Absolutely based
+(defmacro vz/format-sexp (sexp &rest format-args)
+  `(eval (read (format ,(format "%S" sexp) ,@format-args))))
+
 ;; Bootstrap straight
 (defvar bootstrap-version)
 (let ((bootstrap-file (expand-file-name
@@ -97,16 +102,18 @@
              :repo "troyp/fn.el"
              :fork (:host github :repo "vizs/fn.el"))
   :config
+  ;; TODO: Check if first element is string,
+  ;;       if so add it to interactive
   (defmacro fn! (&rest body)
-    "Like fn but interactive"
+    "Like `fn' but interactive"
     `(lambda ()
        (interactive)
-       ,@body))
+       (,@body)))
   (defmacro fn:! (&rest body)
-    "Like fn: but interactive"
+    "Like `fn:' but interactive"
     `(lambda ()
        (interactive)
-       (,@body))))
+       ,@body)))
 (use-package asoc
   :straight (:type git :host github
              :repo "troyp/asoc.el"))
@@ -147,7 +154,6 @@
 (use-package avy)
 (use-package ace-window
   :after avy
-  :custom (aw-keys )
   :config
   ;; More noticable this way
   (set-face-attribute 'aw-leading-char-face nil :height 150)
