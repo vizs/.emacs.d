@@ -198,15 +198,6 @@
 (use-package outshine
   :defer t
   :hook (prog-mode . outshine-mode)
-  :general
-  (:states 'normal
-           "TAB"       #'outshine-cycle
-           "<backtab>" #'outshine-cycle-buffer
-           "M-RET"     #'outshine-insert-heading
-           "<M-up>"    #'outline-move-subtree-up
-           "<M-down>"  #'outline-move-subtree-down
-           "<M-right>" #'outshine-kbd-M-<right>
-           "<M-left>"  #'outshine-kbd-M-<left>)
   :config
   ;; Might be a very bad idea
   (setq-default
@@ -214,7 +205,17 @@
   (setq-ns outshine
     startup-folded-p t
     ;; I might make a function similar to counsel-org-goto
-    imenu-show-headlines-p nil))
+    imenu-show-headlines-p nil)
+  (add-hook 'outshine-mode-hook
+            (defun vz/outshine-mode-init ()
+              (general-nmap
+                "TAB"       #'outshine-cycle
+                "<backtab>" #'outshine-cycle-buffer
+                "M-RET"     #'outshine-insert-heading
+                "<M-up>"    #'outline-move-subtree-up
+                "<M-down>"  #'outline-move-subtree-down))))
+                ;;"<M-right>" #'outshine-kbd-M-<right>
+                ;;"<M-left>"  #'outshine-kbd-M-<left>))))
 
 ;; ** Edit a part of a buffer in separate window
 

@@ -156,11 +156,11 @@ for f.
 I think I would ideally want to bind f to the first command and
 gf or F to ~avy-goto-char-in-line~.
 *** Summary
-| Action        | Key     |
-|---------------+---------|
-| Movement      | hjkl    |
-| Goto Char     | f, gf/F |
-| Word movement | H, L    |
+| Key     | Action        |
+|---------+---------------|
+| hjkl    | Movement      |
+| f, gf/F | Goto Char     |
+| H, L    | Word movement |
 ** Continuous key presses
 When dealing with continuous key pressing situations like
 changing window dimensions, making an hydra would be the way
@@ -198,16 +198,39 @@ or change the existing pair to something like this.
 
 The s key will surround text in pair, and the S key will replace
 the old pair with a new one.
+** TODO ~avy~-based action
+Right now, d simply deletes the current character or region. What if
+there was a way to let d know which thing to delete? Like a line
+selected using ~avy~? Rinse and repeat for other verbs.
+
+The main problem comes with deciding a proper mnemonic for
+the ~avy~ actions. Also is it really easy to do things like delete word
+with ~avy~?
+
+Also, should these things, especially things like word, include all
+the possible candidates or only those in the current line?
+
+This will be especially to delete a character in current line.
+
+Possible text objects include,
+
+- Paragraph
+- Line
+- Word
+- Character
+- Block
+- Define
 ** Things to decide
 *** TODO Paragraph based movement
 I think {} for paragraph based movement is okay but I end up
 confusing myself, so is there a better way? I kind of want to bind
 J/K to ~forward-sexp~ or ~org-forward-something~.
 *** TODO Define/sexp based movement
-Possible candidate is J,K
+Possible candidate is J,K or [,]
 *** TODO Quick go to line
 gj, gk
 *** TODO evil-jump
+*** TODO EOL, BOL, EOF, BOF
 ** Summary
 | Key  | Does what?                                        |
 |------+---------------------------------------------------|
@@ -221,6 +244,8 @@ gj, gk
 | c    | Change                                            |
 | f    | Continuously search for character in line         |
 | gf/F | ~avy-goto-char-in-line~                             |
+| W    | Window hydra                                      |
+| n/N  | Narrow region stuff                               |
 | ...  | More things to decide!                            |
 * Other discussions on modal editing
 - https://www.reddit.com/r/emacs/comments/h85vzr/advice_on_modal_editing_in_emacs/

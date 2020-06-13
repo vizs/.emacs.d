@@ -65,6 +65,8 @@
 :END:
 #+begin_quote
 %?
+
+-- %^{Author}
 #+end_quote
 " :prepend t :kill-buffer t)
     ("e" "Emacs notes" entry
