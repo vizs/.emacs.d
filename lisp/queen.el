@@ -61,7 +61,8 @@
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
-  (declare (indent 1))
+  "`setq' but with the ``namespace'' as NS."
+  (declare (indent 1) (debug 0))
   (dolist (x (seq-partition args 2))
     (eval `(setq ,(intern (format "%s-%s" ns (car x)))
                  ,(cadr x)))))
@@ -69,6 +70,7 @@
 ;; from u/b3n
 ;; Absolutely based
 (defmacro vz/format-sexp (sexp &rest format-args)
+  "Format SEXP and eval it."
   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
 
 ;; Bootstrap straight
@@ -123,6 +125,7 @@
              :repo "troyp/asoc.el"))
 
 (defmacro vz/use-package (name file &rest body)
+  "Like `use-package' but also load file located lisp/hive/FILE.el."
   (declare (indent 2))
   `(use-package ,name
      ,@body
@@ -132,9 +135,11 @@
                         (or ,file ',name)))))
 
 (defun ~ (file)
+  "Path to FILE respective to $HOME"
   (expand-file-name file (getenv "HOME")))
 
 (defun vz/random-choice (list)
+  "Choose a random element from list."
   (nth (random (1- (length list))) list))
 
 (defun vz/set-monospace-faces (faces)
