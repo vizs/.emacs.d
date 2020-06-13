@@ -57,7 +57,7 @@
 :END:
 %:link" :prepend t :kill-buffer t)
     ("q" "Quote" entry
-     (file ,(~ "doc/dump.org"))
+     (file "dump.org")
      "* %^{quote|Quote %U|}
 :PROPERTIES:
 :type: quote

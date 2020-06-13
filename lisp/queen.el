@@ -4,6 +4,7 @@
 ;; ** Sanity
 
 (setq-default
+ ;; I need to find a replacement. Might end up using Go Mono
  vz/monospace-font "Verily Serif Mono"
  vz/variable-font "Charter"
 
@@ -66,7 +67,6 @@
 ;; ** Auto-revert buffer if file is modified
 
 (global-auto-revert-mode)
-
 
 ;; ** Fonts
 

@@ -189,6 +189,8 @@
 
 ;; ** Folding text
 
+;; TODO: counsel-org-goto-like function
+
 ;; outshine improves outline-minor-mode by providing
 ;; org-mode like features
 ;; I only really use very few features,
@@ -355,7 +357,7 @@
   :straight (:type built-in)
   :functions (vz/emacs-lisp-indent-function))
 
-;;** Go
+;; ** Go
 
 (use-package go-mode
   :defer t
@@ -403,7 +405,6 @@
   ;; For that sweet ivy-prescient sorting
   (defun vz/racket--symbol-at-point-or-prompt (_ &rest args)
     (-let (((force-prompt-p prompt completions) args))
-      (message (prin1-to-string force-prompt-p))
       (let ((sap (thing-at-point 'symbol t)))
         (if (or force-prompt-p (null sap))
             (let ((s (if completions
