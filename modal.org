@@ -231,6 +231,17 @@ Possible candidate is J,K or [,]
 gj, gk
 *** TODO evil-jump
 *** TODO EOL, BOL, EOF, BOF
+*** TODO Next and previous buffer actions
+**** TODO Buffer based hydra like the window one?
+| Key | Action                                         |
+|-----+------------------------------------------------|
+| j   | Next buffer                                    |
+| k   | Previous buffer                                |
+| s   | ~ivy-buffer~                                     |
+| S   | Switch to buffer in project/current extension? |
+| k   | Kill buffer by getting a list in ivy?          |
+| n,p | Previous,next buffer                           |
+| b   | Bury buffer                                    |
 ** Summary
 | Key  | Does what?                                        |
 |------+---------------------------------------------------|
