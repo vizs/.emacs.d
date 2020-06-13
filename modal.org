@@ -1,0 +1,226 @@
+#+TITLE: On modal editing, vi, vis and acme
+This document is here to help me decide on my modal editing experience.
+DO NOTE that I'm not really a power-user of any sort so take this with
+a grain of salt.
+* What I like about vi
+Vi shines with its brilliant modal editing design. Although some
+key maps are based on legacy hardware, it still has a large number
+of mnemonics. Things like f, F, t, T all make sense but not hjkl.
+
+Commands based on textual objects is a really neat idea but I think
+the way vi implements them is quite annoying, I don't really like the
+idea of a /motion state/. I think acme does this a lot better.
+** Commands that I tend to use often
+Here is a list of commands that I use a lot
+- ;
+- .
+- f
+- w
+- A
+- a
+- %
+- 0,$
+- D
+- ci<thing>
+** Registers
+I think registers are such an amazing things but the way they are
+accessed is kind of annoying, especially the system clipboard.
+
+And Emacs does have multiple kill rings so this should not be a problem
+at all.
+** Append and Insert
+The a and i commands are the most perplexing, the way cursor
+position is handled in vi is really annoying. I almost always
+change my cursor and use a instead of ever using i because I think,
+probably not the case -- maybe a subconscious thing, append makes
+a lot more sense than insert.
+
+This especially becomes an annoyance I want to paste text whilst
+in insert/normal mode. I often do awkward movement to paste
+the text where I want it to.
+
+But Emacs does not have this awkward position so this is mostly
+non-existent. I did not realise the first time because the block
+cursor put me off -- I think hbar is a much better option when
+inserting text.
+** Action before verb
+Vi uses verb and actions to compose commands, whilst it is really
+good in some cases, it becomes really annoying in others. I think
+a much better way would be a kakoune-like approach, completely
+getting rid of normal state and being in visual mode by default.
+
+So I think I'm going to get rid of an intermediate motion state and
+replace it with a "mark region first then do action" approach.
+
+Commands like d, c would simply act on current character.
+** Change and Replace
+I think the r and c commands can be squashed into a single
+change command. r being c but without any changes.
+** The useless n and N key
+After switching to Emacs, I found rarely using n and N commands,
+I simply searched for what I wanted in ~swiper-isearch~ and pressed
+~C-j~ and ~C-k~ until I landed where I wanted it to be. So these keys
+can be used to for something else like [n]arrow.
+* On Acme
+Acme is a really wonderful text editor that is not appreciated much.
+I think a lot can be learnt from using acme. The way it uses the
+system tools to do actions is a wonderful example -- although this
+is not really the Emacs way of doing things. Plumbing is really wonderful
+and I would like to implement a proper plumbing system using
+~wand~ sometime soon.
+** Some actions that are impressive
+When you right click on the window when the cursor is after a special
+character like " { or (, it immediately selects the between "" {} ().
+I think binding this to something like V would be /really/ useful. I think
+this is a far better approach than complex chords like ci", di{, etc.
+
+This is not the only thing that is impressive about acme, it is generally
+very smart about its selection. This smartness makes it a pleasure to
+plumb text and edit it.
+** Searching in acme
+Searching in acme is dead simple, you right click on text and it moves
+to the next one, it keeps the selection moves to the next match and so
+on.
+
+~swiper-isearch~ does not quite work like this, maybe I should look
+into using ~ctrlf~ instead?
+** Acme references
+This blog post is super helpful -- https://echosa.github.io/blog/2014/06/18/lets-try-acme-ep-0-research/
+* Vis -- the most pleasant modal editing experience that I ever had
+Vis is a text editor that aims to combine the modal editing nature
+of vi and the brilliance of sam i.e., structural regexps.
+
+Vis pulls it off in a really beautiful and seamless way, sam command
+language, hereafter samlang, and multiple cursors and interchangeable
+in a sense and IMHO, vis has the best implementation of multiple
+cursors.
+** Multiple cursor implementation
+Before using vis, I never used multiple cursor and never found the
+appeal of them. But after experiencing the way vis combines
+samlang and multiple cursor, I couldn't help myself but fall in
+love with them. I tried to implement vis-like multiple cursors
+using ~evil-mc~ but I didn't really understand how the plugin
+worked so I gave up.
+*** Some implementation details
+In vis, the /main/ cursor is called the anchor and any action
+related to multiple cursor like marking the next selection
+is made relative to the anchor. One can easily move the anchor
+and when making a new cursor, the mode is changed to visual
+which makes sense IMO since you would want to select more
+text after making a cursor, you don't need to switch back to normal
+mode to make any new cursors however so you have a seamless
+experience.
+** Multiple selection actions
+Vis can transpose multiple selections which is one of the best things
+that I have came across. This would be really handy to have.
+** Samlang
+The main reason why I keep going back to vis is samlang and the
+seamless integration with modal editing.
+
+Being mainly regexp driven, samlang is really powerful and much
+nicer than ex commands like s. I often found myself doing things
+like ~x/_[a-z]/| tr '\_[a-z]' '_[A-Z]'~ when I wanted to
+capitalise strings that is separated by underscore.
+
+Samlang comes in handy when doing bulk editing and refactoring.
+~sam.el~ does not come close IMO.
+* Implementing my dream modal experience
+** Basic navigation
+I could think of two ways to do basic navigation. I could be a gamer
+and use wasd for navigation or be a vimmer and use hjkl.
+
+I already use wasd for resizing/moving windows in my window manager
+configuration and it makes a whole load of sense but binding it in Emacs
+means that I would sacrifice the d and a keys. I find it a lot easier to press
+a than i so I really want it to stick around, and I think d makes a whole
+lot more sense as a delete key than x.
+
+So for now, the basic navigation would be just hjkl
+*** Word based movement
+Emacs' bindings for word based movement makes sense M-[f]orward.
+I think binding f and b to {forward,backward}-word would be a waste.
+Binding it to H and L makes sense, in the same sense that C-{f,b} is
+move forward and backward character.
+
+I only really use w because I forget about e very soon after relearning
+for the N time. And M-f acts like e which I'm fine with so it's a win-win
+situation.
+*** Goto char
+I don't like when I have to press . after doing f<char>. I think
+a better behaviour would be to spam the character that I want to
+go to continuously and pressing escape when I'm done.
+
+That or ~avy-goto-char-in-line~ would be ideal replacement
+for f.
+
+I think I would ideally want to bind f to the first command and
+gf or F to ~avy-goto-char-in-line~.
+*** Summary
+| Action        | Key     |
+|---------------+---------|
+| Movement      | hjkl    |
+| Goto Char     | f, gf/F |
+| Word movement | H, L    |
+** Continuous key presses
+When dealing with continuous key pressing situations like
+changing window dimensions, making an hydra would be the way
+to go I think.
+
+I could derive some inspiration from this plugin -- https://github.com/jerrypnz/major-mode-hydra.el
+*** Possible hydras
+| Key | Action                                          |
+|-----+-------------------------------------------------|
+| W   | window action                                   |
+| N   | navigation keys in non textual modes like dired |
+**** Window action
+I would like the following window actions...
+| Key  | Action                                         |
+|------+------------------------------------------------|
+| hjkl | Move window left,up,down,right                 |
+| HJKL | Increase/Decrease window size                  |
+| d    | Delete window by selecting it using ace-window |
+| o    | Delete other window and quit hydra             |
+| s    | Switch window and quit hydra                   |
+| +,-  | Increase and decrease font size                |
+| r    | Reverse window configuration                   |
+** The v and V keys
+v would simply behave like the visual mode but V would behave like
+acme's right click after special character.
+
+When entering the visual "mode", the c key will kill the region
+and put you in insert mode, the d key will delete the region and put
+you in normal mode.
+
+Navigation key works like expected.
+** The s and S keys
+Quite often than not, I want to surround text on a pair of things
+or change the existing pair to something like this.
+
+The s key will surround text in pair, and the S key will replace
+the old pair with a new one.
+** Things to decide
+*** TODO Paragraph based movement
+I think {} for paragraph based movement is okay but I end up
+confusing myself, so is there a better way? I kind of want to bind
+J/K to ~forward-sexp~ or ~org-forward-something~.
+*** TODO Define/sexp based movement
+Possible candidate is J,K
+*** TODO Quick go to line
+gj, gk
+*** TODO evil-jump
+** Summary
+| Key  | Does what?                                        |
+|------+---------------------------------------------------|
+| hjkl | Move around                                       |
+| H,L  | Move backward,forward word                        |
+| v    | "visual mode"                                     |
+| V    | Acme's right click after special character action |
+| s    | Surround                                          |
+| S    | Replace surround pair                             |
+| d    | Delete                                            |
+| c    | Change                                            |
+| f    | Continuously search for character in line         |
+| gf/F | ~avy-goto-char-in-line~                             |
+| ...  | More things to decide!                            |
+* Other discussions on modal editing
+- https://www.reddit.com/r/emacs/comments/h85vzr/advice_on_modal_editing_in_emacs/
