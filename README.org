@@ -30,4 +30,4 @@ So maybe it might be worth it to make my modal configuration based around
 The main thing that I would miss is probably ~evil-repeat~ and ~evil-repeat-find-char~.
 But the latter should not be a problem anymore if I use ~avy~ for /every/ text movement.
 
-Some of this is inspired by [[Mike Zamansky's video][https://www.youtube.com/watch?v=0M6erlK57go]] on Emacs vs Vi
+Some of this is inspired by [[https://www.youtube.com/watch?v=0M6erlK57go][Mike Zamansky's video]] on Emacs vs Vi.
