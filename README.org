@@ -1,6 +1,8 @@
 #+TITLE: viz's emacs config
 I use straight.el instead of package.el because it is a lot more convenient to use
 than using package.el and a mix of ~load~.
+
+Screenshot - http://0x0.st/iWib.png
 * Conventions used
 | Functions                       | vz/asdf                |
 | Functions that return a boolean | vz/verb?               |
