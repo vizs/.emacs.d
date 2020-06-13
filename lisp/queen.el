@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+;; * Set variables and sane defaults
+;; ** Sanity
+
 (setq-default
  vz/monospace-font "Verily Serif Mono"
  vz/variable-font "Charter"
@@ -33,31 +36,49 @@
  ;; Follow links in version controlled
  vc-follow-symlinks t
 
+ ;; Try to complete as well
+ tab-always-indent 'complete
+
  ;; Indentation
  indent-tabs-mode t
  tab-width 4)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; Automatically chmod +x file if it has a shebang
-(add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
+;; ** Indentation
 
-;; Auto-revert buffer if file is modified
-(global-auto-revert-mode)
+(defun vz/prog-functional-indent-style ()
+  (when (member major-mode vz/functional-major-modes)
+    (setq indent-tabs-mode nil
+          tab-width 2)))
 
-;; Indentation
 (defvar c-basic-offset 4)
 (defvar cperl-basic-offset 4)
 (defvar python-indent 4)
 
 (add-hook 'prog-mode-hook #'vz/prog-functional-indent-style)
 
-;; Fonts
-(add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
-                                                    vz/monospace-font)))
+;; * Niceties
+;; ** Automatically chmod +x file if it has a shebang
 
-;; Display > instead of $ at the visual end of truncated line
+(add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
+
+;; ** Auto-revert buffer if file is modified
+
+(global-auto-revert-mode)
+
+
+;; ** Fonts
+
+(add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
+                                             vz/monospace-font)))
+
+;; ** Display > instead of $ at the visual end of truncated line
+
 (set-display-table-slot standard-display-table 'truncation ?>)
+
+;; ** Helper macros
+;; *** setq but with namespace!
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
@@ -65,7 +86,9 @@
   (declare (indent 1) (debug 0))
   (dolist (x (seq-partition args 2))
     (eval `(setq ,(intern (format "%s-%s" ns (car x)))
-                 ,(cadr x)))))
+            ,(cadr x)))))
+
+;; *** Formating s-expressions?
 
 ;; from u/b3n
 ;; Absolutely based
@@ -73,11 +96,13 @@
   "Format SEXP and eval it."
   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
 
-;; Bootstrap straight
+;; * Straight
+;; ** Bootstrap straight
+
 (defvar bootstrap-version)
 (let ((bootstrap-file (expand-file-name
-                          "straight/repos/straight.el/bootstrap.el"
-                          user-emacs-directory))
+                       "straight/repos/straight.el/bootstrap.el"
+                       user-emacs-directory))
       (bootstrap-version 5))
   (unless (file-exists-p bootstrap-file)
     (with-current-buffer
@@ -86,7 +111,9 @@
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
-    (load bootstrap-file nil 'nomessage))
+  (load bootstrap-file nil 'nomessage))
+
+;; ** Setup straight variables
 
 (straight-use-package 'use-package)
 (setq-ns straight
@@ -94,7 +121,9 @@
   cache-autoloads t
   vc-git-default-clone-depth 1)
 
-;; Emacs Lisp enhancers
+;; * Major helper functions
+;; ** Emacs Lisp enhancers
+
 ;; dash | list
 ;; s    | string
 ;; f    | file
@@ -121,8 +150,9 @@
        (interactive)
        (,@body))))
 (use-package asoc
-  :straight (:type git :host github
-             :repo "troyp/asoc.el"))
+  :straight (:type git :host github :repo "troyp/asoc.el"))
+
+;; ** use-packge but also load a file
 
 (defmacro vz/use-package (name file &rest body)
   "Like `use-package' but also load file located lisp/hive/FILE.el."
@@ -131,8 +161,10 @@
      ,@body
      :config
      (load-file (format "%s/lisp/hive/%s.el"
-                        user-emacs-directory
-                        (or ,file ',name)))))
+                 user-emacs-directory
+                 (or ,file ',name)))))
+
+;; ** Random helper functions
 
 (defun ~ (file)
   "Path to FILE respective to $HOME"
@@ -142,6 +174,8 @@
   "Choose a random element from list."
   (nth (random (1- (length list))) list))
 
+;; ** Font related functions
+
 (defun vz/set-monospace-faces (faces)
   (-each faces
     (fn: set-face-attribute <> nil :family vz/monospace-font)))
@@ -150,16 +184,15 @@
   (-each faces
     (fn: set-face-attribute <> nil :family vz/variable-font)))
 
-(defun vz/prog-functional-indent-style ()
-  (when (member major-mode vz/functional-major-modes)
-    (setq indent-tabs-mode nil
-          tab-width 2)))
+;; ** Quality of life packages
+;; *** Easier binds
 
-;; Quality of life improvements
 (use-package general
   :init
   (setq general-override-states '(insert emacs hybrid normal
                                   visual motion operator replace)))
+
+;; *** Saner switch window and goto-char motion
 
 (use-package avy)
 (use-package ace-window
@@ -172,28 +205,31 @@
     ;; Only consider the windows in the active frame
     scope 'frame))
 
+;; *** Selection engine
+
 (use-package ivy
   :after general
   :general
   (:keymaps 'ivy-minibuffer-map
-    "C-p" nil
-    "C-n" nil
-    "<escape>" #'minibuffer-keyboard-quit
-    "<C-up>"   #'ivy-minibuffer-grow
-    "<C-down>" #'ivy-minibuffer-shrink
-    "C-s"      #'ivy-avy
-    "C-j"      #'ivy-next-line
-    "C-k"      #'ivy-previous-line
-    "C-u"      #'ivy-scroll-down-command
-    "C-d"      #'ivy-scroll-up-command)
+            "C-p" nil
+            "C-n" nil
+            "<escape>" #'minibuffer-keyboard-quit
+            "<C-up>"   #'ivy-minibuffer-grow
+            "<C-down>" #'ivy-minibuffer-shrink
+            "C-s"      #'ivy-avy
+            "C-j"      #'ivy-next-line
+            "C-k"      #'ivy-previous-line
+            "C-u"      #'ivy-scroll-down-command
+            "C-d"      #'ivy-scroll-up-command)
   (:keymaps 'ivy-switch-buffer-map
-    "C-k" nil
-    "C-k"   #'ivy-previous-line
-    "C-M-K" #'ivy-switch-buffer-kill)
+            "C-k" nil
+            "C-k"   #'ivy-previous-line
+            "C-M-K" #'ivy-switch-buffer-kill)
   :config
   (setq-ns ivy
     count-format "[%d/%d] "
     use-virtual-buffers t
+    do-completion-in-region nil
     wrap t
     height 15)
   (require 'ivy-avy)
@@ -238,6 +274,8 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
   (defun vz/counsel-M-x-prompt (ofun &rest args)
     "pls ")
   (advice-add 'counsel--M-x-prompt :around #'vz/counsel-M-x-prompt))
+
+;; *** Blink cursor on certain actions
 
 (use-package beacon
   :config

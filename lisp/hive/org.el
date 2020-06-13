@@ -113,6 +113,7 @@
   :keymaps 'org-mode-map
   :prefix "SPC"
   "oel" #'org-latex-export-to-latex
+  "oil" #'org-insert-link
   "olp" #'org-latex-preview
   "olc" #'org-cdlatex-mode
   "of"  #'org-sparse-tree

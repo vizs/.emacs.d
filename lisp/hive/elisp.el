@@ -9,6 +9,8 @@
 
 (defun vz/elisp-init ()
   (flymake-mode)
+  (aggressive-indent-mode)
+  (eros-mode t)
   ;; Don't check docs
   (remove-hook 'flymake-diagnostic-functions
                #'elisp-flymake-checkdoc t))
@@ -16,6 +18,7 @@
 (add-hook 'emacs-lisp-mode-hook #'vz/elisp-init)
 
 ;; From https://www.reddit.com/r/emacs/comments/d7x7x8/finally_fixing_indentation_of_quoted_lists/
+
 (advice-add #'calculate-lisp-indent :override #'vz/calculate-lisp-indent)
 
 (defun vz/calculate-lisp-indent (&optional parse-start)

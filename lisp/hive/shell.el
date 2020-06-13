@@ -1,11 +1,17 @@
-;; -*- Lexical-binding: t; -*-
+;; -*- lexical-binding: t; -*-
+
+;; * Basic configuration
+;; ** Set path to shell
 
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
-;; Disable colours in shell-mode
+;; ** Disable colours in shell-mode
+
 (setf ansi-color-for-comint-mode 'filter)
 (setq-default shell-font-lock-keywords nil
               comint-buffer-maximum-size 2000)
+
+;; ** Track $PWD more efficiently
 
 ;; from http://0x0.st/Hroa
 (defun shell-sync-dir-with-prompt (string)
@@ -19,6 +25,24 @@
         (replace-match "" t t string 0))
     string))
 
+;; ** Initialise
+
+(defun vz/shell-mode-init ()
+  (shell-dirtrack-mode nil)
+  (add-hook 'comint-output-filter-function #'comint-truncate-buffer)
+  (add-hook 'comint-output-filter-function #'comint-watch-for-password-prompt)
+  (setq-local
+   ;; comint-prompt-read-only t
+   inhibit-field-text-motion t
+   comint-process-echoes t)
+  (setq Man-notify-method 'quiet)
+  (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt nil t))
+
+(add-hook 'shell-mode-hook #'vz/shell-mode-init)
+
+;; * Helper functions
+;; ** Are we inside a shell?
+
 ;; TODO: Maybe we shouldn't consider nix-shell shells?
 
 (defun vz/inside-shell? (&optional buffer)
@@ -29,10 +53,15 @@
         (s-equals? (asoc-get (process-attributes child) 'comm)
                    (f-filename explicit-shell-file-name)))))
 
+;; * Shell history tracking
 ;; TODO: Maybe track command run in nix-shell separately?
+
+;; ** Variables
 
 (defvar vz/shell-history-cache-file (~ ".cache/mksh_history.el")
   "Path to file to save elisp data about shell history")
+
+;; ** Functions
 
 (defun vz/shell-history--get ()
   "Get shell history"
@@ -63,14 +92,13 @@
             (asoc-values)
             (-flatten)))))
 
-(defun vz/shell-history-input-hook (string)
-  "Function to add to `comint-input-filter-functions'"
-  (when (and (eq major-mode 'shell-mode)
-             (vz/inside-shell?))
-    (vz/shell-history--write string))
-  t)
-
-(add-hook 'comint-input-filter-functions #'vz/shell-history-input-hook)
+(add-hook 'comint-input-filter-functions
+          (defun vz/shell-history-input-hook (string)
+            "Function to add to `comint-input-filter-functions'"
+            (when (and (eq major-mode 'shell-mode)
+                       (vz/inside-shell?))
+              (vz/shell-history--write string))
+            t))
 
 (defun vz/shell-insert-from-hist ()
   "Search for command in history and run it"
@@ -86,7 +114,9 @@
           (comint-delete-input))
         (comint-send-string process (concat cmd "\n"))
         (comint-add-to-input-history cmd)))))
-        ;;(vz/term-minor-mode-set-title cmd)))))
+;;(vz/term-minor-mode-set-title cmd)))))
+
+;; * History from mksh
 
 (defun vz/shell-mksh-history ()
   "Returns current shell's history as a list"
@@ -109,6 +139,8 @@
         ;;(vz/term-minor-mode-set-title cmd)
         (vz/shell-history--write cmd)))))
 
+;; * Jump to directory alias
+
 (defun vz/shell-get-dir-alias ()
   (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
   (s-split "\n" (f-read "/tmp/diralias")))
@@ -128,12 +160,17 @@
                   (format "cd ~%s\n"))))
         (comint-send-string proc cmd)
         (comint-add-to-input-history cmd))
-        ;;(vz/term-minor-mode-set-title cmd))
+      ;;(vz/term-minor-mode-set-title cmd))
       (unless (s-blank? input)
         (comint-send-string proc input)))))
 
+;; * Popup a shell in `default-directory'
+;; ** Variables
+
 (defvar vz/popup-shells nil
   "List of all shell buffers opened by vz/popup-shell")
+
+;; ** Functions
 
 (defun vz/popup-shell--add (buffer)
   "Add BUFFER to vz/popup-shells and add a process sentinel"
@@ -183,6 +220,8 @@ to it. If nothing is found, create a new buffer"
         (vz/popup-shell--add (shell (format "%s*"
                                             (make-temp-name "*shell-")))))))))
 
+;; * Jump to prompt in ivy
+
 (defun vz/shell--get-prompt (prompts point)
   "Return all prompts in an alist (prompt-string . point)"
   (save-excursion
@@ -211,12 +250,10 @@ to it. If nothing is found, create a new buffer"
    (goto-char))
   (vz/beacon-highlight))
 
-(defun vz/shell-send-keysequence-to-process (key)
-  "Send keysequence to current running process"
-  (interactive "sPress keysequence:")
-  (comint-send-string (get-buffer-process (current-buffer)) key))
-
+;; * Emacs frame as terminal
 ;; TODO: Auto-kill buffer by adding a function to `delete-frame-functions'
+
+;; ** Variables
 
 (define-minor-mode vz/term-minor-mode
   "Minor mode for binding ^D in *term* buffers")
@@ -226,6 +263,8 @@ to it. If nothing is found, create a new buffer"
 
 (make-variable-buffer-local 'vz/term-minor-mode--frame)
 
+;; ** Functions
+
 (defun vz/term-minor-mode-sentinel (process output)
   "Process sentinel to auto kill associated buffer and frame in term-mode"
   (unless (process-live-p process)
@@ -234,7 +273,7 @@ to it. If nothing is found, create a new buffer"
                         'vz/term-minor-mode--frame)))
       (kill-buffer b)
       (when (frame-live-p f)
-          (delete-frame f)))))
+        (delete-frame f)))))
 
 (defun vz/kill-dead-term ()
   "Remove all dead *term* buffers"
@@ -260,6 +299,13 @@ to it. If nothing is found, create a new buffer"
 
 ;; (add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
 
+;; * Keybindings
+
+(defun vz/shell-send-keysequence-to-process (key)
+  "Send keysequence to current running process"
+  (interactive "sPress keysequence:")
+  (comint-send-string (get-buffer-process (current-buffer)) key))
+
 (general-nmap
   "SPC ps" #'vz/popup-shell)
 
@@ -278,17 +324,3 @@ to it. If nothing is found, create a new buffer"
   "C-?" #'vz/shell-insert-from-mksh-hist
   "C-d" #'comint-send-eof
   "C-j" #'vz/shell-jump-to-dir)
-
-(defun vz/shell-mode-init ()
-  (shell-dirtrack-mode nil)
-  (add-hook 'comint-output-filter-function #'comint-truncate-buffer)
-  (add-hook 'comint-output-filter-function #'comint-watch-for-password-prompt)
-  (setq-local
-   ;; comint-prompt-read-only t
-   inhibit-field-text-motion t
-   comint-process-echoes t
-   vz/jump-func #'vz/shell-jump-to-prompt)
-   (setq Man-notify-method 'quiet)
-  (add-hook 'comint-preoutput-filter-functions #'shell-sync-dir-with-prompt nil t))
-
-(add-hook 'shell-mode-hook #'vz/shell-mode-init)
