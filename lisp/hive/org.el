@@ -22,55 +22,66 @@
 ;; TODO: setup org-protocol
 
 (setq-ns org
- add-colon-after-tag-completion t
- default-notes-file (~ "doc/org/notes.org")
- directory (~ "doc/org")
- preview-latex-image-directory (~ ".cache/org-ltximg/")
- ; file-apps
-         
- ;; indentation
- indent-indentation-per-level 1
- indent-mode-turns-on-hiding-stars t
- src-preserve-indentation t
- ; indent-mode-turns-off-org-adapt-indentation nil
+  add-colon-after-tag-completion t
+  default-notes-file (~ "doc/org/notes.org")
+  directory (~ "doc/org")
+  preview-latex-image-directory (~ ".cache/org-ltximg/")
+  ;; file-apps
 
- ;; style
- highlight-latex-and-related '(latex)
- hidden-keywords '(title author)
- hide-emphasis-markers t
- hide-leading-stars t ; indent mode also hides stars
- fontify-emphasized-text t
- fontify-done-headline t
- fontify-quote-and-verse-blocks t
- fontify-whole-heading-line t
- src-fontify-natively nil
+  ;; indentation
+  indent-indentation-per-level 1
+  indent-mode-turns-on-hiding-stars t
+  src-preserve-indentation t
+  ;; indent-mode-turns-off-org-adapt-indentation nil
 
- preview-latex-default-process 'dvisvgm
+  ;; style
+  highlight-latex-and-related '(latex)
+  hidden-keywords '(title author)
+  hide-emphasis-markers t
+  hide-leading-stars t ; indent mode also hides stars
+  fontify-emphasized-text t
+  fontify-done-headline t
+  fontify-quote-and-verse-blocks t
+  fontify-whole-heading-line t
+  src-fontify-natively nil
 
- capture-templates
- `(("d" "Dump links and book names or whatever" entry
-    (file "dump.org")
-    "* TODO %?
+  preview-latex-default-process 'dvisvgm
+
+  capture-templates
+  `(("d" "Dump links and book names or whatever" entry
+     (file "dump.org")
+     "* TODO %?
 :PROPERTIES:
 :type: %^{Type|anime|emacs|article|music|manga|book|misc}
 :added: %T
 :END:
 %:link" :prepend t :kill-buffer t)
-   ("e" "Emacs notes" entry
-    (file+headline ,(~ "doc/notes.org") "Emacs")
-    "* %?")
-   ("c" "Chemistry notes" entry
-    (file+headline ,(~ "doc/school/g12/notes.org") "Chemistry")
-    "* %?")
-   ("s" "CS notes" entry
-    (file+headline ,(~ "doc/school/g12/notes.org") "CS")
-    "* %?")
-   ("p" "Physics notes" entry
-    (file+headline ,(~ "doc/school/g12/notes.org") "Physics")
-    "* %?")
-   ("m" "Maths notes" entry
-    (file+headline ,(~ "doc/school/g12/notes.org") "Maths")
-    "* %?")))
+    ("q" "Quote" entry
+     (file ,(~ "doc/dump.org"))
+     "* %^{quote|Quote %U|}
+:PROPERTIES:
+:type: quote
+:added: %T
+:END:
+#+begin_quote
+%?
+#+end_quote
+" :prepend t :kill-buffer t)
+    ("e" "Emacs notes" entry
+     (file+headline ,(~ "doc/notes.org") "Emacs")
+     "* %?")
+    ("c" "Chemistry notes" entry
+     (file+headline ,(~ "doc/school/g12/notes.org") "Chemistry")
+     "* %?")
+    ("s" "CS notes" entry
+     (file+headline ,(~ "doc/school/g12/notes.org") "CS")
+     "* %?")
+    ("p" "Physics notes" entry
+     (file+headline ,(~ "doc/school/g12/notes.org") "Physics")
+     "* %?")
+    ("m" "Maths notes" entry
+     (file+headline ,(~ "doc/school/g12/notes.org") "Maths")
+     "* %?")))
 
 (defun vz/org-mode-style ()
   (let ((faces '(org-table org-link org-code org-block org-drawer
@@ -87,7 +98,9 @@
     (set-face-attribute 'org-level-1 nil :height height1)
     (set-face-attribute 'org-level-2 nil :height height2)
     (set-face-attribute 'org-document-title nil :height height0 :weight 'bold)
-    (set-face-attribute 'org-quote nil :slant 'italic)
+    (set-face-attribute 'org-quote nil
+                        :family vz/variable-font
+                        :slant 'italic)
     (set-face-attribute 'org-block-begin-line nil
                         :height height3 :weight 'bold)
     (set-face-attribute 'org-block-end-line nil
