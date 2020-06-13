@@ -58,16 +58,21 @@ in the same vertical column"
 
 (define-key global-map (kbd "C-k") nil)
 
+;; Get back M-.
+(define-key evil-normal-state-map (kbd "M-.") nil)
+
 (general-nmap
   :keymaps 'override
   "gc"      #'comment-line
+  "gj"      #'avy-goto-line-below
+  "gk"      #'avy-goto-line-above
   "/"       #'swiper-isearch
   "?"       #'swiper-isearch-backward
   "SPC rc"  #'vz/reload-config
   "SPC b"   #'ivy-switch-buffer
   "K"       #'previous-buffer
   "J"       #'next-buffer
-  "U"       #'universal-argument
+  "M-u"     #'universal-argument
   "C-w C-h" #'vz/shrink-other-windows
   "C-w S"   #'vz/split-window-below-ask
   "C-w V"   #'vz/split-window-right-ask
@@ -88,8 +93,6 @@ in the same vertical column"
   "SPC ff"  #'counsel-find-file
   "SPC j"   #'counsel-imenu
   "SPC :"   #'eval-expression
-  "gj"      #'avy-goto-line-below
-  "gk"      #'avy-goto-line-above
   "gf"      #'avy-goto-char
   "ga"      #'align-regexp
   "gF"      #'avy-goto-timer

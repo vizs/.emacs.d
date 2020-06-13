@@ -35,7 +35,6 @@
          "|"))
     ""))
 
-
 ;; From https://0x0.st/oYX8
 (defun vz/mode-line-fill (face except)
   (propertize " "

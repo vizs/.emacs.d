@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- Lexical-binding: t; -*-
 
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
 
@@ -63,12 +63,14 @@
             (asoc-values)
             (-flatten)))))
 
-(add-hook 'comint-input-filter-functions
-          (fn (when (and
-                     (eq major-mode 'shell-mode)
-                     (vz/inside-shell?))
-                (vz/shell-history--write <>))
-              t))
+(defun vz/shell-history-input-hook (string)
+  "Function to add to `comint-input-filter-functions'"
+  (when (and (eq major-mode 'shell-mode)
+             (vz/inside-shell?))
+    (vz/shell-history--write string))
+  t)
+
+(add-hook 'comint-input-filter-functions #'vz/shell-history-input-hook)
 
 (defun vz/shell-insert-from-hist ()
   "Search for command in history and run it"

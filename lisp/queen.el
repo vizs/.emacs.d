@@ -1,4 +1,4 @@
-; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; -*-
 
 (setq-default
  vz/monospace-font "Verily Serif Mono"
@@ -15,12 +15,15 @@
  keep-new-versions 5
  keep-old-versions 2
  version-control t
- auto-save-file-transforms '((".*" "~/.cache/emacs-autosave/" t))
+ auto-save-file-name-transforms '((".*" "~/.cache/emacs-autosave/" t))
  auto-save-list-file-prefix "~/.cache/emacs-autosave/"
  create-lockfiles nil
 
  cursor-in-non-selected-windows nil
  custom-file "/dev/null"
+
+ ;; Insert newline at EOF
+ require-final-newline t
 
  gc-cons-threshold 16777216 ;; 16M
 
@@ -58,6 +61,7 @@
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
+  (declare (indent 1))
   (dolist (x (seq-partition args 2))
     (eval `(setq ,(intern (format "%s-%s" ns (car x)))
                  ,(cadr x)))))
@@ -108,17 +112,18 @@
     "Like `fn' but interactive"
     `(lambda ()
        (interactive)
-       (,@body)))
+       ,@body))
   (defmacro fn:! (&rest body)
     "Like `fn:' but interactive"
     `(lambda ()
        (interactive)
-       ,@body)))
+       (,@body))))
 (use-package asoc
   :straight (:type git :host github
              :repo "troyp/asoc.el"))
 
 (defmacro vz/use-package (name file &rest body)
+  (declare (indent 2))
   `(use-package ,name
      ,@body
      :config
@@ -222,7 +227,9 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 (use-package counsel
   :after ivy
   :config
-  (setq-default counsel-find-file-at-point t)
+  (setq-ns counsel
+    find-file-at-point t
+    org-headline-display-todo t)
   (defun vz/counsel-M-x-prompt (ofun &rest args)
     "pls ")
   (advice-add 'counsel--M-x-prompt :around #'vz/counsel-M-x-prompt))

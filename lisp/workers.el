@@ -1,5 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 
+(defun pass (passwd)
+  "Get password using `pass'"
+  (s-replace-regexp "\n$" "" (shell-command-to-string
+                              (format "pass get %s" passwd))))
+
 (defun vz/reload-config ()
   "Reload init.el."
   (interactive)
@@ -32,7 +37,7 @@
   :config
   (setq-ns prescient
     history-length 150
-    ;filter-method '(literal regexp initialism fuzzy)
+    ;;  filter-method '(literal regexp initialism fuzzy)
     save-file (~ ".cache/emacs-prescient.el"))
   (prescient-persist-mode))
 
@@ -58,7 +63,13 @@
   (setq-default
    fringe-indicator-alist (asoc-put! fringe-indicator-alist
                                      'continuation
-                                     '(nil nil)))
+                                     '(nil nil)
+                                     t))
+  (setq-default
+   fringe-indicator-alist (asoc-put! fringe-indicator-alist
+                                     'truncation
+                                     '(nil nil)
+                                     t))
   (fringe-mode '(5 . 0)))
 
 (use-package flyspell
@@ -96,25 +107,33 @@
 
 ;; I actually prefer to center /everything/
 ;; Does not work with vertical splits
-(use-package perfect-margin
-  :defer t
-  :custom
-  (perfect-margin-ignore-regexps '("^\\*term-[0-9]+\\*"))
-  (perfect-margin-ignore-filters '())
-  (perfect-margin-visible-width   90)
-  :general (:states 'normal :keymaps 'override
-    "SPC C" #'perfect-margin-mode))
+;;(use-package perfect-margin
+;;  :defer t
+;;  :custom
+;;  (perfect-margin-ignore-regexps '("^\\*term-[0-9]+\\*"))
+;;  (perfect-margin-ignore-filters '())
+;;  (perfect-margin-visible-width   90))
 
-(straight-use-package 'auctex)
-(straight-use-package 'cdlatex)
+(use-package olivetti
+  :defer t
+  :general
+  (:keymaps 'override :states 'normal
+   "SPC C" #'olivetti-mode)
+  :config
+  (setq-ns olivetti
+    body-width 80
+    enable-visual-line-mode nil))
 
 (vz/use-package org nil
   :straight (:type built-in)
   :defer t
-  :general (:keymaps 'override :states 'normal
-    "SPC oc" #'org-capture
-    "SPC oj" #'counsel-org-goto-all)
+  :general
+  (:keymaps 'override :states 'normal
+   "SPC oc" #'org-capture
+   "SPC oj" #'counsel-org-goto-all)
   :init
+  (straight-use-package 'auctex)
+  (straight-use-package 'cdlatex)
   (use-package org-bullets
     :hook (org-mode . org-bullets-mode)
     :defer t
@@ -127,14 +146,11 @@
 (vz/use-package circe "irc"
   :defer t
   :functions (vz/circe-jump-irc vz/circe-jump-discord)
-  :general (:keymaps 'override :states 'normal :prefix "SPC i"
-    "i" #'vz/circe-jump-irc
-    "d" #'vz/circe-jump-discord)
+  :general
+  (:keymaps 'override :states 'normal :prefix "SPC i"
+   "i" #'vz/circe-jump-irc
+   "d" #'vz/circe-jump-discord)
   :init
-  (defun pass (passwd)
-    "Get password"
-    (s-replace-regexp "\n$" "" (shell-command-to-string
-                                (format "pass get %s" passwd))))
   (defun pass-irc (serv)
     (fn: pass (format "irc/%s" serv)))
   (defun pass-discord (serv)
@@ -149,17 +165,17 @@
   :straight (:type built-in)
   :functions (vz/comint-send-input)
   :general
-   (:keymaps 'comint-mode-map :states 'normal
-    "<RET>" #'vz/comint-send-input
-    "[w"    #'comint-write-output
-    "[d"    #'comint-delete-output
-    "[j"    #'comint-next-prompt
-    "[k"    #'comint-previous-prompt
-    "[c"    #'comint-clear-buffer)
+  (:keymaps 'comint-mode-map :states 'normal
+   "<RET>" #'vz/comint-send-input
+   "[w"    #'comint-write-output
+   "[d"    #'comint-delete-output
+   "[j"    #'comint-next-prompt
+   "[k"    #'comint-previous-prompt
+   "[c"    #'comint-clear-buffer)
   (:keymaps 'comint-mode-map :states 'insert
-    "<S-return>" #'comint-accumulate)
+   "<S-return>" #'comint-accumulate)
   (:states 'visual :keymaps 'comint-mode-map
-    "<RET>" #'vz/comint-send-input)
+   "<RET>" #'vz/comint-send-input)
   :config
   (defun vz/comint-send-input (&optional start end)
     "Send region if present, otherwise current line to current buffer's process"
@@ -202,12 +218,13 @@
   :hook (prog-mode . company-mode)
   :config
   (setq-ns company
-   require-match nil
-   idle-delay 0.2
-   tooltip-limit 10
-   minimum-prefix-length 2)
-  (general-define-key
-   :keymaps 'company-active-map
+    require-match nil
+    idle-delay 0.2
+    tooltip-limit 10
+    show-numbers t
+    minimum-prefix-length 2)
+  :general
+  (:keymaps 'company-active-map
    "M-n" nil
    "M-p" nil
    "C-j" (fn! (company-complete-common-or-cycle 1))
@@ -221,12 +238,12 @@
 (use-package hl-todo
   :defer t
   :hook (prog-mode . hl-todo-mode)
+  :general
+  (:keymaps 'normal :prefix "["
+   "j" #'hl-todo-next
+   "k" #'hl-todo-previous)
   :config
-  (setq hl-todo-highlight-punctuation ":")
-  (general-nmap
-    :prefix "["
-    "j" #'hl-todo-next
-    "k" #'hl-todo-previous))
+  (setq hl-todo-highlight-punctuation ":"))
 
 (use-package ws-butler
   :config (ws-butler-global-mode))
@@ -236,11 +253,11 @@
   :functions (vz/edit-indirect-paragraph)
   :general
   (:keymaps 'override :prefix "SPC" :states '(normal visual)
-    "nr" #'edit-indirect-region
-    "np" #'vz/edit-indirect-paragraph)
+   "nr" #'edit-indirect-region
+   "np" #'vz/edit-indirect-paragraph)
   (:keymaps 'edit-indirect-mode-map :states 'normal
-    "q" #'edit-indirect-commit
-    "Q" #'edit-indirect-abort)
+   "q" #'edit-indirect-commit
+   "Q" #'edit-indirect-abort)
   :config
   (setq edit-indirect-guess-mode-function
         (fn: funcall (with-current-buffer <> major-mode)))
@@ -253,10 +270,10 @@
   :defer t
   :hook
   (before-save . gofmt-before-save)
-  (go-mode . flymake-mode)
-  :general (:states 'normal :prefix "SPC" :keymaps 'go-mode-map
-    "df" #'godef-describe
-    "j" #'godef-jump)
+  :general
+  (:states 'normal :prefix "SPC" :keymaps 'go-mode-map
+   "df" #'godef-describe
+   "j" #'godef-jump)
   :config
   ;; Cleaned up flymake-go
   (defun vz/flymake-go ()
@@ -264,8 +281,10 @@
                      (flymake-proc-init-create-temp-buffer-copy
                       'flymake-proc-create-temp-inplace))))
   (add-hook 'go-mode-hook
-            (fn (add-to-list 'flymake-proc-allowed-file-name-masks
-                             '("\\.go\\'" vz/flymake-go)))
+            (defun vz/go-mode-init ()
+              (flymake-mode)
+              (add-to-list 'flymake-proc-allowed-file-name-masks
+                           '("\\.go\\'" vz/flymake-go)))
             nil t))
 
 (use-package racket-mode
@@ -274,14 +293,19 @@
   (racket-mode . racket-unicode-input-method-enable)
   (racket-mode . aggressive-indent-mode)
   (racket-mode . racket-xp-mode)
-  :general (:states '(normal visual) :keymaps 'racket-mode-map
-    "C-e"     #'racket-eval-last-sexp
-    "SPC rsr" #'racket-send-region
-    "SPC rsd" #'racket-send-definition
-    "SPC rse" #'racket-eval-last-sexp
-    "SPC df"  #'racket-xp-describe
-    "SPC d."  #'racket-xp-visit-definition)
+  :general
+  (:states '(normal visual) :keymaps 'racket-mode-map
+   "C-e"     #'racket-eval-last-sexp
+   "SPC rsr" #'racket-send-region
+   "SPC rsd" #'racket-send-definition
+   "SPC rse" #'racket-eval-last-sexp
+   "SPC df"  #'racket-xp-describe
+   "SPC d."  #'racket-xp-visit-definition)
   :config
+  (add-hook 'racket-xp-mode-hook
+            (defun vz/racket-xp-mode-init ()
+              (remove-hook 'pre-display-functions
+                           #'racket-xp-pre-redisplay t)))
   (defun vz/racket--symbol-at-point-or-prompt (ofun &rest args)
     (-let (((force-prompt-p prompt completions) args))
       (message (prin1-to-string force-prompt-p))
@@ -310,12 +334,13 @@
   :defer t
   :straight (:type built-in)
   ;; :hook (python-mode . run-python)
-  :general (:states 'normal :prefix "SPC" :keymaps 'python-mode-map
-    "rsr" #'python-shell-send-region
-    "rsd" #'python-shell-send-defun
-    "rsf" #'python-shell-send-buffer
-    "rsF" #'python-shell-send-file
-    "df"  #'python-describe-at-point)
+  :general
+  (:states 'normal :prefix "SPC" :keymaps 'python-mode-map
+   "rsr" #'python-shell-send-region
+   "rsd" #'python-shell-send-defun
+   "rsf" #'python-shell-send-buffer
+   "rsF" #'python-shell-send-file
+   "df"  #'python-describe-at-point)
   :config
   (setq-ns python-shell
     interpreter "python3"
@@ -331,3 +356,7 @@
   :hook (scheme-mode . aggressive-indent-mode)
   :config
   (setq scheme-program-name "csi"))
+
+(vz/use-package elisp-mode "elisp"
+  :straight (:type built-in)
+  :functions (vz/emacs-lisp-indent-function))
