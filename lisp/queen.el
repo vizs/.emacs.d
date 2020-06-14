@@ -26,6 +26,11 @@
  cursor-in-non-selected-windows nil
  custom-file "/dev/null"
 
+ ;; Startup stuff
+ initial-scratch-message nil
+ inhibit-startup-screen t
+ initial-buffer-choice t
+
  ;; Insert newline at EOF
  require-final-newline t
 

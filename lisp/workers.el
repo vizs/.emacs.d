@@ -200,6 +200,11 @@
   :hook (prog-mode . outshine-mode)
   :config
   ;; Might be a very bad idea
+  (asoc-put! counsel-outline-settings
+             'emacs-lisp-mode
+             '(:outline-regexp ";; [*]+[\s\t]+"
+               :outline-level counsel-outline-level-emacs-lisp)
+             t)
   (setq-default
    outshine-oldschool-elisp-outline-regexp-base "[*]\\{1,8\\}")
   (setq-ns outshine
@@ -209,6 +214,7 @@
   (add-hook 'outshine-mode-hook
             (defun vz/outshine-mode-init ()
               (general-nmap
+                :keymaps 'outshine-mode
                 "TAB"       #'outshine-cycle
                 "<backtab>" #'outshine-cycle-buffer
                 "M-RET"     #'outshine-insert-heading

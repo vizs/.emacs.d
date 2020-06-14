@@ -189,10 +189,10 @@ in the same vertical column"
     :init-value nil
     :lighter evil-mc-mode-line
     (if evil-mc-mode
-         (evil-mc-define-vars)
-         (evil-mc-initialize-vars)
-         (evil-mc-initialize-hooks)
-        (evil-mc-teardown-hooks)))
+        (evil-mc-define-vars)
+      (evil-mc-initialize-vars)
+      (evil-mc-initialize-hooks)
+      (evil-mc-teardown-hooks)))
   (put 'vz/evil-mc-mode 'permanent-local t)
 
   (define-globalized-minor-mode vz/global-evil-mc-mode
