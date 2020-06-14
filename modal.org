@@ -310,7 +310,8 @@ M-j, M-k
 | Alt-f     | ~avy-goto-char-in-line~                             |
 | Alt-C-f   | ~avy-goto-char-timer~                               |
 | Alt-C-S-f | Search for string in current project              |
-| W         | Window hydra                                      |
+| w         | Window hydra                                      |
+| b         | Buffer hydra                                      |
 | n/N       | Narrow region stuff                               |
 | ...       | More things to decide!                            |
 *** Hydra
@@ -325,7 +326,12 @@ M-j, M-k
 | L   | Increase width               |
 | J   | Increase height              |
 | K   | Decrease height              |
-| s   | ace-window                   |
+| o   | ace-window                   |
+| O   | Delete other windows         |
+| s   | Split horizontally           |
+| S   | Ask and split horizontally   |
+| v   | Split vertically             |
+| V   | Ask and split vertically     |
 | d   | ace-kill-window              |
 | q   | save and quit current window |
 **** Buffer
