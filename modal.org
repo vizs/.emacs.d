@@ -125,6 +125,12 @@ capitalise strings that is separated by underscore.
 Samlang comes in handy when doing bulk editing and refactoring.
 ~sam.el~ does not come close IMO.
 * Implementing my dream modal experience
+My modal experience is not about doing things with as less key
+strokes as possible, I don't think it is necessary. I want to be able to
+edit text when my brain is really fuzzy and tired, I want a dead
+simple interface. So I would rather spam keys than come about with
+complex grammar on the spot. As such, things like ctw will be
+non-existent and will be replaced by ~expand-region~.
 ** Basic navigation
 I could think of two ways to do basic navigation. I could be a gamer
 and use wasd for navigation or be a vimmer and use hjkl.
@@ -161,6 +167,39 @@ gf or F to ~avy-goto-char-in-line~.
 | hjkl    | Movement      |
 | f, gf/F | Goto Char     |
 | H, L    | Word movement |
+** Using modifiers vs introducing new keys
+I don't use terminal Emacs so I can bind things like C-m to something else
+and that would not affect the enter key. I also like the way Emacs uses
+alternate modifiers to bring about a new scope. For example, C-f is
+forward character but M-f is forward word, the scope of the jump is changed
+with the change in the modifier key.
+
+I personally think that is a brilliant idea and want to do something like that
+myself.
+** Jumping to text -- the find command
+Most probably, the only command that I use a lot is f in vi, and honestly
+I would like to use / more but it is placed in an awkward position and its
+behaviour is just wack, so I don't use it.
+
+I believe that f command is the fastest way to navigate through text.
+And I also like how F is the backwards version of f. Keeping this,
+the modifier key and the purpose of Alt being an /alternate/ key, I think
+overloading f with multiple purposes would be really nice.
+
+Alt would be an /alternate/ way of finding things -- so it will use ~avy~
+to jump. If ctrl or ctrl+shift is used with Alt, it will increase the scope
+of the search command.
+*** Find commands
+Here's what I think will make sense
+| Key     | Find's scope                           |
+|---------+----------------------------------------|
+| f       | Search character forward continuously  |
+| F       | Search character backward continuously |
+| C-f     | Search for string forward              |
+| C-S-f   | Search for string backward             |
+| M-f     | Jump to character using ~avy~            |
+| M-C-f   | ~avy-goto-char-timer~                    |
+| M-C-S-f | Search for string in current project   |
 ** Continuous key presses
 When dealing with continuous key pressing situations like
 changing window dimensions, making an hydra would be the way
@@ -179,13 +218,15 @@ I would like the following window actions...
 | hjkl | Move window left,up,down,right                 |
 | HJKL | Increase/Decrease window size                  |
 | d    | Delete window by selecting it using ace-window |
-| o    | Delete other window and quit hydra             |
+| o    | Delete other windows and quit hydra            |
+| x/q  | Kill current window                            |
 | s    | Switch window and quit hydra                   |
 | +,-  | Increase and decrease font size                |
 | r    | Reverse window configuration                   |
 ** The v and V keys
 v would simply behave like the visual mode but V would behave like
-acme's right click after special character.
+acme's right click after special character. If V cannot find a special
+character, it would simply select the thing at point.
 
 When entering the visual "mode", the c key will kill the region
 and put you in insert mode, the d key will delete the region and put
@@ -221,42 +262,82 @@ Possible text objects include,
 - Block
 - Define
 ** Things to decide
-*** TODO Paragraph based movement
+*** DONE Paragraph based movement
 I think {} for paragraph based movement is okay but I end up
 confusing myself, so is there a better way? I kind of want to bind
 J/K to ~forward-sexp~ or ~org-forward-something~.
-*** TODO Define/sexp based movement
+*** DONE Define/sexp based movement
 Possible candidate is J,K or [,]
-*** TODO Quick go to line
-gj, gk
+*** DONE Quick go to line
+M-j, M-k
+*** TODO Zap commands?
 *** TODO evil-jump
 *** TODO EOL, BOL, EOF, BOF
-*** TODO Next and previous buffer actions
-**** TODO Buffer based hydra like the window one?
+*** DONE Next and previous buffer actions
+**** DONE Buffer based hydra like the window one?
 | Key | Action                                         |
 |-----+------------------------------------------------|
 | j   | Next buffer                                    |
 | k   | Previous buffer                                |
 | s   | ~ivy-buffer~                                     |
 | S   | Switch to buffer in project/current extension? |
-| k   | Kill buffer by getting a list in ivy?          |
-| n,p | Previous,next buffer                           |
+| K   | Kill buffer by getting a list in ivy?          |
 | b   | Bury buffer                                    |
+| r   | Revert buffer                                  |
 ** Summary
-| Key  | Does what?                                        |
-|------+---------------------------------------------------|
-| hjkl | Move around                                       |
-| H,L  | Move backward,forward word                        |
-| v    | "visual mode"                                     |
-| V    | Acme's right click after special character action |
-| s    | Surround                                          |
-| S    | Replace surround pair                             |
-| d    | Delete                                            |
-| c    | Change                                            |
-| f    | Continuously search for character in line         |
-| gf/F | ~avy-goto-char-in-line~                             |
-| W    | Window hydra                                      |
-| n/N  | Narrow region stuff                               |
-| ...  | More things to decide!                            |
-* Other discussions on modal editing
+| Key       | Does what?                                        |
+|-----------+---------------------------------------------------|
+| hjkl      | Move around                                       |
+| H,L       | Move backward,forward word                        |
+| M-j       | Avy goto line down                                |
+| M-k       | Avy goto line above                               |
+| {         | Paragraph up                                      |
+| }         | Paragraph down                                    |
+| C-{       | Block up                                          |
+| C-}       | Block down                                        |
+| v         | "visual mode"                                     |
+| V         | Acme's right click after special character action |
+| s         | Surround                                          |
+| S         | Replace surround pair                             |
+| a         | Append/go to insert mode                          |
+| A         | Append to EOL                                     |
+| d         | Delete                                            |
+| c         | Change                                            |
+| f         | Continuously search forward for character in line |
+| F         | Like f but backwards                              |
+| C-f       | Search for string forward                         |
+| C-S-f     | Search for string backward                        |
+| Alt-f     | ~avy-goto-char-in-line~                             |
+| Alt-C-f   | ~avy-goto-char-timer~                               |
+| Alt-C-S-f | Search for string in current project              |
+| W         | Window hydra                                      |
+| n/N       | Narrow region stuff                               |
+| ...       | More things to decide!                            |
+*** Hydra
+**** Window
+| Key | Action                       |
+|-----+------------------------------|
+| h   | Move to the right window     |
+| j   | Move to the window below     |
+| k   | Move to the window above     |
+| l   | Move to the left window      |
+| H   | Decrease width               |
+| L   | Increase width               |
+| J   | Increase height              |
+| K   | Decrease height              |
+| s   | ace-window                   |
+| d   | ace-kill-window              |
+| q   | save and quit current window |
+**** Buffer
+| Key | Action                              |
+|-----+-------------------------------------|
+| j   | Previous buffer                     |
+| k   | Next buffer                         |
+| s   | ivy-switch-buffer                   |
+| S   | Switch to buffer in current project |
+| K   | Kill buffer                         |
+| r   | Revert buffer                       |
+| w   | Write buffer                        |
+* Other discussions on editing
 - https://www.reddit.com/r/emacs/comments/h85vzr/advice_on_modal_editing_in_emacs/
+- https://github.com/wandersoncferreira/vim-mindset-apply-emacs
