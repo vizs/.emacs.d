@@ -4,8 +4,8 @@
 ;; ** Sanity
 
 (setq-default
- ;; I need to find a replacement. Might end up using Go Mono
- vz/monospace-font "Verily Serif Mono"
+ ;; I especially like how much IBM Plex Mono stands out in org mode buffers
+ vz/monospace-font "monospace"
  vz/variable-font "Charter"
 
  vz/ircdiscord-process nil
@@ -33,8 +33,6 @@
 
  ;; Insert newline at EOF
  require-final-newline t
-
- gc-cons-threshold 16777216 ;; 16M
 
  ;; I prefer to separate default kill register and clipboard
  x-select-enable-clipboard nil
@@ -87,16 +85,23 @@
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
-  "`setq' but with the ``namespace'' as NS."
+  "`setq' but with the ``namespace'' as NS.
+If variable is a cons cell, then cdr is attached to setq.
+For example, to set a local variable, you can make the variable name
+as `(name-without-ns . local)'."
   (declare (indent 1) (debug 0))
   (dolist (x (seq-partition args 2))
-    (eval `(setq ,(intern (format "%s-%s" ns (car x)))
-            ,(cadr x)))))
+    (let ((set 'setq)
+          (var (car x)))
+      (when (listp (car x))
+        (setq set (intern (format "setq-%s" (cdr (car x))))
+              var (car (car x))))
+      (eval `(,set ,(intern (format "%s-%s" ns var))
+              ,(cadr x))))))
 
 ;; *** Formating s-expressions?
 
 ;; from u/b3n
-;; Absolutely based
 (defmacro vz/format-sexp (sexp &rest format-args)
   "Format SEXP and eval it."
   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
