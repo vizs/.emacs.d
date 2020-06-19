@@ -4,8 +4,12 @@
 ;; ** Sanity
 
 (setq-default
- vz/monospace-font "monospace"
- vz/variable-font "Charter"
+ vz/monospace-font (replace-regexp-in-string
+                    "\n$" ""
+                    (shell-command-to-string "fc-match -f %{family} monospace"))
+ vz/variable-font (replace-regexp-in-string
+                   "\n$" ""
+                   (shell-command-to-string "fc-match -f %{family} serif"))
 
  vz/ircdiscord-process nil
  vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
@@ -303,3 +307,8 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
              (expand-file-name "lisp/themes" user-emacs-directory))
 
 (load-theme 'vz t)
+
+(add-hook 'after-make-frame-functions
+          (defun vz/frame-load-theme (frame)
+            (with-selected-frame frame
+              (load-theme 'vz t))))
