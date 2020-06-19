@@ -55,16 +55,16 @@
                            t))
   (fringe-mode '(5 . 0)))
 
-   ;; ** Highlighting parenthesis
+;; ** Highlighting parenthesis
 
-   (use-package show-paren
-     :defer t
-     :hook (prog-mode . show-paren-mode)
-     :straight (:type built-in)
-     :config
-     (setq-ns show-paren
-       delay 0
-       when-point-inside-paren t))
+(use-package show-paren
+  :defer t
+  :hook (prog-mode . show-paren-mode)
+  :straight (:type built-in)
+  :config
+  (setq-ns show-paren
+    delay 0
+    when-point-inside-paren t))
 
 ;; ** Spell check
 

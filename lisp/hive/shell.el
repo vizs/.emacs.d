@@ -11,7 +11,7 @@
 (setq-default shell-font-lock-keywords nil
               comint-buffer-maximum-size 2000)
 
-;; ** Track $PWD more efficiently
+;; ** Track $PWD more effectively
 
 ;; from http://0x0.st/Hroa
 (defun shell-sync-dir-with-prompt (string)
@@ -54,6 +54,7 @@
                    (f-filename explicit-shell-file-name)))))
 
 ;; * Shell history tracking
+
 ;; TODO: Maybe track command run in nix-shell separately?
 
 ;; ** Variables
@@ -226,9 +227,10 @@ to it. If nothing is found, create a new buffer"
   "Return all prompts in an alist (prompt-string . point)"
   (save-excursion
     (goto-char point)
-    (let ((pt (re-search-forward "^$ " nil t 1)))
+    (let ((pt (re-search-forward "^!?\\$ " nil t 1)))
       (if (null pt)
-          prompts
+          ;; Does not include current "active" prompt
+          (cdr prompts)
         (goto-char pt)
         (vz/shell--get-prompt
          (cons (->>
@@ -251,15 +253,16 @@ to it. If nothing is found, create a new buffer"
   (vz/beacon-highlight))
 
 ;; * Emacs frame as terminal
+
 ;; TODO: Auto-kill buffer by adding a function to `delete-frame-functions'
 
 ;; ** Variables
 
 (define-minor-mode vz/term-minor-mode
-  "Minor mode for binding ^D in *term* buffers")
+  "Minor mode for binding C-d in *term* buffers")
 
 (defvar vz/term-minor-mode--frame nil
-  "Frame variable that *term* buffer uses")
+  "Frame variable that *term-asdf* buffer uses")
 
 (make-variable-buffer-local 'vz/term-minor-mode--frame)
 
@@ -311,7 +314,7 @@ to it. If nothing is found, create a new buffer"
 
 (general-nmap
   :keymaps 'shell-mode-map
-  "SPC j" #'vz/shell-jump-to-dir
+  "SPC j" #'vz/shell-jump-to-prompt
   "[/"    #'vz/shell-insert-from-hist)
 
 (general-imap

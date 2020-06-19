@@ -1,7 +1,5 @@
 ;; -*- lexical-binding: t; -*-
 
-;; Dangling parenthesis are present for making my life in the future easier
-
 ;; * Set the variables
 ;; ** Matching for nick
 
@@ -22,7 +20,8 @@
   `(("Freenode"
      :nick "_viz_"
      :port (6667 . 6697)
-     :channels (:after-auth "#nixhub" "#vis-editor" "#unixporn" "#nixos" "#emacs")
+     :channels (:after-auth "#nixhub" "#vis-editor" "#unixporn" "#nixos" "#emacs"
+                "#river")
      :nickserv-nick "_viz_"
      :nickserv-password ,(pass-irc "Freenode"))
     ("Discord Madhouse"
@@ -42,7 +41,7 @@
      :port 6667
      :channel ("#general" "#commands")
      :pass ,(pass-discord 702578317081182258)))
-                                        ; reduce-lurker-spam t
+  ;; reduce-lurker-spam t
   use-cycle-completion t
   highlight-nick-type 'message
   server-buffer-name "{network}:{host}")
@@ -112,8 +111,7 @@
                "%s just joined. Hide your bananas"
                "%s just showed up. Hold my beer"
                "%s has just arrived. Seems OP - nerf please"
-               "Roses are red, violets are blue, %s has joined the chat with you"
-               )))
+               "Roses are red, violets are blue, %s has joined the chat with you")))
     (format (vz/random-choice msg) nick)))
 
 ;; *** Leave
@@ -138,8 +136,7 @@
       ('part (vz/circe-draw-msg-generic "<" (vz/circe-leave-msg nick)))
       ('acn  (vz/circe-draw-msg-generic "*" (concat nick " " body)))
       ('nch  (vz/circe-draw-msg-generic old-nick (concat "is now " new-nick)))
-      ('smsg (vz/circe-draw-msg-generic "***" body 'circe-server-face))
-      )))
+      ('smsg (vz/circe-draw-msg-generic "***" body 'circe-server-face)))))
 
 ;; *** Set the variable
 

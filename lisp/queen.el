@@ -4,7 +4,6 @@
 ;; ** Sanity
 
 (setq-default
- ;; I especially like how much IBM Plex Mono stands out in org mode buffers
  vz/monospace-font "monospace"
  vz/variable-font "Charter"
 
@@ -37,7 +36,7 @@
  ;; I prefer to separate default kill register and clipboard
  x-select-enable-clipboard nil
 
- ;; Follow links in version controlled
+ ;; Follow links to version controlled files
  vc-follow-symlinks t
 
  ;; Try to complete as well
@@ -105,13 +104,6 @@ as (name-without-ns . local)."
 (defmacro vz/format-sexp (sexp &rest format-args)
   "Format SEXP and eval it."
   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
-
-;; ** Custom theme
-
-(add-to-list 'custom-theme-load-path
-             (expand-file-name "lisp/themes" user-emacs-directory))
-
-(load-theme 'vz t)
 
 ;; * Straight
 ;; ** Bootstrap straight
@@ -305,3 +297,9 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
     "`beacon-blink' for one second to capture attention"
     (let ((beacon-blink-duration 1))
       (beacon-blink))))
+;; * Custom theme
+
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "lisp/themes" user-emacs-directory))
+
+(load-theme 'vz t)
