@@ -43,26 +43,28 @@
   :straight (:type built-in)
   :config
   ;; Remove the ugly left and right curly arrow for continued lines
-  (asoc-put! fringe-indicator-alist
-             'continuation
-             '(nil nil)
-             t)
-  (asoc-put! fringe-indicator-alist
-             'truncation
-             '(nil nil)
-             t)
+  (setq-default fringe-indicator-alist
+                (asoc-put! fringe-indicator-alist
+                           'continuation
+                           '(nil nil)
+                           t))
+  (setq-default fringe-indicator-alist
+                (asoc-put! fringe-indicator-alist
+                           'truncation
+                           '(nil nil)
+                           t))
   (fringe-mode '(5 . 0)))
 
-;; ** Highlighting parenthesis
+   ;; ** Highlighting parenthesis
 
-(use-package show-paren
-  :defer t
-  :hook (prog-mode . show-paren-mode)
-  :straight (:type built-in)
-  :config
-  (setq-ns show-paren
-    delay 0
-    when-point-inside-paren t))
+   (use-package show-paren
+     :defer t
+     :hook (prog-mode . show-paren-mode)
+     :straight (:type built-in)
+     :config
+     (setq-ns show-paren
+       delay 0
+       when-point-inside-paren t))
 
 ;; ** Spell check
 
@@ -139,7 +141,12 @@
           (comint-send-string (get-buffer-process (current-buffer))
                               (concat cmd "\n"))
           (comint-add-to-input-history cmd))
-      (comint-send-input))
+      ;; setting `comint-eol-on-send' to nil doesn't work
+      (let ((pos (point))
+            (blink-cursor-mode nil))
+        (comint-send-input)
+        (when (evil-normal-state-p)
+          (goto-char pos))))
     (when (evil-visual-state-p)
       (evil-exit-visual-state))))
 
