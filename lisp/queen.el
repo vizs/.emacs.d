@@ -87,8 +87,8 @@
 (defmacro setq-ns (ns &rest args)
   "`setq' but with the ``namespace'' as NS.
 If variable is a cons cell, then cdr is attached to setq.
-For example, to set a local variable, you can make the variable name
-as `(name-without-ns . local)'."
+For example, to set a buffer local variable, you pass the variable name
+as (name-without-ns . local)."
   (declare (indent 1) (debug 0))
   (dolist (x (seq-partition args 2))
     (let ((set 'setq)
@@ -105,6 +105,13 @@ as `(name-without-ns . local)'."
 (defmacro vz/format-sexp (sexp &rest format-args)
   "Format SEXP and eval it."
   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
+
+;; ** Custom theme
+
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "lisp/themes" user-emacs-directory))
+
+(load-theme 'vz t)
 
 ;; * Straight
 ;; ** Bootstrap straight

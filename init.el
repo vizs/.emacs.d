@@ -5,7 +5,6 @@
 
 (load-file (expand-file-name "lisp/queen.el" user-emacs-directory))
 (load-file (expand-file-name "lisp/workers.el" user-emacs-directory))
-(load-file (expand-file-name "lisp/hive/theme.el" user-emacs-directory))
 
 (unless (boundp 'vz/initial-loaded)
   (vz/disable-bold-italic))

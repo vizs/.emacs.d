@@ -17,7 +17,7 @@
 ;; Increase the size of LaTeX previews
 (plist-put org-format-latex-options :scale 1.25)
 
-(setq-default cdlatex-auto-help-delay 0.5)
+(setq-default cdlatex-auto-help-delay 0.75)
 
 ;; TODO: setup org-protocol
 
@@ -38,12 +38,16 @@
   highlight-latex-and-related '(latex)
   hidden-keywords '(title author)
   hide-emphasis-markers t
-  hide-leading-stars t ; indent mode also hides stars
+  hide-leading-stars nil ; indent mode also hides stars
   fontify-emphasized-text t
   fontify-done-headline t
   fontify-quote-and-verse-blocks t
   fontify-whole-heading-line t
   src-fontify-natively nil
+
+  ;; I prefer a human readable format over a machine readable one :P
+  time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %k:%M>")
+  (display-custom-times . default) t ;; Buffer local variable
 
   preview-latex-default-process 'dvisvgm
 
@@ -53,7 +57,7 @@
      "* TODO %?
 :PROPERTIES:
 :type: %^{Type|anime|emacs|article|music|manga|book|misc}
-:added: %T
+:added: %U
 :END:
 %:link" :prepend t :kill-buffer t)
     ("q" "Quote" entry
@@ -61,7 +65,7 @@
      "* %^{quote|Quote %U|}
 :PROPERTIES:
 :type: quote
-:added: %T
+:added: %U
 :END:
 #+begin_quote
 %?
@@ -83,7 +87,9 @@
      "* %?")
     ("m" "Maths notes" entry
      (file+headline ,(~ "doc/school/g12/notes.org") "Maths")
-     "* %?")))
+     "* %?"))
+
+  agenda-files `(,(~ "doc/org/calendar.org")))
 
 (defun vz/org-mode-style ()
   (let ((faces '(org-table org-link org-code org-block org-drawer
@@ -117,8 +123,8 @@
         buffer-face-mode-face `(:family ,vz/variable-font :height 120))
   (setq-local
    electric-pair-inhibit-predicate
-                    `(lambda (<>) (if (char-equal <> ?<) t
-                                    (,electric-pair-inhibit-predicate <>))))
+   `(lambda (c) (if (char-equal c ?<) t
+                  (,electric-pair-inhibit-predicate c))))
   (buffer-face-mode)
   (vz/org-mode-style))
 

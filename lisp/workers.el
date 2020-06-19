@@ -43,16 +43,14 @@
   :straight (:type built-in)
   :config
   ;; Remove the ugly left and right curly arrow for continued lines
-  (setq-default
-   fringe-indicator-alist (asoc-put! fringe-indicator-alist
-                                     'continuation
-                                     '(nil nil)
-                                     t))
-  (setq-default
-   fringe-indicator-alist (asoc-put! fringe-indicator-alist
-                                     'truncation
-                                     '(nil nil)
-                                     t))
+  (asoc-put! fringe-indicator-alist
+             'continuation
+             '(nil nil)
+             t)
+  (asoc-put! fringe-indicator-alist
+             'truncation
+             '(nil nil)
+             t)
   (fringe-mode '(5 . 0)))
 
 ;; ** Highlighting parenthesis
@@ -179,6 +177,9 @@
 
 (use-package olivetti
   :defer t
+  :hook
+  (Man-mode . olivetti-mode)
+  (org-mode . olivetti-mode)
   :general
   (:keymaps 'override :states 'normal
             "SPC C" #'olivetti-mode)
@@ -214,7 +215,6 @@
   (add-hook 'outshine-mode-hook
             (defun vz/outshine-mode-init ()
               (general-nmap
-                :keymaps 'outshine-mode
                 "TAB"       #'outshine-cycle
                 "<backtab>" #'outshine-cycle-buffer
                 "M-RET"     #'outshine-insert-heading

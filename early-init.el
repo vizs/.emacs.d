@@ -12,3 +12,9 @@
 
 (advice-add #'x-apply-session-resources :override #'ignore)
 (advice-add #'package--ensure-init-file :override #'ignore)
+
+(add-hook 'emacs-startup-hook
+          #'(lambda ()
+              (garbage-collect)
+              ;; 16M
+              (setq gc-cons-threshold 16777216)))

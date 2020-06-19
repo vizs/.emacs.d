@@ -142,8 +142,8 @@ found ahead"
  ("D" kill-sentence)
 
  ;; TODO Bind M-c and M-S-c to zzz commands
- ("c" vz/m-kill-char :then ryo-modal-mode)
- ("C" kill-sentence  :then ryo-modal-mode)
+ ("c" vz/m-kill-char :then '(ryo-modal-mode))
+ ("C" kill-sentence  :then '(ryo-modal-mode))
 
  ("f" vz/m-search-char-forward)
  ("F" vz/m-search-char-backward))
