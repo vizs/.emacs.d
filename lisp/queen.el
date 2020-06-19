@@ -43,8 +43,7 @@
  ;; Follow links to version controlled files
  vc-follow-symlinks t
 
- ;; Try to complete as well
- tab-always-indent 'complete
+ ;; tab-always-indent 'complete
 
  ;; Indentation
  indent-tabs-mode t
@@ -84,7 +83,7 @@
 (set-display-table-slot standard-display-table 'truncation ?>)
 
 ;; ** Helper macros
-;; *** setq but with namespace!
+;; *** setq but with namespace
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
@@ -101,6 +100,21 @@ as (name-without-ns . local)."
               var (car (car x))))
       (eval `(,set ,(intern (format "%s-%s" ns var))
               ,(cadr x))))))
+
+;; *** setq but for a hook
+
+;; inspo: doom-emacs
+
+(defmacro setq-hook--create-fun (mode &rest body)
+  "Helper macro to create function for `setq-hook'."
+  `(defun ,(intern (format "vz/setq-for-%s" mode)) ()
+    (setq-local ,@body)))
+
+(defmacro setq-hook (mode &rest body)
+  "Set buffer local variable for a major mode."
+  (declare (indent 1) (debug (setq body)))
+  (let ((f `(setq-hook--create-fun ,mode ,@body)))
+    `(add-hook ',mode ,f)))
 
 ;; *** Formating s-expressions?
 
@@ -307,8 +321,3 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
              (expand-file-name "lisp/themes" user-emacs-directory))
 
 (load-theme 'vz t)
-
-(add-hook 'after-make-frame-functions
-          (defun vz/frame-load-theme (frame)
-            (with-selected-frame frame
-              (load-theme 'vz t))))

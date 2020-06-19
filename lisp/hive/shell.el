@@ -221,10 +221,10 @@ to it. If nothing is found, create a new buffer"
         (vz/popup-shell--add (shell (format "%s*"
                                             (make-temp-name "*shell-")))))))))
 
-;; * Jump to prompt in ivy
+;; * Jump to prompt
 
-(defun vz/shell--get-prompt (prompts point)
-  "Return all prompts in an alist (prompt-string . point)"
+(defun vz/shell--get-prompts (prompts point)
+  "Return all prompts as a propertized string"
   (save-excursion
     (goto-char point)
     (let ((pt (re-search-forward "^!?\\$ " nil t 1)))
@@ -232,23 +232,21 @@ to it. If nothing is found, create a new buffer"
           ;; Does not include current "active" prompt
           (cdr prompts)
         (goto-char pt)
-        (vz/shell--get-prompt
-         (cons (->>
+        (vz/shell--get-prompts
+         (cons (-->
                 (thing-at-point 'line t)
-                (s-replace-regexp "\n$" "")
-                (format "%2$s:%1$d" pt))
+                (s-replace-regexp "\n$" "" it)
+                (propertize it 'pos pt))
                prompts)
          pt)))))
 
 (defun vz/shell-jump-to-prompt ()
-  "Jump to prompt by selecting it in ivy"
+  "Jump to prompt by selecting it in ivy. The most recent is towards the top."
   (interactive)
   (->>
-   (vz/shell--get-prompt '() (point-min))
-   (ivy-read "> ")
-   (s-split ":")
-   (-last-item)
-   (string-to-number)
+   (ivy-read "> " (vz/shell--get-prompts '() (point-min))
+             :sort nil)
+   (get-text-property 0 'pos)
    (goto-char))
   (vz/beacon-highlight))
 

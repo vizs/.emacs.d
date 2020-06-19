@@ -68,6 +68,9 @@
    `(ivy-minibuffer-match-face-4      ((,class :background ,ac :foreground ,fg)))
    `(ivy-match-required-face          ((,class :background ,bg :foreground ,re)))
 
+   `(ivy-modified-buffer              ((,class :background ,bg :foreground ,fg)))
+   `(ivy-modified-outside-buffer      ((,class :background ,bg :foreground ,fg)))
+
    `(ivy-separator                    ((,class :background ,lg :foreground ,bl)))
    `(ivy-remote                       ((,class :background ,bg :foreground ,lf)))
 
@@ -149,37 +152,37 @@
   (add-to-list 'default-frame-alist `(cursor-color . ,gr))
 
   (dolist (f '(lui-irc-colors-bg-0-face
-              lui-irc-colors-bg-1-face
-              lui-irc-colors-bg-2-face
-              lui-irc-colors-bg-3-face
-              lui-irc-colors-bg-4-face
-              lui-irc-colors-bg-5-face
-              lui-irc-colors-bg-6-face
-              lui-irc-colors-bg-7-face
-              lui-irc-colors-bg-8-face
-              lui-irc-colors-bg-9-face
-              lui-irc-colors-bg-10-face
-              lui-irc-colors-bg-11-face
-              lui-irc-colors-bg-12-face
-              lui-irc-colors-bg-13-face
-              lui-irc-colors-bg-14-face
-              lui-irc-colors-bg-15-face
-              lui-irc-colors-fg-0-face
-              lui-irc-colors-fg-1-face
-              lui-irc-colors-fg-2-face
-              lui-irc-colors-fg-3-face
-              lui-irc-colors-fg-4-face
-              lui-irc-colors-fg-5-face
-              lui-irc-colors-fg-6-face
-              lui-irc-colors-fg-7-face
-              lui-irc-colors-fg-8-face
-              lui-irc-colors-fg-9-face
-              lui-irc-colors-fg-10-face
-              lui-irc-colors-fg-11-face
-              lui-irc-colors-fg-12-face
-              lui-irc-colors-fg-13-face
-              lui-irc-colors-fg-14-face
-              lui-irc-colors-fg-15-face))
+               lui-irc-colors-bg-1-face
+               lui-irc-colors-bg-2-face
+               lui-irc-colors-bg-3-face
+               lui-irc-colors-bg-4-face
+               lui-irc-colors-bg-5-face
+               lui-irc-colors-bg-6-face
+               lui-irc-colors-bg-7-face
+               lui-irc-colors-bg-8-face
+               lui-irc-colors-bg-9-face
+               lui-irc-colors-bg-10-face
+               lui-irc-colors-bg-11-face
+               lui-irc-colors-bg-12-face
+               lui-irc-colors-bg-13-face
+               lui-irc-colors-bg-14-face
+               lui-irc-colors-bg-15-face
+               lui-irc-colors-fg-0-face
+               lui-irc-colors-fg-1-face
+               lui-irc-colors-fg-2-face
+               lui-irc-colors-fg-3-face
+               lui-irc-colors-fg-4-face
+               lui-irc-colors-fg-5-face
+               lui-irc-colors-fg-6-face
+               lui-irc-colors-fg-7-face
+               lui-irc-colors-fg-8-face
+               lui-irc-colors-fg-9-face
+               lui-irc-colors-fg-10-face
+               lui-irc-colors-fg-11-face
+               lui-irc-colors-fg-12-face
+               lui-irc-colors-fg-13-face
+               lui-irc-colors-fg-14-face
+               lui-irc-colors-fg-15-face))
     (custom-theme-set-faces 'vz `(,f ((,class :inherit default)))))
 
   (dolist (f '(font-lock-builtin-face

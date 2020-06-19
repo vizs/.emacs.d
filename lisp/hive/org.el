@@ -40,7 +40,6 @@
   hide-emphasis-markers t
   hide-leading-stars nil ; indent mode also hides stars
   fontify-emphasized-text t
-  fontify-done-headline t
   fontify-quote-and-verse-blocks t
   fontify-whole-heading-line t
   src-fontify-natively nil
