@@ -51,15 +51,26 @@
   preview-latex-default-process 'dvisvgm
 
   capture-templates
-  `(("d" "Dump links and book names or whatever" entry
+  `(("d" "Dump links, book names, whatever")
+    ("da" "Anime/Manga to read" entry
      (file "dump.org")
-     "* TODO %?
+     "* TODO %^{Name|}
 :PROPERTIES:
-:type: %^{Type|anime|emacs|article|music|manga|book|misc}
+:type: %^{Type|anime|manga}
 :added: %U
 :END:
+%?
 %:link" :prepend t :kill-buffer t)
-    ("q" "Quote" entry
+    ("de" "Emacs link to go through"
+     (file "dump.org")
+     "* TODO %^{What is it?|}
+:PROPERTIES:
+:type: emacs
+:added: %U
+:END:
+%?
+%:link" :prepend t :kill-buffer t)
+    ("dq" "Add a quote" entry
      (file "dump.org")
      "* %^{quote|Quote %U|}
 :PROPERTIES:
@@ -72,21 +83,54 @@
 -- %^{Author}
 #+end_quote
 " :prepend t :kill-buffer t)
-    ("e" "Emacs notes" entry
+    ("dm" "Music Link" entry
+     (file "dump.org")
+     "* %^{Name|}
+:PROPERTIES:
+:type: music
+:added: %U
+:END:
+%?
+" :prepend t :kill-buffer t)
+    ("do" "Others" entry
+     (file "dump.org")
+     "* TODO %^{Title|}
+:PROPERTIES:
+:type: %^{Type|article|book|misc}
+:added: %U
+:END:
+%?
+" :prepend t :kill-buffer t)
+
+    ("n" "Notes")
+    ("ne" "Emacs notes" entry
      (file+headline ,(~ "doc/notes.org") "Emacs")
      "* %?")
-    ("c" "Chemistry notes" entry
+    ("nc" "Chemistry notes" entry
      (file+headline ,(~ "doc/school/g12/notes.org") "Chemistry")
      "* %?")
-    ("s" "CS notes" entry
+    ("ns" "CS notes" entry
      (file+headline ,(~ "doc/school/g12/notes.org") "CS")
      "* %?")
-    ("p" "Physics notes" entry
+    ("np" "Physics notes" entry
      (file+headline ,(~ "doc/school/g12/notes.org") "Physics")
      "* %?")
-    ("m" "Maths notes" entry
+    ("nm" "Maths notes" entry
      (file+headline ,(~ "doc/school/g12/notes.org") "Maths")
-     "* %?"))
+     "* %?")
+
+    ("c" "Calendar")
+    ("cs" "Schedule" entry
+     (file+headline "calendar.org" "Schedules")
+     "* TODO %?
+SCHEDULED: %(call-interactively #'org-time-stamp)" :prepend t)
+    ("cd" "Deadline" entry
+     (file+headline "calendar.org" "Deadlines")
+     "* TODO %?
+DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
+    ("ca" "Appointment" entry
+     (file+headline "calendar.org" "Appointments")
+     "* TODO %?\n%(call-interactively #'org-time-stamp)" :prepend t))
 
   agenda-files `(,(~ "doc/org/calendar.org")))
 
