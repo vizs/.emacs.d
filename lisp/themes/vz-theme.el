@@ -17,7 +17,7 @@
   (custom-theme-set-faces
    'vz
    `(default                          ((,class :background ,bg :foreground ,fg)))
-   `(font-lock-comment-face           ((,class :foreground ,lf)))
+   `(font-lock-comment-face           ((,class :inherit italic)))
 
    `(show-paren-match                 ((,class :background ,ac :foreground ,fg)))
    `(show-paren-match-expression      ((,class :background ,ac :foreground ,fg)))
@@ -39,6 +39,7 @@
    `(highlight                        ((,class :background ,ac :foreground ,fg)))
    `(trailing-whitespace              ((,class :background ,yw :foreground ,fg)))
    `(flyspell-incorrect               ((,class :underline (:color ,re :style wave))))
+   ;;`(help-argument-name
 
    `(beacon-fallback-background       ((,class :background ,yw :foregruond ,yw)))
 
@@ -70,6 +71,7 @@
 
    `(ivy-modified-buffer              ((,class :background ,bg :foreground ,fg)))
    `(ivy-modified-outside-buffer      ((,class :background ,bg :foreground ,fg)))
+   `(ivy-org                          ((,class :inherit default)))
 
    `(ivy-separator                    ((,class :background ,lg :foreground ,bl)))
    `(ivy-remote                       ((,class :background ,bg :foreground ,lf)))
