@@ -75,14 +75,15 @@ If variable is a cons cell, then cdr is attached to setq.
 For example, to set a buffer local variable, you pass the variable name
 as (name-without-ns . local)."
   (declare (indent 1) (debug 0))
-  (dolist (x (seq-partition args 2))
-    (let ((set 'setq)
-          (var (car x)))
-      (when (listp (car x))
-        (setq set (intern (format "setq-%s" (cdr (car x))))
-              var (car (car x))))
-      (eval `(,set ,(intern (format "%s-%s" ns var))
-              ,(cadr x))))))
+  `(progn
+     ,@(mapcar (lambda (x)
+                 (let ((set 'setq)
+                       (var (car x)))
+                  (when (listp var)
+                   (setq set (intern (format "setq-%s" (cdr var)))
+                    var (car var)))
+                  (list set (intern (format "%s-%s" ns var)) (cadr x))))
+        (seq-partition args 2))))
 
 ;; *** setq but for a hook
 
@@ -296,7 +297,8 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
      (or (get-buffer it) (find-file-noselect it))))
   (ivy-mode 1))
 
-(use-package ivy-avy)
+(use-package ivy-avy
+  :after ivy)
 
 (use-package counsel
   :after ivy
@@ -321,6 +323,7 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
     "`beacon-blink' for one second to capture attention"
     (let ((beacon-blink-duration 1))
       (beacon-blink))))
+
 ;; * Custom theme
 
 (add-to-list 'custom-theme-load-path
