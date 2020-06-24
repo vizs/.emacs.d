@@ -259,10 +259,13 @@ to it. If nothing is found, create a new buffer"
 (define-minor-mode vz/term-minor-mode
   "Minor mode for binding C-d in *term* buffers")
 
-(defvar vz/term-minor-mode--frame nil
+(defvar vz/term-minor-mode-frame nil
   "Frame variable that *term-asdf* buffer uses")
 
-(make-variable-buffer-local 'vz/term-minor-mode--frame)
+(make-variable-buffer-local 'vz/term-minor-mode-frame)
+
+(defvar vz/term-minor-mode-frames nil
+  "Frames used by *term-asdf* buffers")
 
 ;; ** Functions
 
@@ -271,7 +274,7 @@ to it. If nothing is found, create a new buffer"
   (unless (process-live-p process)
     (let* ((b (process-buffer process))
            (f (asoc-get (buffer-local-variables b)
-                        'vz/term-minor-mode--frame)))
+                        'vz/term-minor-mode-frame)))
       (kill-buffer b)
       (when (frame-live-p f)
         (delete-frame f)))))
@@ -285,7 +288,7 @@ to it. If nothing is found, create a new buffer"
          (fn:
           with-current-buffer <>
           (and (s-prefix? "*term-" (buffer-name <>))
-               (or (not (frame-live-p vz/term-minor-mode--frame))
+               (or (not (frame-live-p vz/term-minor-mode-frame))
                    (not (get-buffer-process <>)))))
          (buffer-list))
       (fn: kill-buffer <>))))
@@ -296,9 +299,19 @@ to it. If nothing is found, create a new buffer"
     (->>
      (s-trim-right string)
      (format "term: %s")
-     (set-frame-parameter vz/term-minor-mode--frame 'title))))
+     (set-frame-parameter vz/term-minor-mode-frame 'title))))
 
 ;; (add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
+
+(defun vz/term-minor-mode-on-delete-frame (frame)
+  "If FRAME is a member of `vz/term-minor-mode-frames', then kill the
+term buffer associated with it"
+  (when (member frame vz/term-minor-mode-frames)
+    (setq vz/term-minor-mode-frames (remove frame vz/term-minor-mode-frames))
+    (let ((kill-buffer-query-functions nil))
+      (kill-buffer (frame-parameter frame 'term-buffer)))))
+
+(add-hook 'delete-frame-functions #'vz/term-minor-mode-on-delete-frame)
 
 ;; * Keybindings
 
