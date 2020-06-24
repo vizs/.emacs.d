@@ -65,23 +65,6 @@
 (add-hook 'prog-mode-hook #'vz/prog-functional-indent-style)
 
 ;; * Niceties
-;; ** Automatically chmod +x file if it has a shebang
-
-(add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
-
-;; ** Auto-revert buffer if file is modified
-
-(global-auto-revert-mode)
-
-;; ** Fonts
-
-(add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
-                                             vz/monospace-font)))
-
-;; ** Display > instead of $ at the visual end of truncated line
-
-(set-display-table-slot standard-display-table 'truncation ?>)
-
 ;; ** Helper macros
 ;; *** setq but with namespace
 
@@ -122,6 +105,28 @@ as (name-without-ns . local)."
 (defmacro vz/format-sexp (sexp &rest format-args)
   "Format SEXP and eval it."
   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
+
+;; ** Automatically chmod +x file if it has a shebang
+
+(add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
+
+;; ** Auto-revert buffer if file is modified
+
+;; From u/redblobgames
+(setq-ns auto-revert
+  use-notify t
+  avoid-polling t)
+
+(global-auto-revert-mode)
+
+;; ** Fonts
+
+(add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
+                                             vz/monospace-font)))
+
+;; ** Display > instead of $ at the visual end of truncated line
+
+(set-display-table-slot standard-display-table 'truncation ?>)
 
 ;; * Straight
 ;; ** Bootstrap straight

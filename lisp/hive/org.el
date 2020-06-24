@@ -141,7 +141,7 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
     (vz/set-monospace-faces faces)
     (-each faces (fn: set-face-attribute <> nil :height 102)))
   (-each org-level-faces
-    (fn: set-face-attribute <> nil :weight 'bold))
+    (fn: set-face-attribute <> nil :weight 'bold :slant 'normal))
   (let* ((height1 (+ 120 40))
          (height0 (+ height1 20))
          (height2 (- height1 20))
@@ -176,7 +176,7 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
 (general-nmap
   :keymaps 'org-mode-map
   :prefix "SPC"
-  "oel" #'org-latex-export-to-latex
+  "oe"  #'org-export-dispatch
   "oil" #'org-insert-link
   "olp" #'org-latex-preview
   "olc" #'org-cdlatex-mode

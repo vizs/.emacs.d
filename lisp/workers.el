@@ -18,8 +18,9 @@
   "Disable bold and italic for everything except bold and italic face."
   (-each (face-list)
     (fn:
-     set-face-attribute <> nil :weight 'normal :slant 'normal))
-                               ;;:underline nil))
+     set-face-attribute <> nil :weight 'normal))
+  ;; :slant 'normal
+  ;; :underline nil))
   (set-face-attribute 'bold   nil :weight 'bold)
   (set-face-attribute 'italic nil :slant 'italic :underline nil))
 
@@ -142,11 +143,8 @@
                               (concat cmd "\n"))
           (comint-add-to-input-history cmd))
       ;; setting `comint-eol-on-send' to nil doesn't work
-      (let ((pos (point))
-            (blink-cursor-mode nil))
-        (comint-send-input)
-        (when (evil-normal-state-p)
-          (goto-char pos))))
+      (save-excursion
+        (comint-send-input)))
     (when (evil-visual-state-p)
       (evil-exit-visual-state))))
 
@@ -184,9 +182,7 @@
 
 (use-package olivetti
   :defer t
-  :hook
-  (Man-mode . olivetti-mode)
-  (org-mode . olivetti-mode)
+  :hook ((Man-mode org-mode) . olivetti-mode)
   :general
   (:keymaps 'override :states 'normal
             "SPC C" #'olivetti-mode)

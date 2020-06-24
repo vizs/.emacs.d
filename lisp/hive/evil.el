@@ -32,7 +32,7 @@
 ;; Behaves sort of like acme(1)
 (defun vz/shrink-other-windows ()
   "Shrink all other windows except the selected window
-in the same vertical column"
+in the same column"
   (interactive)
   (window-resize (selected-window) (window-max-delta)))
 
