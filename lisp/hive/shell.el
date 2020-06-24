@@ -303,6 +303,9 @@ to it. If nothing is found, create a new buffer"
 
 ;; (add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
 
+;; `term-buffer' is set to the name of the shell buffer when the frame is created.
+;; `term-buffer' is a frame parameter.
+
 (defun vz/term-minor-mode-on-delete-frame (frame)
   "If FRAME is a member of `vz/term-minor-mode-frames', then kill the
 term buffer associated with it"

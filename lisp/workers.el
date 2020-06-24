@@ -193,8 +193,6 @@
 
 ;; ** Folding text
 
-;; TODO: counsel-org-goto-like function
-
 ;; outshine improves outline-minor-mode by providing
 ;; org-mode like features
 ;; I only really use very few features,
@@ -204,14 +202,14 @@
   :hook (prog-mode . outshine-mode)
   :config
   ;; Might be a very bad idea
-  (asoc-put! counsel-outline-settings
-             'emacs-lisp-mode
-             '(:outline-regexp ";; [*]+[\s\t]+"
-               :outline-level counsel-outline-level-emacs-lisp)
-             t)
-  (setq-default
-   outshine-oldschool-elisp-outline-regexp-base "[*]\\{1,8\\}")
+  (setq-default counsel-outline-settings
+                (asoc-put! counsel-outline-settings
+                           'emacs-lisp-mode
+                           '(:outline-regexp ";; [*]+[\s\t]+"
+                             :outline-level counsel-outline-level-emacs-lisp)
+                           t))
   (setq-ns outshine
+    (oldschool-elisp-outline-regexp-base . default) "[*]\\{1,8\\}"
     startup-folded-p t
     ;; I might make a function similar to counsel-org-goto
     imenu-show-headlines-p nil)
@@ -223,8 +221,6 @@
                 "M-RET"     #'outshine-insert-heading
                 "<M-up>"    #'outline-move-subtree-up
                 "<M-down>"  #'outline-move-subtree-down))))
-                ;;"<M-right>" #'outshine-kbd-M-<right>
-                ;;"<M-left>"  #'outshine-kbd-M-<left>))))
 
 ;; ** Edit a part of a buffer in separate window
 

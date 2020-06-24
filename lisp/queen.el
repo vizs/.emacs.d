@@ -264,7 +264,6 @@ as (name-without-ns . local)."
     do-completion-in-region nil
     wrap t
     height 15)
-  (require 'ivy-avy)
 
   ;; This was moved to ivy-hydra.el
   (defun ivy-minibuffer-grow ()
@@ -296,6 +295,8 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
       (ivy-read "> "))
      (or (get-buffer it) (find-file-noselect it))))
   (ivy-mode 1))
+
+(use-package ivy-avy)
 
 (use-package counsel
   :after ivy
