@@ -61,7 +61,7 @@
 :END:
 %?
 %:link" :prepend t :kill-buffer t)
-    ("de" "Emacs link to go through"
+    ("de" "Emacs link to go through" entry
      (file "dump.org")
      "* TODO %^{What is it?|}
 :PROPERTIES:
