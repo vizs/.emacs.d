@@ -8,26 +8,28 @@
       (cond
        (buffer-read-only    " [!]")
        ((buffer-modified-p) " [+]")
-       (:else               ""))
-  ""))
+       (t                   ""))
+    ""))
 
 (defun vz/mode-line-evil-state ()
-  (cond
-   ((eq evil-state 'visual) "    VISUAL » ")
-   ((eq evil-state 'insert) "    INSERT » ")
-   (:else                   "    ")))
+  (concat "  "
+          (pcase evil-state
+            ('visual "VISUAL » ")
+            ('insert "INSERT » "))))
 
 (defun vz/mode-line-file-short-dir ()
-  (--if-let (buffer-file-name)
+  (--if-let (if (derived-mode-p 'shell-mode)
+                (concat default-directory "/a")
+              (buffer-file-name))
       (let* ((dir (->>
                    (f-dirname it)
                    (f-short)
                    (f-split)))
-             (len (1- (length dir))))
+             (length (1- (length dir))))
         (concat
          (->>
           dir
-          (-map-indexed (fn (if (eq <1> len)
+          (-map-indexed (fn (if (eq <1> length)
                                 <2>
                               (substring <2> 0 1))))
           (apply #'f-join)
@@ -43,7 +45,7 @@
         'face face))
 
 (setq-default
- battery-update-interval 240
+ battery-update-interval 360
  vz/mode-line-format `((:eval (vz/mode-line-evil-state))
                        (:eval (vz/mode-line-file-short-dir))
                        "%b"
