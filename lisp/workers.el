@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
 
 ;; * Functions
 
@@ -91,8 +91,8 @@
   :config
   (define-fringe-bitmap 'vz/fringe-left-arrow
     [#b11000000 #b01100000 #b00110000
-                #b00011000 #b00110000 #b01100000
-                #b11000000]
+     #b00011000 #b00110000 #b01100000
+     #b11000000]
     nil nil 'center)
   (setq-ns flymake
     error-bitmap   '(vz/fringe-left-arrow error)
@@ -199,7 +199,7 @@
 ;; I still need to see what outshine offers
 (use-package outshine
   :defer t
-  :hook (prog-mode . outshine-mode)
+;;  :hook (prog-mode . outshine-mode)
   :config
   ;; Might be a very bad idea
   (setq-default counsel-outline-settings
@@ -209,9 +209,8 @@
                              :outline-level counsel-outline-level-emacs-lisp)
                            t))
   (setq-ns outshine
-    (oldschool-elisp-outline-regexp-base . default) "[*]\\{1,8\\}"
+    oldschool-elisp-outline-regexp-base "[*]\\{1,8\\}"
     startup-folded-p t
-    ;; I might make a function similar to counsel-org-goto
     imenu-show-headlines-p nil)
   (add-hook 'outshine-mode-hook
             (defun vz/outshine-mode-init ()
@@ -352,7 +351,7 @@
 (use-package scheme
   :defer t
   :straight (:type built-in)
-  :hook (scheme-mode . aggressive-indent-mode)
+  ;; :hook (scheme-mode . aggressive-indent-mode)
   :config
   (setq scheme-program-name "csi"))
 
@@ -378,13 +377,13 @@
   (defun vz/flymake-go ()
     (list "go" (list "fmt"
                      (flymake-proc-init-create-temp-buffer-copy
-                      'flymake-proc-create-temp-inplace))))
-  (add-hook 'go-mode-hook
-            (defun vz/go-mode-init ()
-              (flymake-mode)
-              (add-to-list 'flymake-proc-allowed-file-name-masks
-                           '("\\.go\\'" vz/flymake-go)))
-            nil t))
+                      'flymake-proc-create-temp-inplace)))))
+  ;;(add-hook 'go-mode-hook
+  ;;          (defun vz/go-mode-init ()
+  ;;            (flymake-mode)
+  ;;            (add-to-list 'flymake-proc-allowed-file-name-masks
+  ;;                         '("\\.go\\'" vz/flymake-go)))
+  ;;          nil t))
 
 ;; ** Racket
 
@@ -392,7 +391,7 @@
   :defer t
   :hook
   (racket-mode . racket-unicode-input-method-enable)
-  (racket-mode . aggressive-indent-mode)
+  ;; (racket-mode . aggressive-indent-mode)
   (racket-mode . racket-xp-mode)
   :general
   (:states '(normal visual) :keymaps 'racket-mode-map
@@ -407,21 +406,17 @@
   (add-hook 'racket-xp-mode-hook
             (defun vz/racket-xp-mode-init ()
               (remove-hook 'pre-display-functions
-                           #'racket-xp-pre-redisplay t)))
+                           #'racket-xp-pre-redisplay t)
+              (setq-local eldoc-documentation-function #'racket-xp-eldoc-function)))
   ;; For that sweet ivy-prescient sorting
   (defun vz/racket--symbol-at-point-or-prompt (_ &rest args)
-    (-let (((force-prompt-p prompt completions) args))
-      (let ((sap (thing-at-point 'symbol t)))
-        (if (or force-prompt-p (null sap))
-            (let ((s (if completions
-                         (ivy-read prompt completions
-                                   :initial-input sap
-                                   :sort t)
-                       (read-from-minibuffer prompt sap))))
-              (if (s-blank? (racket--trim (substring-no-properties s)))
-                  nil
-                s))
-          sap))))
+    (-let (((_ prompt completions) args))
+      (let* ((s (ivy-read prompt completions
+                          :initial-input (thing-at-point 'symbol)
+                          :sort t)))
+        (if (s-blank? (racket--trim (substring-no-properties s)))
+            nil
+          s))))
   (advice-add 'racket--symbol-at-point-or-prompt
               :around #'vz/racket--symbol-at-point-or-prompt))
 
@@ -434,9 +429,10 @@
 ;; TODO: Use nix-sandbox for flymake commands
 ;; (use-package nix-sandbox)
 
+;; ** Fennel Mode
 ;; To Lua or not to Lua
 ;; TODO
-;; (use-package fennel-mode)
+(use-package fennel-mode)
 
 ;; * Sorting entries
 
@@ -459,3 +455,8 @@
 (use-package company-prescient
   :after company
   :hook (prog-mode . company-prescient-mode))
+
+;; * Fun
+;; ** Dad Jokes
+
+(use-package dad-joke)
