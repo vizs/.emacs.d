@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
 ;; My dream modal editor -- check modal.org in root
 
 ;; * Ryo modal changes
@@ -26,7 +26,7 @@
 ;; ** Escape out of "insert" mode
 
 (defun vz/m-normal-mode ()
-  "Activate `ryo-modal-mode'"
+  "Enable `ryo-modal-mode'"
   (interactive)
   (if (minibufferp)
       (minibuffer-keyboard-quit)
@@ -39,25 +39,25 @@
 
 (dolist (d '(forward backward))
   (vz/format-sexp
-   (defun vz/m-%1$s-block ()
+   (defun vz/m-%1$s-block (&optional arg)
      "Move %1$s-block based on `major-mode'. If `major-mode'
 is a lisp, then do sexp movement. If `major-mode' is python,
 then do `python-nav-%1$s-block'. Otherwise, do '%1$s-paragraph'"
-     (interactive)
-     (pcase major-mode
-       ((or emacs-lisp-mode scheme-mode
-            racket-mode lisp-mode)
-        (%1$s-sexp))
-       (python-mode (python-nav-%1$s-block))
-       (_ (%1$s-paragraph))))
+     (interactive "p")
+     (cond
+      ((derived-mode-p 'lisp-mode 'emacs-lisp-mode
+                       'scheme-mode 'racket-mode)
+       (%1$s-sexp arg))
+      ((derived-mode-p 'python-mode) (python-nav-%1$s-block arg))
+      (t (%1$s-paragraph arg))))
    d))
 
 ;; ** d command
 
 ;; `delete-forward-char' takes an optional argument to save in killring
-(defun vz/m-kill-char ()
-  (interactive)
-  (delete-forward-char 1 t))
+(defun vz/m-kill-char (&optional arg)
+  (interactive "p")
+  (delete-forward-char arg t))
 
 ;; ** f and F commands
 
@@ -116,6 +116,13 @@ found ahead"
               (ryo-modal-mode t)))))
    d))
 
+;; ** Kill till EOL
+
+(defun vz/m-kill-sentence ()
+  "Like `kill-sentence' but disregards prefix argument"
+  (interactive)
+  (kill-sentence))
+
 ;; ** Binding
 
 (ryo-modal-keys
@@ -132,26 +139,26 @@ found ahead"
  ("H" backward-word)
  ("L" forward-word)
 
- ("{" forward-paragraph)
- ("}" backward-paragraph)
+ ("[" forward-paragraph)
+ ("]" backward-paragraph)
 
  ("C-{" vz/m-forward-block)
  ("C-}" vz/m-backward-block)
 
  ("d" vz/m-kill-char)
- ("D" kill-sentence)
+ ("D" vz/m-kill-sentence)
 
- ;; TODO Bind M-c and M-S-c to zzz commands
- ("c" vz/m-kill-char :then '(ryo-modal-mode))
- ("C" kill-sentence  :then '(ryo-modal-mode))
+ ;; TODO Bind M-s and M-S-s to zzz commands
+ ("s" vz/m-kill-char     :exit t)
+ ("S" vz/m-kill-sentence :exit t)
 
- ("f" vz/m-search-char-forward)
- ("F" vz/m-search-char-backward))
+ ("f" vz/m-search-char-forward  :norepeat t)
+ ("F" vz/m-search-char-backward :norepeat t))
 
 ;; Prefix keys
 
 (ryo-modal-keys
- (:no-repeat t)
+ (:norepeat t)
  ("0" "M-0")
  ("1" "M-1")
  ("2" "M-2")

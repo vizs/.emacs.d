@@ -44,16 +44,8 @@
   :straight (:type built-in)
   :config
   ;; Remove the ugly left and right curly arrow for continued lines
-  (setq-default fringe-indicator-alist
-                (asoc-put! fringe-indicator-alist
-                           'continuation
-                           '(nil nil)
-                           t))
-  (setq-default fringe-indicator-alist
-                (asoc-put! fringe-indicator-alist
-                           'truncation
-                           '(nil nil)
-                           t))
+  (setf (cdr (assoc 'continuation fringe-indicator-alist)) '(nil nil))
+  (setf (cdr (assoc 'truncation   fringe-indicator-alist)) '(nil nil))
   (fringe-mode '(5 . 0)))
 
 ;; ** Highlighting parenthesis
@@ -410,13 +402,12 @@
               (setq-local eldoc-documentation-function #'racket-xp-eldoc-function)))
   ;; For that sweet ivy-prescient sorting
   (defun vz/racket--symbol-at-point-or-prompt (_ &rest args)
-    (-let (((_ prompt completions) args))
-      (let* ((s (ivy-read prompt completions
-                          :initial-input (thing-at-point 'symbol)
-                          :sort t)))
-        (if (s-blank? (racket--trim (substring-no-properties s)))
-            nil
-          s))))
+    (let* ((s (ivy-read (cadr args) (caddr args)
+                        :preselect (thing-at-point 'symbol)
+                        :sort t)))
+      (if (s-blank? (racket--trim (substring-no-properties s)))
+          nil
+        s)))
   (advice-add 'racket--symbol-at-point-or-prompt
               :around #'vz/racket--symbol-at-point-or-prompt))
 
@@ -429,7 +420,7 @@
 ;; TODO: Use nix-sandbox for flymake commands
 ;; (use-package nix-sandbox)
 
-;; ** Fennel Mode
+;; ** Fennel
 ;; To Lua or not to Lua
 ;; TODO
 (use-package fennel-mode)

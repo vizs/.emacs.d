@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
 
 ;; * Set variables and sane defaults
 ;; ** Sanity
@@ -45,6 +45,8 @@
 
  ;; tab-always-indent 'complete
 
+ enable-local-eval t
+
  ;; Indentation
  indent-tabs-mode t
  tab-width 4)
@@ -53,33 +55,35 @@
 
 ;; ** Indentation
 
-(defun vz/prog-functional-indent-style ()
-  (when (member major-mode vz/functional-major-modes)
-    (setq indent-tabs-mode nil
-          tab-width 2)))
-
 (defvar c-basic-offset 4)
 (defvar cperl-basic-offset 4)
 (defvar python-indent 4)
 
-(add-hook 'prog-mode-hook #'vz/prog-functional-indent-style)
+(add-hook 'prog-mode-hook
+          (defun vz/prog-functional-indent-style ()
+            (when (apply #'derived-mode-p vz/functional-major-modes)
+              (setq-local indent-tabs-mode nil
+                          tab-width 2))))
 
 ;; * Niceties
 ;; ** Helper macros
+
+(require 'seq)
+
 ;; *** setq but with namespace
 
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
-  "`setq' but with the ``namespace'' as NS.
+  "`setq' but with the namespace as NS.
 If variable is a cons cell, then cdr is attached to setq.
 For example, to set a buffer local variable, you pass the variable name
 as (name-without-ns . local)."
-  (declare (indent 1) (debug 0))
+  (declare (indent 1))
   `(progn
      ,@(mapcar (lambda (x)
                  (let ((set 'setq)
                        (var (car x)))
-                  (when (listp var)
+                  (when (and (listp var) (not (listp (cdr var))))
                    (setq set (intern (format "setq-%s" (cdr var)))
                     var (car var)))
                   (list set (intern (format "%s-%s" ns var)) (cadr x))))
@@ -96,9 +100,9 @@ as (name-without-ns . local)."
 
 (defmacro setq-hook (mode &rest body)
   "Set buffer local variable for a major mode."
-  (declare (indent 1) (debug (setq body)))
+  (declare (indent 1))
   (let ((f `(setq-hook--create-fun ,mode ,@body)))
-    `(add-hook ',mode ,f)))
+    `(add-hook ',mode ,f nil t)))
 
 ;; *** Formating s-expressions?
 
@@ -203,10 +207,6 @@ as (name-without-ns . local)."
   "Path to FILE respective to $HOME"
   (expand-file-name file (getenv "HOME")))
 
-(defun vz/random-choice (list)
-  "Choose a random element from list."
-  (nth (random (1- (length list))) list))
-
 ;; ** Font related functions
 
 (defun vz/set-monospace-faces (faces)
@@ -260,7 +260,7 @@ as (name-without-ns . local)."
             "C-M-K" #'ivy-switch-buffer-kill)
   :config
   (setq-ns ivy
-    count-format "[%d/%d] "
+    count-format " [%d/%d] "
     use-virtual-buffers t
     do-completion-in-region nil
     wrap t
@@ -271,14 +271,14 @@ as (name-without-ns . local)."
     "Grow the minibuffer window by 1 line."
     (interactive)
     (setq-local max-mini-window-height
-                (cl-incf ivy-height)))
+                (setq ivy-height (1+ ivy-height))))
 
   (defun ivy-minibuffer-shrink ()
     "Shrink the minibuffer window by 1 line."
     (interactive)
     (when (> ivy-height 2)
       (setq-local max-mini-window-height
-                  (cl-decf ivy-height))
+                  (setq ivy-height (1- ivy-height)))
       (window-resize nil -1)))
 
   (defun vz/get-file-or-buffer ()

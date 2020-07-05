@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
 
 ;; * Basic configuration
 ;; ** Set path to shell
@@ -115,7 +115,7 @@
           (comint-delete-input))
         (comint-send-string process (concat cmd "\n"))
         (comint-add-to-input-history cmd)))))
-;;(vz/term-minor-mode-set-title cmd)))))
+;; (vz/term-minor-mode-set-title cmd)))))
 
 ;; * History from mksh
 

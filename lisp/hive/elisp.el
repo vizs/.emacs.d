@@ -9,7 +9,7 @@
 
 (defun vz/elisp-init ()
   (flymake-mode)
-  (aggressive-indent-mode)
+  ;; (aggressive-indent-mode)
   (eros-mode t)
   ;; Don't check docs
   (remove-hook 'flymake-diagnostic-functions

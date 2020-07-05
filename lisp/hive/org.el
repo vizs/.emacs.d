@@ -8,8 +8,8 @@
 
 (tempo-define-template
  "org-latex-eq*"
- '("#+begin_export latex" n "\\begin{equation*}" n "\\begin{split}"
-   n r n "\\end{split}" n "\\end{equation*}" n "#+end_export" >)
+ '("\\begin{equation*}" n "\\begin{split}"
+   n r n "\\end{split}" n "\\end{equation*}" >)
  "<eq")
 
 (add-to-list 'org-tempo-tags '("<eq" . tempo-template-org-latex-eq*))
@@ -36,7 +36,6 @@
 
   ;; style
   highlight-latex-and-related '(latex)
-  hidden-keywords '(title author)
   hide-emphasis-markers t
   hide-leading-stars nil ; indent mode also hides stars
   fontify-emphasized-text t
@@ -46,7 +45,7 @@
 
   ;; I prefer a human readable format over a machine readable one :P
   time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %k:%M>")
-  (display-custom-times . default) t ;; Buffer local variable
+  (display-custom-times . default) t
 
   preview-latex-default-process 'dvisvgm
 

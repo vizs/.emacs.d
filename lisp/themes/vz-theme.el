@@ -38,8 +38,11 @@
    `(lazy-highlight                   ((,class :background ,ac :foreground ,fg)))
    `(highlight                        ((,class :background ,ac :foreground ,fg)))
    `(trailing-whitespace              ((,class :background ,yw :foreground ,fg)))
-   `(flyspell-incorrect               ((,class :underline (:color ,re :style wave))))
    ;;`(help-argument-name
+
+   `(flyspell-incorrect               ((,class :underline (:color ,re :style wave))))
+   `(flymake-error                    ((,class :underline (:color ,re :style wave))))
+   `(flymake-warning                  ((,class :underline (:color ,GR :style wave))))
 
    `(beacon-fallback-background       ((,class :background ,yw :foregruond ,yw)))
 
@@ -82,7 +85,6 @@
    `(swiper-background-match-face-4   ((,class :background ,ac :foreground ,fg)))
 
    `(swiper-line-face                 ((,class :background ,GR :foreground ,lg)))
-   `(swiper-line-face                 ((,class :background ,GR :foreground ,lg)))
    `(swiper-match-face-3              ((,class :background ,ac :foreground ,fg)))
    `(swiper-match-face-4              ((,class :background ,ac :foreground ,fg)))
    `(swiper-match-face-1              ((,class :background ,lg :foreground ,bl)))
@@ -120,6 +122,7 @@
    `(org-document-info                ((,class :background ,bg :foreground ,yw)))
    `(org-drawer                       ((,class :background ,bg :foreground ,lf)))
    `(org-date                         ((,class :background ,bg :foreground ,lf)))
+   `(org-meta-line                    ((,class :background ,bg :foreground ,fg :weight bold)))
 
    `(makefile-space                   ((,class :background ,yw :foreground ,bg)))
 

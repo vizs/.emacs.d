@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
 
 ;; * Set the variables
 ;; ** Matching for nick
@@ -59,23 +59,22 @@
 ;; ** Generic function -- also works for prompt
 
 (defun vz/circe-draw-msg-generic (nick body &optional body-face)
-  (let* ((nick (cond ((member nick vz/circe-mynicks) "me")
-                     ((s-equals? nick vz/circe--old-nick) "")
-                     (:else nick)))
+  (let* ((nick (pcase nick
+                 ((pred (fn: circe-nick)) "me")
+                 (vz/circe--old-nick "")
+                 (_ nick)))
          (body-face (cond
                      ((s-equals? "me" nick) 'circe-my-message-body-face)
                      ((string-match-p vz/circe-mynicks-re body) 'circe-highlight-nick-face)
                      ((null body-face) 'default)
                      (:else body-face)))
-         (lnick (length nick))
-         (lbody (length body))
-         (spaces (propertize (s-repeat 9 " ") 'face 'circe-originator-face)))
+         (lnick (length nick)))
     (unless (string-empty-p nick)
       (setq-local vz/circe--old-nick nick))
     (when (eq body-face 'circe-highlight-nick-face)
-      (setq-local vz/circe-mentions (cons
-                                     (cons body (line-number-at-pos))
-                                     vz/circe-mentions)))
+      (setq-local
+       vz/circe-mentions (cons (cons body (line-number-at-pos))
+                               vz/circe-mentions)))
     (concat
      (propertize
       (concat
@@ -89,9 +88,6 @@
           'circe-my-message-face
         'circe-originator-face))
      (propertize body 'face body-face))))
-
-(defun vz/circe-draw-prompt ()
-  (lui-set-prompt (vz/circe-draw-msg-generic (buffer-name) "")))
 
 ;; ** Generate random message based on action
 ;; *** Join
@@ -112,7 +108,7 @@
                "%s just showed up. Hold my beer"
                "%s has just arrived. Seems OP - nerf please"
                "Roses are red, violets are blue, %s has joined the chat with you")))
-    (format (vz/random-choice msg) nick)))
+    (format (seq-random-elt msg) nick)))
 
 ;; *** Leave
 
@@ -141,17 +137,18 @@
 ;; *** Set the variable
 
 (setq-ns circe-format
-  say                (fn: vz/circe-handle-msg 'say   <rest>)
-  self-say           (fn: vz/circe-handle-msg 'ssay  <rest>)
-  action             (fn: vz/circe-handle-msg 'acn   <rest>)
-  server-message     (fn: vz/circe-handle-msg 'smsg  <rest>)
-  server-notice      (fn: vz/circe-handle-msg 'smsg  <rest>)
-  server-quit        (fn: vz/circe-handle-msg 'part  <rest>)
-  server-join        (fn: vz/circe-handle-msg 'join  <rest>)
-  server-topic       (fn: vz/circe-handle-msg 'smsg  <rest>)
-  server-part        (fn: vz/circe-handle-msg 'part  <rest>)
-  server-nick-change (fn: vz/circe-handle-msg 'nch   <rest>)
-  server-rejoin      (fn: vz/circe-handle-msg 'join  <rest>))
+  say                 (fn: vz/circe-handle-msg 'say   <rest>)
+  self-say            (fn: vz/circe-handle-msg 'ssay  <rest>)
+  action              (fn: vz/circe-handle-msg 'acn   <rest>)
+  server-message      (fn: vz/circe-handle-msg 'smsg  <rest>)
+  server-notice       (fn: vz/circe-handle-msg 'smsg  <rest>)
+  server-quit         (fn: vz/circe-handle-msg 'part  <rest>)
+  server-quit-channel (fn: vz/circe-handle-msg 'part  <rest>)
+  server-join         (fn: vz/circe-handle-msg 'join  <rest>)
+  server-topic        (fn: vz/circe-handle-msg 'smsg  <rest>)
+  server-part         (fn: vz/circe-handle-msg 'part  <rest>)
+  server-nick-change  (fn: vz/circe-handle-msg 'nch   <rest>)
+  server-rejoin       (fn: vz/circe-handle-msg 'join  <rest>))
 
 ;; * Jump commands
 ;; ** Helper
@@ -232,7 +229,7 @@
 (defun vz/circe-init ()
   (setq
    vz/circe--old-nick ""
-   buffer-face-mode-face '(:family "Charter" :height 120)
+   buffer-face-mode-face `(:family ,vz/variable-font :height 120)
    mode-line-format nil)
   (setq-local vz/jump-func #'vz/circe-jump-to-mention
               vz/circe-mentions nil)
@@ -246,16 +243,18 @@
     (vz/set-monospace-faces faces)
     (-each faces (fn: set-face-attribute <> nil :height 102))))
 
-(add-hook 'circe-chat-mode-hook #'vz/circe-init)
+(defun vz/circe-draw-prompt ()
+  (lui-set-prompt (vz/circe-draw-msg-generic (buffer-name) "")))
+
 (add-hook 'circe-chat-mode-hook #'vz/circe-draw-prompt)
+(add-hook 'circe-chat-mode-hook #'vz/circe-init)
 
 ;; ** Lui
 
 (defun vz/lui-init ()
   (setq
-   fringes-outside-margins t
    right-margin-width 5
-   left-margin-width 5
+   left-margin-width 0
    word-wrap t
    wrap-prefix (propertize (s-repeat 9 " ") 'face 'circe-originator-face))
   (setf (cdr (assoc 'continuation fringe-indicator-alist)) nil))
