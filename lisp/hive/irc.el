@@ -219,10 +219,9 @@
 
 ;; ** Bind
 
-;; (general-nmap
-;;   :prefix "SPC i"
-;;   "i" #'vz/circe-jump-irc
-;;   "d" #'vz/circe-jump-discord)
+(bind-keys
+ :map circe-mode-map
+ ("C-c j" . vz/jump-to-mention))
 
 ;; * Hooks
 ;; ** Circe

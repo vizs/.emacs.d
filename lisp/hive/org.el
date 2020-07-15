@@ -183,15 +183,12 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
 
 (add-hook 'org-mode-hook #'vz/org-mode-init)
 
-;; (general-nmap
-;;   :keymaps 'org-mode-map
-;;   :prefix "SPC"
-;;   "oe"  #'org-export-dispatch
-;;   "oil" #'org-insert-link
-;;   "olp" #'org-latex-preview
-;;   "olc" #'org-cdlatex-mode
-;;   "of"  #'org-sparse-tree
-;;   "ot"  #'org-todo
-;;   "ost" #'org-babel-tangle
-;;   "j"   (fn! (counsel-org-goto)
-;;              (vz/beacon-highlight)))
+(defun vz/counsel-org-goto ()
+  "Run `counsel-org-goto`, then beacon blink"
+  (interactive)
+  (counsel-org-goto)
+  (vz/beacon-highlight))
+
+(bind-keys
+ :map org-mode-map
+ ("C-c j" . vz/counsel-org-goto))

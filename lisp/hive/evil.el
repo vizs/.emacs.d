@@ -101,7 +101,7 @@ in the same column"
 (general-vmap
   :keymaps 'override
   "TAB" #'indent-for-tab-command
-  "gc"  #'comment-region
+  "gc"  #'comment-or-uncomment-region
   ">"   #'vz/evil-shift-right
   "<"   #'vz/evil-shift-left
   "gj"  #'avy-goto-line-below
