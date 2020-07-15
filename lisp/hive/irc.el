@@ -51,6 +51,7 @@
 
 (setq-ns lui
   logging-directory (expand-file-name "~/.cache/irc-log")
+  flyspell-p t
   fill-type nil
   time-stamp-format "%H:%M"
   time-stamp-position 'right-margin)
