@@ -60,6 +60,20 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+;; *** C-j is easier to press than enter
+
+;; Without this, electric-indent-mode is not
+;; considered
+(bind-key "C-j" #'newline)
+
+;; *** Repeat commands
+
+;; Honestly C-x z and C-x M-ESC are hard asf to press
+
+(bind-keys
+ ("C-." . repeat)
+ ("C->" . repeat-complex-command))
+
 ;; ** Indentation
 
 (defvar c-basic-offset 4)
@@ -285,13 +299,17 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 
 (use-package counsel
   :after ivy
+  :bind
+  (("M-y" . counsel-yank-pop)
+   ("C-c j" . counsel-imenu))
   :config
   (setq-ns counsel
     find-file-at-point t
-    org-headline-display-todo t)
-  (defun vz/counsel-M-x-prompt (_ &rest args)
-    "pls ")
-  (advice-add 'counsel--M-x-prompt :around #'vz/counsel-M-x-prompt))
+    org-headline-display-todo t
+    org-headline-display-tags t)
+  (defun vz/counsel-M-x-prompt (_ &rest _) "pls ")
+  (advice-add 'counsel--M-x-prompt :around #'vz/counsel-M-x-prompt)
+  (counsel-mode t))
 
 ;; *** Blink cursor on certain actions
 

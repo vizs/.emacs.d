@@ -37,22 +37,6 @@
 ;; It's in a separate file because it depends on dynamic scoping
 (load-file (expand-file-name "lisp/hive/scripting.el" user-emacs-directory))
 
-;; * Bindings that is independent of the major-mode (mostly)
-
-(defun vz/counsel-outshine-or-imenu ()
-  "Run `counsel-outline` if `outshine-mode` is enabled, `counsel-imenu` otherwise."
-  (interactive)
-  (if outshine-mode
-      (counsel-outline)
-    (counsel-imenu)))
-
-(bind-keys
- ("C-c j" . counsel-imenu)
- ("C-c J" . vz/counsel-outshine-or-imenu)
- ;; I swear C-x M-ESC is really painful to press
- ("C->" . repeat-complex-command)
- ("C-." . repeat))
-
 ;; * Builtin stuff that doesn't depend on anything else
 ;; ** Fringe
 
@@ -186,14 +170,17 @@
 ;; I still need to see what outshine offers
 (use-package outshine
   :defer t
+  :functions vz/outshine-jump
+  :bind
+  (:map outshine-mode-map
+        ("C-c J" . vz/outshine-jump))
   :config
-  ;; Might be a very bad idea
-  (setq-default counsel-outline-settings
-                (asoc-put! counsel-outline-settings
-                           'emacs-lisp-mode
-                           '(:outline-regexp ";; [*]+[\s\t]+"
-                             :outline-level counsel-outline-level-emacs-lisp)
-                           t))
+  (defun vz/outshine-jump ()
+    (interactive)
+    (setq-local counsel-outline-settings `(,major-mode
+                                           (:outline-regexp ,(outshine-calc-outline-regexp)
+                                            :outline-level ,(outshine-calc-outline-level))))
+    (counsel-outline))
   (setq-ns outshine
     oldschool-elisp-outline-regexp-base "[*]\\{1,8\\}"
     startup-folded-p t
@@ -219,6 +206,15 @@
   :straight (:type git :host github
                    :repo "cmpitg/wand"
                    :fork (:repo "vizs/wand")))
+
+;; ** Marking text
+
+;; expand-region makes a better mark-sexp :p
+
+(use-package expand-region
+  :defer t
+  :functions er/expand-region
+  :bind ("C-M-SPC" . er/expand-region))
 
 ;; * Org-mode
 

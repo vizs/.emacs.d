@@ -284,6 +284,12 @@ M-j, M-k
 | K   | Kill buffer by getting a list in ivy?          |
 | b   | Bury buffer                                    |
 | r   | Revert buffer                                  |
+*** TODO Integrating registers
+Registers are immensely helpful! You can store pretty much every useful
+information like window configuration, buffer position in them! So come up
+with a convenient key (probably r) to bind register commands to.
+
+More on this: https://tech.toryanderson.com/2020/07/03/emacs-tip-registers/
 ** Summary
 | Key       | Does what?                                        |
 |-----------+---------------------------------------------------|
