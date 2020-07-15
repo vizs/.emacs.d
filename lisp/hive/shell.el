@@ -206,12 +206,13 @@ to it. If nothing is found, create a new buffer"
                            (and (vz/inside-shell? <>)
                                 (null (get-buffer-window <> t))))
                           vz/popup-shells))
-           (cwd default-directory)
+           (cwd (or (f-dirname (buffer-file-name)) default-directory))
            (cwd-buffers (-filter
                          (fn:
                           with-current-buffer <>
                           (s-equals? default-directory cwd))
                          free-buffers)))
+      (message "%s" cwd)
       (cond
        (cwd-buffers
         (vz/popup-shell--switch (car cwd-buffers) cwd t))
@@ -251,9 +252,6 @@ to it. If nothing is found, create a new buffer"
   (vz/beacon-highlight))
 
 ;; * Emacs frame as terminal
-
-;; TODO: Auto-kill buffer by adding a function to `delete-frame-functions'
-
 ;; ** Variables
 
 (define-minor-mode vz/term-minor-mode
@@ -291,7 +289,7 @@ to it. If nothing is found, create a new buffer"
                (or (not (frame-live-p vz/term-minor-mode-frame))
                    (not (get-buffer-process <>)))))
          (buffer-list))
-      (fn: kill-buffer <>))))
+      #'kill-buffer)))
 
 (defun vz/term-minor-mode-set-title (string)
   "Set frame title when `vz/term-minor-mode' is active"
@@ -323,21 +321,12 @@ term buffer associated with it"
   (interactive "sPress keysequence:")
   (comint-send-string (get-buffer-process (current-buffer)) key))
 
-(general-nmap
-  "SPC ps" #'vz/popup-shell)
+(bind-keys
+ :map shell-mode-map
+ ("C-c j" . vz/shell-jump-to-dir)
+ ("C-c ?" . vz/shell-insert-from-mksh-hist)
+ ("C-c /" . vz/shell-insert-from-hist)
+ ("C-c J" . vz/shell-jump-to-prompt))
 
-(general-nmap
-  :keymaps 'shell-mode-map
-  "SPC j" #'vz/shell-jump-to-prompt
-  "[/"    #'vz/shell-insert-from-hist)
-
-(general-imap
-  :keymaps 'shell-mode-map
-  "C-k" #'vz/shell-send-keysequence-to-process
-  "C-c" #'comint-interrupt-subjob
-  "C-z" #'comint-stop-subjob
-  "C-l" #'comint-clear-buffer
-  "C-/" #'vz/shell-insert-from-hist
-  "C-?" #'vz/shell-insert-from-mksh-hist
-  "C-d" #'comint-send-eof
-  "C-j" #'vz/shell-jump-to-dir)
+(bind-keys
+ ("C-c P" . vz/popup-shell))

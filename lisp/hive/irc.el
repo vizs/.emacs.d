@@ -137,18 +137,19 @@
 ;; *** Set the variable
 
 (setq-ns circe-format
-  say                 (fn: vz/circe-handle-msg 'say   <rest>)
-  self-say            (fn: vz/circe-handle-msg 'ssay  <rest>)
-  action              (fn: vz/circe-handle-msg 'acn   <rest>)
-  server-message      (fn: vz/circe-handle-msg 'smsg  <rest>)
-  server-notice       (fn: vz/circe-handle-msg 'smsg  <rest>)
-  server-quit         (fn: vz/circe-handle-msg 'part  <rest>)
-  server-quit-channel (fn: vz/circe-handle-msg 'part  <rest>)
-  server-join         (fn: vz/circe-handle-msg 'join  <rest>)
-  server-topic        (fn: vz/circe-handle-msg 'smsg  <rest>)
-  server-part         (fn: vz/circe-handle-msg 'part  <rest>)
-  server-nick-change  (fn: vz/circe-handle-msg 'nch   <rest>)
-  server-rejoin       (fn: vz/circe-handle-msg 'join  <rest>))
+  say      (fn: vz/circe-handle-msg 'say   <rest>)
+  self-say (fn: vz/circe-handle-msg 'ssay  <rest>)
+  action   (fn: vz/circe-handle-msg 'acn   <rest>))
+(setq-ns circe-format-server
+  message      (fn: vz/circe-handle-msg 'smsg  <rest>)
+  notice       (fn: vz/circe-handle-msg 'smsg  <rest>)
+  quit         (fn: vz/circe-handle-msg 'part  <rest>)
+  quit-channel (fn: vz/circe-handle-msg 'part  <rest>)
+  join         (fn: vz/circe-handle-msg 'join  <rest>)
+  topic        (fn: vz/circe-handle-msg 'smsg  <rest>)
+  part         (fn: vz/circe-handle-msg 'part  <rest>)
+  nick-change  (fn: vz/circe-handle-msg 'nch   <rest>)
+  rejoin       (fn: vz/circe-handle-msg 'join  <rest>))
 
 ;; * Jump commands
 ;; ** Helper
@@ -218,10 +219,10 @@
 
 ;; ** Bind
 
-(general-nmap
-  :prefix "SPC i"
-  "i" #'vz/circe-jump-irc
-  "d" #'vz/circe-jump-discord)
+;; (general-nmap
+;;   :prefix "SPC i"
+;;   "i" #'vz/circe-jump-irc
+;;   "d" #'vz/circe-jump-discord)
 
 ;; * Hooks
 ;; ** Circe

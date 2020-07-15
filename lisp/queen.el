@@ -26,7 +26,10 @@
  auto-save-list-file-prefix "~/.cache/emacs-autosave/"
  create-lockfiles nil
 
+ ;; Cursor styling
  cursor-in-non-selected-windows nil
+ ;; cursor-type '(bar . 2)
+
  custom-file "/dev/null"
 
  ;; Startup stuff
@@ -46,6 +49,10 @@
  ;; tab-always-indent 'complete
 
  enable-local-eval t
+
+ ;; Horizontal scrolling
+ mouse-wheel-tilt-scroll t
+ mouse-wheel-flip-direction t
 
  ;; Indentation
  indent-tabs-mode t
@@ -83,10 +90,10 @@ as (name-without-ns . local)."
      ,@(mapcar (lambda (x)
                  (let ((set 'setq)
                        (var (car x)))
-                  (when (and (listp var) (not (listp (cdr var))))
-                   (setq set (intern (format "setq-%s" (cdr var)))
-                    var (car var)))
-                  (list set (intern (format "%s-%s" ns var)) (cadr x))))
+                   (when (and (listp var) (not (listp (cdr var))))
+                     (setq set (intern (format "setq-%s" (cdr var)))
+                           var (car var)))
+                   (list set (intern (format "%s-%s" ns var)) (cadr x))))
         (seq-partition args 2))))
 
 ;; *** setq but for a hook
@@ -129,9 +136,9 @@ as (name-without-ns . local)."
 (add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
                                              vz/monospace-font)))
 
-;; ** Display > instead of $ at the visual end of truncated line
+;; ** Display … instead of $ at the visual end of truncated line
 
-(set-display-table-slot standard-display-table 'truncation ?>)
+(set-display-table-slot standard-display-table 'truncation ?…)
 
 ;; * Straight
 ;; ** Bootstrap straight
@@ -218,18 +225,17 @@ as (name-without-ns . local)."
     (fn: set-face-attribute <> nil :family vz/variable-font)))
 
 ;; ** Quality of life packages
-;; *** Easier binds
-
-(use-package general
-  :init
-  (setq general-override-states '(insert emacs hybrid normal
-                                  visual motion operator replace)))
-
 ;; *** Saner switch window and goto-char motion
 
-(use-package avy)
+(use-package avy
+  :bind
+  (("C-c n" . avy-goto-line-below)
+   ("C-c p" . avy-goto-line-above)
+   ("C-c f" . avy-goto-char)))
 (use-package ace-window
   :after avy
+  :bind (("C-x o" . ace-window)
+	       ("C-x 0" . ace-delete-window))
   :config
   ;; More noticable this way
   (set-face-attribute 'aw-leading-char-face nil :height 150)
@@ -241,23 +247,9 @@ as (name-without-ns . local)."
 ;; *** Selection engine
 
 (use-package ivy
-  :after general
-  :general
-  (:keymaps 'ivy-minibuffer-map
-            "C-p" nil
-            "C-n" nil
-            "<escape>" #'minibuffer-keyboard-quit
-            "<C-up>"   #'ivy-minibuffer-grow
-            "<C-down>" #'ivy-minibuffer-shrink
-            "C-s"      #'ivy-avy
-            "C-j"      #'ivy-next-line
-            "C-k"      #'ivy-previous-line
-            "C-u"      #'ivy-scroll-down-command
-            "C-d"      #'ivy-scroll-up-command)
-  (:keymaps 'ivy-switch-buffer-map
-            "C-k" nil
-            "C-k"   #'ivy-previous-line
-            "C-M-K" #'ivy-switch-buffer-kill)
+  :bind (:map ivy-minibuffer-map
+              ("<C-up>" . ivy-minibuffer-grow)
+              ("<C-down>" . ivy-minibuffer-shrink))
   :config
   (setq-ns ivy
     count-format " [%d/%d] "
@@ -265,14 +257,12 @@ as (name-without-ns . local)."
     do-completion-in-region nil
     wrap t
     height 15)
-
   ;; This was moved to ivy-hydra.el
   (defun ivy-minibuffer-grow ()
     "Grow the minibuffer window by 1 line."
     (interactive)
     (setq-local max-mini-window-height
                 (setq ivy-height (1+ ivy-height))))
-
   (defun ivy-minibuffer-shrink ()
     "Shrink the minibuffer window by 1 line."
     (interactive)
@@ -280,21 +270,14 @@ as (name-without-ns . local)."
       (setq-local max-mini-window-height
                   (setq ivy-height (1- ivy-height)))
       (window-resize nil -1)))
-
   (defun vz/get-file-or-buffer ()
     "Select a list of opened buffers, files in current directory and entries in
 recentf and return the corresponding buffer. Create one if it doesn't exist"
-    (unless (boundp 'recentf-list)
-      (recentf-mode)
-      (recentf-load-list))
-    (-->
-     (->>
-      (append (-map #'buffer-name (buffer-list))
-              (-filter #'f-file? (directory-files default-directory))
-              recentf-list)
-      (-uniq)
-      (ivy-read "> "))
-     (or (get-buffer it) (find-file-noselect it))))
+    (--> (append (ivy--virtual-buffers)
+               (-filter #'f-file? (directory-files default-directory))
+               (-map #'buffer-name (buffer-list)))
+         (ivy-read "> " it)
+         (or (get-buffer it) (find-file-noselect it))))
   (ivy-mode 1))
 
 (use-package ivy-avy
@@ -306,7 +289,7 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
   (setq-ns counsel
     find-file-at-point t
     org-headline-display-todo t)
-  (defun vz/counsel-M-x-prompt (ofun &rest args)
+  (defun vz/counsel-M-x-prompt (_ &rest args)
     "pls ")
   (advice-add 'counsel--M-x-prompt :around #'vz/counsel-M-x-prompt))
 

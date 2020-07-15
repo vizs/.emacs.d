@@ -103,8 +103,8 @@
   (wand:execute
    (plist-get (link-hint--process (link-hint--get-links)) :args)))
 
-(general-define-key
- :states '(normal visual)
- :keymaps 'override
- "|"      #'vz/plumb
- "SPC lp" #'vz/plumb-link-select)
+;; (general-define-key
+;;  :states '(normal visual)
+;;  :keymaps 'override
+;;  "|"      #'vz/plumb
+;;  "SPC lp" #'vz/plumb-link-select)

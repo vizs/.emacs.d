@@ -3,6 +3,13 @@
 ;; TODO: Add advice around org-capture-abort and friends to auto-kill frame
 ;;       if launched via `org-capture' script
 
+(use-package org-bullets
+  :defer t)
+
+(use-package valign
+  :straight (:type git :host github :repo "casouri/valign")
+  :config (valign-mode))
+
 ;; Enable structure template completion
 (require 'org-tempo)
 
@@ -42,6 +49,9 @@
   fontify-quote-and-verse-blocks t
   fontify-whole-heading-line t
   src-fontify-natively nil
+
+  ;; org-bullets
+  bullets-bullet-list '(" ")
 
   ;; I prefer a human readable format over a machine readable one :P
   time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %k:%M>")
@@ -135,7 +145,7 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
 
 (defun vz/org-mode-style ()
   (let ((faces '(org-table org-link org-code org-block org-drawer
-                 org-date org-special-keyword org-verbatim
+                 org-date org-special-keyword org-verbatim org-tag
                  org-latex-and-related)))
     (vz/set-monospace-faces faces)
     (-each faces (fn: set-face-attribute <> nil :height 102)))
@@ -159,6 +169,7 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
 (defun vz/org-mode-init ()
   (org-indent-mode t)
   (org-num-mode t)
+  (org-bullets-mode t)
   (electric-pair-local-mode t)
   (org-toggle-pretty-entities)
   (setq line-spacing 0.01
@@ -172,15 +183,15 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
 
 (add-hook 'org-mode-hook #'vz/org-mode-init)
 
-(general-nmap
-  :keymaps 'org-mode-map
-  :prefix "SPC"
-  "oe"  #'org-export-dispatch
-  "oil" #'org-insert-link
-  "olp" #'org-latex-preview
-  "olc" #'org-cdlatex-mode
-  "of"  #'org-sparse-tree
-  "ot"  #'org-todo
-  "ost" #'org-babel-tangle
-  "j"   (fn! (counsel-org-goto)
-             (vz/beacon-highlight)))
+;; (general-nmap
+;;   :keymaps 'org-mode-map
+;;   :prefix "SPC"
+;;   "oe"  #'org-export-dispatch
+;;   "oil" #'org-insert-link
+;;   "olp" #'org-latex-preview
+;;   "olc" #'org-cdlatex-mode
+;;   "of"  #'org-sparse-tree
+;;   "ot"  #'org-todo
+;;   "ost" #'org-babel-tangle
+;;   "j"   (fn! (counsel-org-goto)
+;;              (vz/beacon-highlight)))

@@ -37,6 +37,22 @@
 ;; It's in a separate file because it depends on dynamic scoping
 (load-file (expand-file-name "lisp/hive/scripting.el" user-emacs-directory))
 
+;; * Bindings that is independent of the major-mode (mostly)
+
+(defun vz/counsel-outshine-or-imenu ()
+  "Run `counsel-outline` if `outshine-mode` is enabled, `counsel-imenu` otherwise."
+  (interactive)
+  (if outshine-mode
+      (counsel-outline)
+    (counsel-imenu)))
+
+(bind-keys
+ ("C-c j" . counsel-imenu)
+ ("C-c J" . vz/counsel-outshine-or-imenu)
+ ;; I swear C-x M-ESC is really painful to press
+ ("C->" . repeat-complex-command)
+ ("C-." . repeat))
+
 ;; * Builtin stuff that doesn't depend on anything else
 ;; ** Fringe
 
@@ -91,54 +107,36 @@
     warning-bitmap '(vz/fringe-left-arrow warning)
     note-bitmap    '(vz/fringe-left-arrow compilation-info)))
 
-;; * Evil, shell, modeline
+;; * Modeline
 
-;; Load in evil first!
-(vz/use-package evil nil
-  :init
-  (setq-ns evil-want
-    keybinding nil
-    C-d-scroll t
-    C-u-scroll t
-    Y-yank-to-eol t))
-
-;; ** Enable the mode-line
-
-(load-file (expand-file-name "lisp/hive/modeline.el" user-emacs-directory))
-
-;; ** Shell
+(load-file (expand-file-name "lisp/hive/modeline.el"
+			     user-emacs-directory))
+;; * Shell
 
 (use-package comint
   :defer t
   :straight (:type built-in)
   :functions (vz/comint-send-input)
-  :general
-  (:keymaps 'comint-mode-map :states 'normal
-            "<RET>" #'vz/comint-send-input
-            "[w"    #'comint-write-output
-            "[d"    #'comint-delete-output
-            "[j"    #'comint-next-prompt
-            "[k"    #'comint-previous-prompt
-            "[c"    #'comint-clear-buffer)
-  (:keymaps 'comint-mode-map :states 'insert
-            "<S-return>" #'comint-accumulate)
-  (:states 'visual :keymaps 'comint-mode-map
-           "<RET>" #'vz/comint-send-input)
+  :bind
+  (:map comint-mode-map
+        ("<S-return>" . comint-accumulate)
+	      ("<return>"   . vz/comint-send-input))
   :config
-  (defun vz/comint-send-input (&optional start end)
+  (defun vz/comint-send-input ()
     "Send region if present, otherwise current line to current buffer's process"
-    (interactive "r")
+    (interactive)
     (if (use-region-p)
-        (let ((cmd (buffer-substring (or start (region-beginning))
-                                     (or end (region-end)))))
+        (let ((cmd (buffer-substring (region-beginning)
+                                     (region-end))))
           (comint-send-string (get-buffer-process (current-buffer))
                               (concat cmd "\n"))
           (comint-add-to-input-history cmd))
-      ;; setting `comint-eol-on-send' to nil doesn't work
-      (save-excursion
-        (comint-send-input)))
-    (when (evil-visual-state-p)
-      (evil-exit-visual-state))))
+      (save-excursion (comint-send-input))
+      ;; Super ugly but whatever
+      (when (eq (save-excursion (goto-char (line-beginning-position))
+                                (face-at-point))
+                'comint-highlight-prompt)
+        (comint-next-prompt 1)))))
 
 (vz/use-package shell nil
   :defer t
@@ -154,7 +152,6 @@
 
 ;; ** Whitespace
 
-;; Edit whitespace in edited /only/
 (use-package ws-butler
   :config (ws-butler-global-mode))
 
@@ -163,10 +160,10 @@
 (use-package hl-todo
   :defer t
   :hook (prog-mode . hl-todo-mode)
-  :general
-  (:keymaps 'normal :prefix "["
-            "j" #'hl-todo-next
-            "k" #'hl-todo-previous)
+  :bind
+  (:map prog-mode-map
+   ("C-c tn" . hl-todo-next)
+   ("C-c tp" . hl-todo-previous))
   :config
   (setq hl-todo-highlight-punctuation ":"))
 
@@ -175,9 +172,7 @@
 (use-package olivetti
   :defer t
   :hook ((Man-mode org-mode) . olivetti-mode)
-  :general
-  (:keymaps 'override :states 'normal
-            "SPC C" #'olivetti-mode)
+  :bind ("C-c C" . olivetti-mode)
   :config
   (setq-ns olivetti
     body-width 80
@@ -191,7 +186,6 @@
 ;; I still need to see what outshine offers
 (use-package outshine
   :defer t
-;;  :hook (prog-mode . outshine-mode)
   :config
   ;; Might be a very bad idea
   (setq-default counsel-outline-settings
@@ -203,28 +197,13 @@
   (setq-ns outshine
     oldschool-elisp-outline-regexp-base "[*]\\{1,8\\}"
     startup-folded-p t
-    imenu-show-headlines-p nil)
-  (add-hook 'outshine-mode-hook
-            (defun vz/outshine-mode-init ()
-              (general-nmap
-                "TAB"       #'outshine-cycle
-                "<backtab>" #'outshine-cycle-buffer
-                "M-RET"     #'outshine-insert-heading
-                "<M-up>"    #'outline-move-subtree-up
-                "<M-down>"  #'outline-move-subtree-down))))
+    imenu-show-headlines-p nil))
 
 ;; ** Edit a part of a buffer in separate window
 
 (use-package edit-indirect
   :defer t
-  :functions (vz/edit-indirect-paragraph)
-  :general
-  (:keymaps 'override :prefix "SPC" :states '(normal visual)
-            "nr" #'edit-indirect-region
-            "np" #'vz/edit-indirect-paragraph)
-  (:keymaps 'edit-indirect-mode-map :states 'normal
-            "q" #'edit-indirect-commit
-            "Q" #'edit-indirect-abort)
+  :functions vz/edit-indirect-paragraph
   :config
   (setq edit-indirect-guess-mode-function
         (fn: funcall (with-current-buffer <> major-mode)))
@@ -247,21 +226,13 @@
 (vz/use-package org nil
   :straight (:type built-in)
   :defer t
-  :general
-  (:keymaps 'override :states 'normal
-            "SPC oc" #'org-capture
-            "SPC oj" #'counsel-org-goto-all)
+  :bind
+  (("C-c oc" . org-capture)
+   ("C-c oa" . org-agenda)
+   ("C-c oj" . counsel-org-goto-all))
   :init
   (straight-use-package 'auctex)
-  (straight-use-package 'cdlatex)
-  (use-package org-bullets
-    :hook (org-mode . org-bullets-mode)
-    :defer t
-    :config
-    (setq org-bullets-bullet-list '(" ")))
-  (use-package valign
-    :straight (:type git :host github :repo "casouri/valign")
-    :config (valign-mode)))
+  (straight-use-package 'cdlatex))
 
 ;; * Communication
 
@@ -269,10 +240,6 @@
 (vz/use-package circe "irc"
   :defer t
   :functions (vz/circe-jump-irc vz/circe-jump-discord)
-  :general
-  (:keymaps 'override :states 'normal :prefix "SPC i"
-            "i" #'vz/circe-jump-irc
-            "d" #'vz/circe-jump-discord)
   :init
   (defun pass-irc (serv)
     (fn: pass (format "irc/%s" serv)))
@@ -286,13 +253,21 @@
 ;; * Programming Languages
 
 (use-package company
-  :general
-  (:keymaps 'company-active-map
-            "M-n" nil
-            "M-p" nil
-            "C-j" (fn! (company-complete-common-or-cycle  1))
-            "C-k" (fn! (company-complete-common-or-cycle -1)))
+  :demand t
+	:functions (company-complete-common-or-cycle
+			        vz/company-previous-candidate
+			        vz/company-next-candidate)
+	:bind
+  (:map company-active-map
+        ("M-n" . vz/company-next-candidate)
+        ("M-p" . vz/company-previous-candidate))
   :config
+  (defun vz/company-previous-candidate ()
+    (interactive)
+    (company-complete-common-or-cycle -1))
+  (defun vz/company-next-candidate ()
+    (interactive)
+    (company-complete-common-or-cycle 1))
   (setq-ns company
     require-match nil
     idle-delay 0.2
@@ -324,14 +299,8 @@
 (use-package python
   :defer t
   :straight (:type built-in)
-  ;; :hook (python-mode . run-python)
-  :general
-  (:states 'normal :prefix "SPC" :keymaps 'python-mode-map
-           "rsr" #'python-shell-send-region
-           "rsd" #'python-shell-send-defun
-           "rsf" #'python-shell-send-buffer
-           "rsF" #'python-shell-send-file
-           "df"  #'python-describe-at-point)
+  :bind
+  ("C-c df" . python-describe-at-point)
   :config
   (setq-ns python-shell
     interpreter "python3"
@@ -360,10 +329,8 @@
   :defer t
   :hook
   (before-save . gofmt-before-save)
-  :general
-  (:states 'normal :prefix "SPC" :keymaps 'go-mode-map
-           "df" #'godef-describe
-           "j" #'godef-jump)
+  :bind
+  ("C-c df" . godefjump)
   :config
   ;; Cleaned up flymake-go
   (defun vz/flymake-go ()
@@ -385,14 +352,14 @@
   (racket-mode . racket-unicode-input-method-enable)
   ;; (racket-mode . aggressive-indent-mode)
   (racket-mode . racket-xp-mode)
-  :general
-  (:states '(normal visual) :keymaps 'racket-mode-map
-           "C-e"     #'racket-eval-last-sexp
-           "SPC rsr" #'racket-send-region
-           "SPC rsd" #'racket-send-definition
-           "SPC rse" #'racket-eval-last-sexp
-           "SPC df"  #'racket-xp-describe
-           "SPC d."  #'racket-xp-visit-definition)
+  ;; :general
+  ;; (:states '(normal visual) :keymaps 'racket-mode-map
+  ;;          "C-e"     #'racket-eval-last-sexp
+  ;;          "SPC rsr" #'racket-send-region
+  ;;          "SPC rsd" #'racket-send-definition
+  ;;          "SPC rse" #'racket-eval-last-sexp
+  ;;          "SPC df"  #'racket-xp-describe
+  ;;          "SPC d."  #'racket-xp-visit-definition)
   :config
   (setq racket-show-functions '(racket-show-pos-tip))
   (add-hook 'racket-xp-mode-hook

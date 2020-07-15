@@ -11,12 +11,6 @@
        (t                   ""))
     ""))
 
-(defun vz/mode-line-evil-state ()
-  (concat "  "
-          (pcase evil-state
-            ('visual "VISUAL » ")
-            ('insert "INSERT » "))))
-
 (defun vz/mode-line-file-short-dir ()
   (--if-let (if (derived-mode-p 'shell-mode)
                 (concat default-directory "/a")
@@ -46,7 +40,7 @@
 
 (setq-default
  battery-update-interval 360
- vz/mode-line-format `((:eval (vz/mode-line-evil-state))
+ vz/mode-line-format `("    "
                        (:eval (vz/mode-line-file-short-dir))
                        "%b"
                        (:eval (vz/mode-line-file-state))
