@@ -64,15 +64,14 @@
 
 ;; Without this, electric-indent-mode is not
 ;; considered
-(bind-key "C-j" #'newline)
+(global-set-key "\C-j" #'newline)
 
 ;; *** Repeat commands
 
 ;; Honestly C-x z and C-x M-ESC are hard asf to press
 
-(bind-keys
- ("C-." . repeat)
- ("C->" . repeat-complex-command))
+(global-set-key (kbd "C-.") #'repeat)
+(global-set-key (kbd "C->") #'repeat-complex-command)
 
 ;; ** Indentation
 
@@ -248,9 +247,16 @@ as (name-without-ns . local)."
    ("C-c f" . avy-goto-char)))
 (use-package ace-window
   :after avy
+  :functions vz/ace-delete-window
   :bind (("C-x o" . ace-window)
-	       ("C-x 0" . ace-delete-window))
+	       ("C-x 0" . vz/ace-delete-window))
   :config
+  (defun vz/ace-delete-window ()
+    "If window count is 2, run `delete-window`; `ace-delete-window` otherwise."
+    (interactive)
+    (if (eq 2 (length (window-list)))
+        (delete-window)
+      (ace-delete-window)))
   ;; More noticable this way
   (set-face-attribute 'aw-leading-char-face nil :height 150)
   (setq-ns aw

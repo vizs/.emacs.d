@@ -177,9 +177,10 @@
   :config
   (defun vz/outshine-jump ()
     (interactive)
-    (setq-local counsel-outline-settings `(,major-mode
-                                           (:outline-regexp ,(outshine-calc-outline-regexp)
-                                            :outline-level ,(outshine-calc-outline-level))))
+    (setq-local counsel-outline-settings
+                `(,major-mode
+                  (:outline-regexp ,(outshine-calc-outline-regexp)
+                   :outline-level ,(outshine-calc-outline-level))))
     (counsel-outline))
   (setq-ns outshine
     oldschool-elisp-outline-regexp-base "[*]\\{1,8\\}"

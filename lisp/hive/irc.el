@@ -60,10 +60,10 @@
 ;; ** Generic function -- also works for prompt
 
 (defun vz/circe-draw-msg-generic (nick body &optional body-face)
-  (let* ((nick (pcase nick
-                 ((pred (fn: circe-nick)) "me")
-                 (vz/circe--old-nick "")
-                 (_ nick)))
+  (let* ((nick (cond
+                 ((s-equals? nick (circe-nick)) "me")
+                 ((s-equals? nick vz/circe--old-nick) "")
+                 (t nick)))
          (body-face (cond
                      ((s-equals? "me" nick) 'circe-my-message-body-face)
                      ((string-match-p vz/circe-mynicks-re body) 'circe-highlight-nick-face)
@@ -224,6 +224,12 @@
  :map circe-mode-map
  ("C-c j" . vz/jump-to-mention))
 
+;; * Commands
+
+(defun circe-command-SHRUG (&optional text)
+  "Just send a shrug thingy or append it to eol."
+  (circe-command-SAY (concat text " ¯\\_(ツ)_/¯")))
+
 ;; * Hooks
 ;; ** Circe
 
@@ -240,7 +246,7 @@
        :height 120))
     "Face for self-say body")
   (let ((faces '(circe-prompt-face circe-originator-face
-                 circe-my-message-face)))
+                 lui-time-stamp-face circe-my-message-face)))
     (vz/set-monospace-faces faces)
     (-each faces (fn: set-face-attribute <> nil :height 102))))
 
