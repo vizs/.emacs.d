@@ -256,8 +256,8 @@
 			        vz/company-next-candidate)
 	:bind
   (:map company-active-map
-        ("M-n" . vz/company-next-candidate)
-        ("M-p" . vz/company-previous-candidate))
+        ("C-n" . vz/company-next-candidate)
+        ("C-p" . vz/company-previous-candidate))
   :config
   (defun vz/company-previous-candidate ()
     (interactive)
@@ -326,8 +326,6 @@
   :defer t
   :hook
   (before-save . gofmt-before-save)
-  :bind
-  ("C-c df" . godefjump)
   :config
   ;; Cleaned up flymake-go
   (defun vz/flymake-go ()
