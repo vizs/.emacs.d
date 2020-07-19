@@ -144,12 +144,10 @@
 
 (defun vz/shell-get-dir-alias ()
   (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
-  (-map (fn (->> <>
-                 (s-split "=")
-                 (cadr)))
-        (->> (f-read "/tmp/diralias")
-             (s-split "\n")
-             (-drop-last 1))))
+  (-map (fn (cadr (s-split "=" <>)))
+        (-drop-last
+         1
+         (s-split "\n" (f-read "/tmp/diralias")))))
 
 (defun vz/shell-jump-to-dir ()
   "Jump to directory alias"
@@ -161,7 +159,7 @@
       (let ((cmd (->>
                   (vz/shell-get-dir-alias)
                   (ivy-read "> ")
-                  (format "cd ~%s\n"))))
+                  (format "cd %s\n"))))
         (comint-send-string proc cmd)
         (comint-add-to-input-history cmd))
       ;;(vz/term-minor-mode-set-title cmd))
@@ -209,7 +207,9 @@ to it. If nothing is found, create a new buffer"
                            (and (vz/inside-shell? <>)
                                 (null (get-buffer-window <> t))))
                           vz/popup-shells))
-           (cwd (or (f-dirname (buffer-file-name)) default-directory))
+           (cwd (condition-case ()
+                    (f-dirname (buffer-file-name))
+                  (error default-directory)))
            (cwd-buffers (-filter
                          (fn:
                           with-current-buffer <>
