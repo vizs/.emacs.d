@@ -115,12 +115,10 @@
           (comint-send-string (get-buffer-process (current-buffer))
                               (concat cmd "\n"))
           (comint-add-to-input-history cmd))
-      (save-excursion (comint-send-input))
-      ;; Super ugly but whatever
-      (when (eq (save-excursion (goto-char (line-beginning-position))
-                                (face-at-point))
-                'comint-highlight-prompt)
-        (comint-next-prompt 1)))))
+      (let ((after (comint-after-pmark-p)))
+        (save-excursion (comint-send-input))
+        (when after
+          (comint-next-prompt 1))))))
 
 (vz/use-package shell nil
   :defer t
@@ -207,15 +205,6 @@
   :straight (:type git :host github
                    :repo "cmpitg/wand"
                    :fork (:repo "vizs/wand")))
-
-;; ** Marking text
-
-;; expand-region makes a better mark-sexp :p
-
-(use-package expand-region
-  :defer t
-  :functions er/expand-region
-  :bind ("C-M-SPC" . er/expand-region))
 
 ;; * Org-mode
 
@@ -413,3 +402,6 @@
 ;; ** Dad Jokes
 
 (use-package dad-joke)
+;; * Improve(?) editing experience
+
+(load-file (expand-file-name "lisp/hive/editing.el" user-emacs-directory))

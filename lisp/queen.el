@@ -28,7 +28,7 @@
 
  ;; Cursor styling
  cursor-in-non-selected-windows nil
- ;; cursor-type '(bar . 2)
+ cursor-type '(bar . 4)
 
  custom-file "/dev/null"
 
@@ -59,19 +59,6 @@
  tab-width 4)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
-
-;; *** C-j is easier to press than enter
-
-;; Without this, electric-indent-mode is not
-;; considered
-(global-set-key "\C-j" #'newline)
-
-;; *** Repeat commands
-
-;; Honestly C-x z and C-x M-ESC are hard asf to press
-
-(global-set-key (kbd "C-.") #'repeat)
-(global-set-key (kbd "C->") #'repeat-complex-command)
 
 ;; ** Indentation
 
@@ -305,6 +292,7 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 
 (use-package counsel
   :after ivy
+  :demand t
   :bind
   (("M-y" . counsel-yank-pop)
    ("C-c j" . counsel-imenu))

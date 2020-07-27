@@ -8,7 +8,9 @@
 
 (use-package valign
   :straight (:type git :host github :repo "casouri/valign")
-  :config (valign-mode))
+  :hook (org-mode . valign-mode)
+  :config
+  (setq valign-fancy-bar t))
 
 ;; Enable structure template completion
 (require 'org-tempo)
