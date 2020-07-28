@@ -5,9 +5,9 @@
   "Run `back-to-indentation` or `beginning-of-line` depending
 on the position of the cursor."
   (interactive)
-  (let ((pos (point)))
+  (let ((point (point)))
     (back-to-indentation)
-    (when (= pos (point))
+    (when (eq point (point))
       (beginning-of-line))))
 
 (defun vz/increase-number-at-point (arg)
@@ -24,15 +24,17 @@ on the position of the cursor."
   (interactive "p")
   (vz/increase-number-at-point (- arg)))
 
-(bind-keys
- ("C-a" . vz/beginning-of-line)
+(vz/bind
+ "C-a" #'vz/beginning-of-line
+ "C-c M-+" #'vz/increase-number-at-point
+ "C-c M--" #'vz/decrease-number-at-point
  ;; electric-indent-mode is considered
- ("C-j" . newline)
+ "C-j" #'newline
  ;; C-x z and C-x M-ESC are hard to press
- ("C-." . repeat)
- ("C->" . repeat-complex-command)
- ("C-c M-+" . vz/increase-number-at-point)
- ("C-c M--" . vz/decrease-number-at-point))
+ "C-." #'repeat
+ "C->" #'repeat-complex-command
+ ;; I never use Emacs in a terminal
+ "C-z" #'zap-up-to-char)
 
 (use-package expand-region
   :defer t

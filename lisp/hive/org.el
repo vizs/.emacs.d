@@ -191,6 +191,6 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
   (counsel-org-goto)
   (vz/beacon-highlight))
 
-(bind-keys
+(vz/bind
  :map org-mode-map
- ("C-c j" . vz/counsel-org-goto))
+ "C-c j" #'vz/counsel-org-goto)

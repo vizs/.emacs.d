@@ -222,7 +222,7 @@
 
 (bind-keys
  :map circe-mode-map
- ("C-c j" . vz/jump-to-mention))
+ "C-c j" #'vz/jump-to-mention)
 
 ;; * Commands
 

@@ -33,6 +33,21 @@
        (vz/windows-in-direction direction (cons it windows))
      windows)))
 
+(defmacro vz/bind (&rest args)
+  "This sort of works like `general` and `bind-keys`.
+The arguments to function is given like in `general` and :map <>
+behaviour is similar to that of in `bind-keys`."
+  (let ((map 'global-map))
+    `(progn
+       ,@(-map
+          (fn (if (eq (car <>) :map)
+                  (progn (setq map (cadr <>))
+                   '())
+                (list 'define-key map
+                 (kbd (car <>))
+                 (cadr <>))))
+          (-partition 2 args)))))
+
 ;; Functions used to communicate with emacsclient.
 ;; It's in a separate file because it depends on dynamic scoping
 (load-file (expand-file-name "lisp/hive/scripting.el" user-emacs-directory))
@@ -405,3 +420,14 @@
 ;; * Improve(?) editing experience
 
 (load-file (expand-file-name "lisp/hive/editing.el" user-emacs-directory))
+
+;; * Interface
+;; ** Transmission
+
+(use-package transmission
+  :demand t
+  :bind ("C-c T" . transmission)
+  :config
+  (setq-ns transmission
+    time-format "%A, %d %B, %Y %k:%M"
+    units 'iec))
