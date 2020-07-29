@@ -15,9 +15,8 @@ on the position of the cursor."
 `backward-kill-word'."
   (interactive "p")
   (if (use-region-p)
-      (if paredit-mode
-          (paredit-kill-region (region-beginning) (region-end))
-        (kill-region (region-beginning) (region-end)))
+      ((if paredit-mode paredit-kill-region kill-region)
+       (region-beginning) (region-end))
     (if paredit-mode
         (paredit-backward-kill-word)
       (backward-kill-word arg))))
@@ -36,11 +35,18 @@ on the position of the cursor."
   (interactive "p")
   (vz/increase-number-at-point (- arg)))
 
+(defun vz/join-line (arg)
+  "`join-line' but forwards. With prefix argument,
+simply run `join-line'."
+  (interactive "P")
+  (join-line (not arg)))
+
 (vz/bind
  "C-a" #'vz/beginning-of-line
  "C-c M-+" #'vz/increase-number-at-point
  "C-c M--" #'vz/decrease-number-at-point
  "C-w" #'vz/backward-kill-word-or-kill-region
+ "M-j" #'vz/join-line
 
  ;; electric-indent-mode is considered
  "C-j" #'newline
