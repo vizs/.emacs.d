@@ -10,15 +10,24 @@ on the position of the cursor."
     (when (eq point (point))
       (beginning-of-line))))
 
+(defun vz/backward-delete-or-kill-region (arg)
+  "Run `kill-region' if region is active or
+`backward-delete-char'."
+  (interactive "p")
+  (if (use-region-p)
+      (kill-region (region-beginning) (region-end))
+    (if paredit-mode
+        (paredit-backward-delete arg)
+      (backward-delete-char arg))))
+
 (defun vz/backward-kill-word-or-kill-region (arg)
   "Run `kill-region' if region is active or
 `backward-kill-word'."
   (interactive "p")
   (if (use-region-p)
-      ((if paredit-mode paredit-kill-region kill-region)
-       (region-beginning) (region-end))
+      (kill-region (region-beginning) (region-end))
     (if paredit-mode
-        (paredit-backward-kill-word)
+        (paredit-backward-word)
       (backward-kill-word arg))))
 
 (defun vz/increase-number-at-point (arg)
@@ -36,17 +45,19 @@ on the position of the cursor."
   (vz/increase-number-at-point (- arg)))
 
 (defun vz/join-line (arg)
-  "`join-line' but forwards. With prefix argument,
-simply run `join-line'."
+  "Reverse of `delete-indentation'."
   (interactive "P")
-  (join-line (not arg)))
+  (delete-indentation (not arg)))
 
 (vz/bind
- "C-a" #'vz/beginning-of-line
  "C-c M-+" #'vz/increase-number-at-point
  "C-c M--" #'vz/decrease-number-at-point
- "C-w" #'vz/backward-kill-word-or-kill-region
+
+ "C-a" #'vz/beginning-of-line
  "M-j" #'vz/join-line
+
+ "C-w" #'vz/backward-delete-or-kill-region
+ "M-w" #'vz/backward-kill-word-or-kill-region
 
  ;; electric-indent-mode is considered
  "C-j" #'newline
@@ -60,17 +71,31 @@ simply run `join-line'."
 
  ;; Swap `query-replace` and `query-replace-regexp`
  "M-%" #'query-replace-regexp
- "C-M-%" #'query-replace)
+ "C-M-%" #'query-replace
+
+ ;; X Clipboard
+ "C-S-y" #'clipboard-yank
+ "C-S-w" #'clipboard-kill-region
+ "M-S-w" #'clipboard-kill-ring-save
+
+ ;; Use isearch regexp
+ "C-s" #'isearch-forward-regexp
+ "C-r" #'isearch-backward-regexp)
 
 (use-package expand-region
   :defer t
   :functions er/expand-region
   :bind ("C-M-SPC" . er/expand-region)
   :config
-  (setq expand-region-contract-fast-key "S-SPC"))
+  (setq-ns expand-region
+    contract-fast-key "S-SPC"
+    smart-cursor t))
 
 (use-package paredit
   :defer t
+  :bind (:map paredit-mode-map
+              ("M-r" . nil)
+              ("M-S-r" . paredit-raise-sexp))
   :hook ((emacs-lisp-mode
           lisp-interaction-mode
           racket-mode
