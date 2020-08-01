@@ -113,3 +113,53 @@ on the position of the cursor."
    :prefix "M-g"
    "c" #'avy-goto-char-in-line
    "g" #'avy-goto-line))
+
+;; Stolen from modal editing experiment
+
+(defun vz/jump-to-char--forward (char)
+  (message "Search for %s" char)
+  (-when-let (point (save-excursion
+                      (condition-case nil
+                          (re-search-forward char (line-end-position))
+                        (error
+                         (beginning-of-line)
+                         (re-search-forward char (line-end-position))))))
+    (goto-char point)))
+
+(defun vz/jump-to-char--backward (char)
+  (message "Search for %s" char)
+  (-when-let (point (save-excursion
+                      (condition-case nil
+                          (re-search-backward char (line-beginning-position))
+                        (error
+                         (end-of-line)
+                         (re-search-backward char (line-beginning-position))))))
+    (goto-char point)))
+
+(defun vz/jump-to-char (direction char)
+  "Jump to CHAR in DIRECTION. If CHAR is not found after cursor till EOL, then
+loop around and look for occurence for CHAR from the start of line."
+  (pcase direction
+    ('forward (vz/jump-to-char--forward char))
+    ('backward (vz/jump-to-char--backward char))))
+
+(defvar vz/jump-to-char-forward-map (make-keymap)
+  "Keymap for `vz/jump-to-char' forwards.")
+
+(defvar vz/jump-to-char-backward-map (make-keymap)
+  "Keymap for `vz/jump-to-char' backwards.")
+
+(vz/bind
+ "M-g f" (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
+
+ :map vz/jump-to-char-forward-map
+ [remap self-insert-command] (fn! (vz/jump-to-char 'forward (this-command-keys)))
+ "C-," (fn! (setq overriding-local-map vz/jump-to-char-backward-map))
+ "C-g" (fn! (setq overriding-local-map nil))
+ "<escape>" (fn! (setq overriding-local-map nil))
+
+ :map vz/jump-to-char-backward-map
+ [remap self-insert-command] (fn! (vz/jump-to-char 'backward (this-command-keys)))
+ "C-," (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
+ "<escape>" (fn! (setq overriding-local-map nil))
+ "C-g" (fn! (setq overriding-local-map nil)))
