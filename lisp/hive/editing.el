@@ -20,14 +20,14 @@ on the position of the cursor."
         (paredit-backward-delete arg)
       (backward-delete-char arg))))
 
-(defun vz/backward-kill-word-or-kill-region (arg)
-  "Run `kill-region' if region is active or
+(defun vz/backward-kill-word-or-kill-ring-save (arg)
+  "Run `kill-ring-save' if region is active or
 `backward-kill-word'."
   (interactive "p")
   (if (use-region-p)
-      (kill-region (region-beginning) (region-end))
+      (kill-ring-save (region-beginning) (region-end))
     (if paredit-mode
-        (paredit-backward-word)
+        (paredit-backward-kill-word)
       (backward-kill-word arg))))
 
 (defun vz/increase-number-at-point (arg)
@@ -57,7 +57,7 @@ on the position of the cursor."
  "M-j" #'vz/join-line
 
  "C-w" #'vz/backward-delete-or-kill-region
- "M-w" #'vz/backward-kill-word-or-kill-region
+ "M-w" #'vz/backward-kill-word-or-kill-ring-save
 
  ;; electric-indent-mode is considered
  "C-j" #'newline
@@ -80,7 +80,11 @@ on the position of the cursor."
 
  ;; Use isearch regexp
  "C-s" #'isearch-forward-regexp
- "C-r" #'isearch-backward-regexp)
+ "C-r" #'isearch-backward-regexp
+
+ ;; Translations
+ :map key-translation-map
+ "M-r" (kbd "C-x r"))
 
 (use-package expand-region
   :defer t
@@ -100,3 +104,12 @@ on the position of the cursor."
           lisp-interaction-mode
           racket-mode
           scheme-mode) . paredit-mode))
+
+(use-package avy
+  :demand t
+  :config
+  (setq avy-all-windows nil)
+  (vz/bind
+   :prefix "M-g"
+   "c" #'avy-goto-char-in-line
+   "g" #'avy-goto-line))

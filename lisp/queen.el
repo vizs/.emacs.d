@@ -60,6 +60,10 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+;; *** Delete region when inserting text
+
+;; (delete-selection-mode t)
+
 ;; ** Indentation
 
 (defvar c-basic-offset 4)
@@ -229,9 +233,8 @@ as (name-without-ns . local)."
 
 (use-package avy
   :bind
-  (("C-c n" . avy-goto-line-below)
-   ("C-c p" . avy-goto-line-above)
-   ("C-c f" . avy-goto-char)))
+  (("C-S-n" . avy-goto-line-below)
+   ("C-S-p" . avy-goto-line-above)))
 (use-package ace-window
   :after avy
   :functions vz/ace-delete-window
@@ -293,16 +296,17 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 (use-package counsel
   :after ivy
   :demand t
-  :bind
-  (("M-y" . counsel-yank-pop)
-   ("C-c j" . counsel-imenu))
+  :bind ("C-c j" . counsel-imenu)
   :config
   (setq-ns counsel
     find-file-at-point t
     org-headline-display-todo t
     org-headline-display-tags t)
-  (defun vz/counsel-M-x-prompt (_ &rest _) "pls ")
-  (advice-add 'counsel--M-x-prompt :around #'vz/counsel-M-x-prompt)
+  (defun vz/counsel-M-x-prompt ()
+    "pls ")
+  (advice-add 'counsel--M-x-prompt :override #'vz/counsel-M-x-prompt)
+  (-each '(yank-pop describe-bindings)
+    (fn (define-key counsel-mode-map (vector 'remap <>) nil)))
   (counsel-mode t))
 
 ;; *** Blink cursor on certain actions

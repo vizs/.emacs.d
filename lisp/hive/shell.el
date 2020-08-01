@@ -325,7 +325,7 @@ term buffer associated with it"
   (comint-send-string (get-buffer-process (current-buffer)) key))
 
 (vz/bind
- "C-c P" #'vz/popup-shell
+ "C-c p" #'vz/popup-shell
  :map shell-mode-map
  "C-c j" #'vz/shell-jump-to-dir
  "C-c ?" #'vz/shell-insert-from-mksh-hist

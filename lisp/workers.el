@@ -37,16 +37,19 @@
   "This sort of works like `general` and `bind-keys`.
 The arguments to function is given like in `general` and :map <>
 behaviour is similar to that of in `bind-keys`."
-  (let ((map 'global-map))
+  (let ((map 'global-map)
+        (prefix ""))
     `(progn
        ,@(-map
-          (fn (if (eq (car <>) :map)
-                  (progn (setq map (cadr <>))
-                   '())
-                (list 'define-key map
-                 (kbd (car <>))
-                 (cadr <>))))
-          (-partition 2 args)))))
+          (fn (-let (((key fun) <>))
+               (pcase key
+                (:map    (setq map fun)    '())
+                (:prefix (setq prefix fun) '())
+                (_ (list 'define-key
+                          map
+                          (if (stringp key) (kbd (concat prefix " " key)) key)
+                          fun)))))
+           (-partition 2 args)))))
 
 ;; Functions used to communicate with emacsclient.
 ;; It's in a separate file because it depends on dynamic scoping
@@ -97,8 +100,12 @@ behaviour is similar to that of in `bind-keys`."
   :hook (sh-mode . flymake-mode)
   :config
   (define-fringe-bitmap 'vz/fringe-left-arrow
-    [#b11000000 #b01100000 #b00110000
-     #b00011000 #b00110000 #b01100000
+    [#b11000000
+     #b01100000
+     #b00110000
+     #b00011000
+     #b00110000
+     #b01100000
      #b11000000]
     nil nil 'center)
   (setq-ns flymake
@@ -136,7 +143,7 @@ behaviour is similar to that of in `bind-keys`."
           (comint-next-prompt 1))))))
 
 (vz/use-package shell nil
-  :defer t
+  :demand t
   :straight (:type built-in))
 
 ;; * External packages
@@ -351,14 +358,6 @@ behaviour is similar to that of in `bind-keys`."
   (racket-mode . racket-unicode-input-method-enable)
   ;; (racket-mode . aggressive-indent-mode)
   (racket-mode . racket-xp-mode)
-  ;; :general
-  ;; (:states '(normal visual) :keymaps 'racket-mode-map
-  ;;          "C-e"     #'racket-eval-last-sexp
-  ;;          "SPC rsr" #'racket-send-region
-  ;;          "SPC rsd" #'racket-send-definition
-  ;;          "SPC rse" #'racket-eval-last-sexp
-  ;;          "SPC df"  #'racket-xp-describe
-  ;;          "SPC d."  #'racket-xp-visit-definition)
   :config
   (setq racket-show-functions '(racket-show-pos-tip))
   (add-hook 'racket-xp-mode-hook
@@ -417,6 +416,7 @@ behaviour is similar to that of in `bind-keys`."
 ;; ** Dad Jokes
 
 (use-package dad-joke)
+
 ;; * Improve(?) editing experience
 
 (load-file (expand-file-name "lisp/hive/editing.el" user-emacs-directory))
