@@ -174,16 +174,20 @@
 
 ;; ** Functions
 
-(defun vz/popup-shell--add (buffer)
-  "Add BUFFER to vz/popup-shells and add a process sentinel"
+(defun vz/popup-shell--add (buffer &optional cwd)
+  "Add BUFFER to vz/popup-shells and add a process sentinel.
+If CWD is non-nil, then cd to CWD."
   (add-to-list 'vz/popup-shells buffer)
   (set-process-sentinel
    (get-buffer-process buffer)
-   (fn
-    (unless (process-live-p <>)
-      (let ((buf (process-buffer <>)))
-        (setq vz/popup-shells (remove buf vz/popup-shells))
-        (kill-buffer buf))))))
+   (fn (unless (process-live-p <>)
+         (let ((buf (process-buffer <>)))
+           (setq vz/popup-shells (remove buf vz/popup-shells))
+           (kill-buffer buf)))))
+  (when cwd
+    (with-current-buffer buffer
+      (comint-send-string (get-buffer-process buffer)
+                          (format "cd %s\n" cwd)))))
 
 (defun vz/popup-shell--switch (buffer cwd &optional dont-cd?)
   "Switch to CWD in BUFFER"
@@ -193,37 +197,35 @@
           (process (get-buffer-process buffer)))
       (comint-delete-input)
       (comint-send-string process (format "cd %s\n" cwd))
-      (unless (s-equals? input "$ ")
+      (unless (s-matches? input (rx (= 1 (or "$" "#" "%" "μ"))))
         (comint-send-string process input)))))
 
 (defun vz/popup-shell ()
   "Try to find ``free'' buffers that have the CWD as `default-directory' and switch
 to it. If nothing is found, create a new buffer"
   (interactive)
-  (if (null vz/popup-shells)
-      (vz/popup-shell--add (shell))
-    (let* ((free-buffers (-filter
-                          (fn
-                           (and (vz/inside-shell? <>)
-                                (null (get-buffer-window <> t))))
-                          vz/popup-shells))
-           (cwd (condition-case ()
-                    (f-dirname (buffer-file-name))
-                  (error default-directory)))
-           (cwd-buffers (-filter
-                         (fn:
-                          with-current-buffer <>
-                          (s-equals? default-directory cwd))
-                         free-buffers)))
-      (message "%s" cwd)
-      (cond
-       (cwd-buffers
-        (vz/popup-shell--switch (car cwd-buffers) cwd t))
-       ((and (null cwd-buffers) free-buffers)
-        (vz/popup-shell--switch (car free-buffers) cwd))
-       (:else
-        (vz/popup-shell--add (shell (format "%s*"
-                                            (make-temp-name "*shell-")))))))))
+  (let ((cwd (condition-case nil
+                  (f-dirname (buffer-file-name))
+                (error default-directory))))
+    (if (null vz/popup-shells)
+        (vz/popup-shell--add (shell) cwd)
+      (let* ((free-buffers (-filter
+                            (fn (and (vz/inside-shell? <>)
+                                     (null (get-buffer-window <> t))))
+                            vz/popup-shells))
+             (cwd-buffers (-filter
+                           (fn (with-current-buffer <>
+                                 (f-equal? default-directory cwd)))
+                           free-buffers)))
+        (cond
+         (cwd-buffers
+          (vz/popup-shell--switch (car cwd-buffers) cwd t))
+         ((and (null cwd-buffers) free-buffers)
+          (vz/popup-shell--switch (car free-buffers) cwd))
+         (t
+          (vz/popup-shell--add
+           (shell (format "%s*" (make-temp-name "*shell-")))
+           cwd)))))))
 
 ;; * Jump to prompt
 
@@ -239,7 +241,7 @@ to it. If nothing is found, create a new buffer"
         (vz/shell--get-prompts (cons (propertize
                                     (s-replace-regexp "\n$" "" (thing-at-point 'line t))
                                     'pos pt) prompts)
-                               pt)
+                             pt)
       (cdr prompts))))
 
 (defun vz/shell-jump-to-prompt ()
