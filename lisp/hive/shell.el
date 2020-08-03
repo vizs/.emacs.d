@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
+;; -*- lexical-binding: t; -*-
 
 ;; * Basic configuration
 ;; ** Set path to shell
@@ -231,18 +231,16 @@ to it. If nothing is found, create a new buffer"
   "Return all prompts as a propertized string"
   (save-excursion
     (goto-char point)
-    (let ((pt (re-search-forward "^!?\\$ " nil t 1)))
-      (if (null pt)
-          ;; Does not include current "active" prompt
-          (cdr prompts)
-        (goto-char pt)
-        (vz/shell--get-prompts
-         (cons (-->
-                (thing-at-point 'line t)
-                (s-replace-regexp "\n$" "" it)
-                (propertize it 'pos pt))
-               prompts)
-         pt)))))
+    (-if-let (pt (re-search-forward (rx (zero-or-one "!")
+                                        (= 1 (or "$" "μ" "#" "%"))
+                                        (0+ any)
+                                        eol)
+                                    nil t 1))
+        (vz/shell--get-prompts (cons (propertize
+                                    (s-replace-regexp "\n$" "" (thing-at-point 'line t))
+                                    'pos pt) prompts)
+                               pt)
+      (cdr prompts))))
 
 (defun vz/shell-jump-to-prompt ()
   "Jump to prompt by selecting it in ivy. The most recent is towards the top."
@@ -331,3 +329,8 @@ term buffer associated with it"
  "C-c ?" #'vz/shell-insert-from-mksh-hist
  "C-c /" #'vz/shell-insert-from-hist
  "C-c J" #'vz/shell-jump-to-prompt)
+
+;; Local Variables:
+;; eval: (outline-minor-mode)
+;; outline-regexp: ";; [*]+"
+;; End:
