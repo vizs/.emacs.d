@@ -12,22 +12,3 @@ Screenshot - http://0x0.st/iWib.png
 * On org-mode
 I currently use org-mode to take notes for school but plan to use it for agenda
 and schedules.
-* TODO Consider giving up evil?
-I think the default Emacs bindings make sense but the reason why I don't use it
-is because I don't find it comfortable to press Ctrl, even if I map it to Right Alt.
-(And no, I don't want to map it to Caps Lock).
-
-Also, I think Emacs' editing methodologies make sense, in fact, I think something
-like ~expand-region~ and ~avy~ jump functions is a lot more intuitive.
-
-The reason why I don't use Emacs default binds is because I like my editor to
-be modal -- vi-like or acme-like. Acme-like in the sense that mouse does all the things
-i.e., /normal mode/ and keyboard does only input i.e., /insert mode/.
-
-So maybe it might be worth it to make my modal configuration based around
-~expand-region~ and ~avy~ using ~modalka~.
-
-The main thing that I would miss is probably ~evil-repeat~ and ~evil-repeat-find-char~.
-But the latter should not be a problem anymore if I use ~avy~ for /every/ text movement.
-
-Some of this is inspired by [[https://www.youtube.com/watch?v=0M6erlK57go][Mike Zamansky's video]] on Emacs vs Vi.
