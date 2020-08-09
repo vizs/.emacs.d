@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
+;; -*- lexical-binding: t; -*-
 
 ;; * Set variables and sane defaults
 ;; ** Sanity
@@ -56,7 +56,9 @@
 
  ;; Indentation
  indent-tabs-mode t
- tab-width 4)
+ tab-width 4
+
+ frame-resize-pixelwise t)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -143,6 +145,10 @@ as (name-without-ns . local)."
 ;; ** Display … instead of $ at the visual end of truncated line
 
 (set-display-table-slot standard-display-table 'truncation ?…)
+
+;; ** Inner border
+
+(add-to-list 'default-frame-alist '(internal-border-width . 4))
 
 ;; * Straight
 ;; ** Bootstrap straight
@@ -257,9 +263,11 @@ as (name-without-ns . local)."
 ;; *** Selection engine
 
 (use-package ivy
+  :functions vz/ivy-minibuffer-insert-at-point
   :bind (:map ivy-minibuffer-map
               ("<C-up>" . ivy-minibuffer-grow)
-              ("<C-down>" . ivy-minibuffer-shrink))
+              ("<C-down>" . ivy-minibuffer-shrink)
+              ("M-." . vz/ivy-minibuffer-insert-at-point))
   :config
   (setq-ns ivy
     count-format " [%d/%d] "
@@ -280,12 +288,20 @@ as (name-without-ns . local)."
       (setq-local max-mini-window-height
                   (setq ivy-height (1- ivy-height)))
       (window-resize nil -1)))
+
+  (defun vz/ivy-minibuffer-insert-at-point ()
+    "Insert symbol at point from the previously focused window."
+    (interactive)
+    (with-current-buffer (window-buffer (previous-window))
+      (ivy--insert-minibuffer (thing-at-point 'symbol t)))
+    (end-of-line))
+
   (defun vz/get-file-or-buffer ()
     "Select a list of opened buffers, files in current directory and entries in
 recentf and return the corresponding buffer. Create one if it doesn't exist"
     (--> (append (ivy--virtual-buffers)
-               (-filter #'f-file? (directory-files default-directory))
-               (-map #'buffer-name (buffer-list)))
+                 (-filter #'f-file? (directory-files default-directory))
+                 (-map #'buffer-name (buffer-list)))
          (ivy-read "> " it)
          (or (get-buffer it) (find-file-noselect it))))
   (ivy-mode 1))
@@ -329,3 +345,8 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
              (expand-file-name "lisp/themes" user-emacs-directory))
 
 (load-theme 'vz t)
+
+;; Local Variables:
+;; eval: (outline-minor-mode)
+;; outline-regexp: ";; [*]+"
+;; End:

@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
+;; -*- lexical-binding: t; -*-
 
 ;; * Set the variables
 ;; ** Matching for nick
@@ -267,3 +267,8 @@
   (setf (cdr (assoc 'continuation fringe-indicator-alist)) nil))
 
 (add-hook 'lui-mode-hook #'vz/lui-init)
+
+;; Local Variables:
+;; eval: (outline-minor-mode)
+;; outline-regexp: ";; [*]+"
+;; End:

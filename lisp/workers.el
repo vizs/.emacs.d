@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; eval: (outshine-mode t); -*-
+;; -*- lexical-binding: t; -*-
 
 ;; * Functions
 
@@ -33,6 +33,12 @@
        (vz/windows-in-direction direction (cons it windows))
      windows)))
 
+(defun vz/uniqify (string)
+  "Uniqify STRING by adding random characters at the end.
+If STRING starts with a *, add * at the end of the resultant string."
+  (concat (make-temp-name (concat string "-"))
+          (when (s-starts-with? "*" string) "*")))
+
 (defmacro vz/bind (&rest args)
   "This sort of works like `general` and `bind-keys`.
 The arguments to function is given like in `general` and :map <>
@@ -46,10 +52,10 @@ behaviour is similar to that of in `bind-keys`."
                 (:map    (setq map fun)    '())
                 (:prefix (setq prefix fun) '())
                 (_ (list 'define-key
-                          map
-                          (if (stringp key) (kbd (concat prefix " " key)) key)
-                          fun)))))
-           (-partition 2 args)))))
+                    map
+                    (if (stringp key) (kbd (concat prefix " " key)) key)
+                    fun)))))
+          (-partition 2 args)))))
 
 ;; Functions used to communicate with emacsclient.
 ;; It's in a separate file because it depends on dynamic scoping
@@ -64,7 +70,7 @@ behaviour is similar to that of in `bind-keys`."
   ;; Remove the ugly left and right curly arrow for continued lines
   (setf (cdr (assoc 'continuation fringe-indicator-alist)) '(nil nil))
   (setf (cdr (assoc 'truncation   fringe-indicator-alist)) '(nil nil))
-  (fringe-mode '(5 . 0)))
+  (fringe-mode '(8 . 0)))
 
 ;; ** Highlighting parenthesis
 
@@ -132,8 +138,9 @@ behaviour is similar to that of in `bind-keys`."
     "Send region if present, otherwise current line to current buffer's process"
     (interactive)
     (if (use-region-p)
-        (let ((cmd (buffer-substring (region-beginning)
-                                     (region-end))))
+        (let ((cmd (buffer-substring-no-properties (region-beginning)
+                                                   (region-end))))
+          (message "yes")
           (comint-send-string (get-buffer-process (current-buffer))
                               (concat cmd "\n"))
           (comint-add-to-input-history cmd))
@@ -184,28 +191,11 @@ behaviour is similar to that of in `bind-keys`."
 
 ;; ** Folding text
 
-;; outshine improves outline-minor-mode by providing
-;; org-mode like features
-;; I only really use very few features,
-;; I still need to see what outshine offers
-(use-package outshine
-  :defer t
-  :functions vz/outshine-jump
-  :bind
-  (:map outshine-mode-map
-        ("C-c J" . vz/outshine-jump))
-  :config
-  (defun vz/outshine-jump ()
-    (interactive)
-    (setq-local counsel-outline-settings
-                `(,major-mode
-                  (:outline-regexp ,(outshine-calc-outline-regexp)
-                   :outline-level ,(outshine-calc-outline-level))))
-    (counsel-outline))
-  (setq-ns outshine
-    oldschool-elisp-outline-regexp-base "[*]\\{1,8\\}"
-    startup-folded-p t
-    imenu-show-headlines-p nil))
+(use-package bicycle
+  :after outline
+  :bind (:map outline-minor-mode-map
+              ([C-tab] . bicycle-cycle)
+              ("<backtab>" . bicycle-cycle-global)))
 
 ;; ** Edit a part of a buffer in separate window
 
@@ -366,15 +356,15 @@ behaviour is similar to that of in `bind-keys`."
                            #'racket-xp-pre-redisplay t)
               (setq-local eldoc-documentation-function #'racket-xp-eldoc-function)))
   ;; For that sweet ivy-prescient sorting
-  (defun vz/racket--symbol-at-point-or-prompt (_ &rest args)
-    (let* ((s (ivy-read (cadr args) (caddr args)
+  (defun vz/racket--symbol-at-point-or-prompt (force-prompt-p prompt &optional completions)
+    (let* ((s (ivy-read prompt completions
                         :preselect (thing-at-point 'symbol)
                         :sort t)))
       (if (s-blank? (racket--trim (substring-no-properties s)))
           nil
         s)))
   (advice-add 'racket--symbol-at-point-or-prompt
-              :around #'vz/racket--symbol-at-point-or-prompt))
+              :override #'vz/racket--symbol-at-point-or-prompt))
 
 ;; ** Nix
 
@@ -431,3 +421,8 @@ behaviour is similar to that of in `bind-keys`."
   (setq-ns transmission
     time-format "%A, %d %B, %Y %k:%M"
     units 'iec))
+
+;; Local Variables:
+;; eval: (outline-minor-mode)
+;; outline-regexp: ";; [*]+"
+;; End:

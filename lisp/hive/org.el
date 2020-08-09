@@ -145,6 +145,8 @@ DEADLINE: %(call-interactively #'org-time-stamp)" :prepend t)
 
   agenda-files `(,(~ "doc/org/calendar.org")))
 
+(add-to-list 'org-startup-options '("cdlatex" org-cdlatex-mode t))
+
 (defun vz/org-mode-style ()
   (let ((faces '(org-table org-link org-code org-block org-drawer
                  org-date org-special-keyword org-verbatim org-tag

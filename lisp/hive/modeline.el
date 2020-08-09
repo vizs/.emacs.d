@@ -31,12 +31,17 @@
          "|"))
     ""))
 
+(defun vz/mode-line-git-branch ()
+  (-if-let (branch (car (vc-git-branches)))
+      (format " (%s)" branch)
+    ""))
+
 ;; From https://0x0.st/oYX8
 (defun vz/mode-line-fill (face except)
   (propertize " "
-        'display `((space :align-to (- (+ right right-fringe right-margin)
-                                       ,except)))
-        'face face))
+              'display `((space :align-to (- (+ right right-fringe right-margin)
+                                           ,except)))
+              'face face))
 
 (setq-default
  battery-update-interval 360
@@ -44,6 +49,7 @@
                        (:eval (vz/mode-line-file-short-dir))
                        "%b"
                        (:eval (vz/mode-line-file-state))
+                       (:eval (vz/mode-line-git-branch))
                        (:eval (vz/mode-line-fill 'mode-line 19))
                        "« "
                        (:eval (format-time-string "[%H:%M] "))

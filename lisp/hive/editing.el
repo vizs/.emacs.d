@@ -58,6 +58,8 @@ on the position of the cursor."
 
  "C-w" #'vz/backward-delete-or-kill-region
  "M-w" #'vz/backward-kill-word-or-kill-ring-save
+ "C-S-k" #'kill-whole-line
+ "M-k" (fn! (kill-ring-save (point) (line-end-position)))
 
  ;; electric-indent-mode is considered
  "C-j" #'newline
@@ -77,6 +79,7 @@ on the position of the cursor."
  "C-S-y" #'clipboard-yank
  "C-S-w" #'clipboard-kill-region
  "M-S-w" #'clipboard-kill-ring-save
+ "M-K" (fn! (clipboard-kill-ring-save (point) (line-end-position)))
 
  ;; Use isearch regexp
  "C-s" #'isearch-forward-regexp
@@ -84,7 +87,10 @@ on the position of the cursor."
 
  ;; Translations
  :map key-translation-map
- "M-r" (kbd "C-x r"))
+ "M-r" (kbd "C-x r")
+
+ :map isearch-mode-map
+ "C-'" #'avy-isearch)
 
 (use-package expand-region
   :defer t
@@ -112,36 +118,29 @@ on the position of the cursor."
   (vz/bind
    :prefix "M-g"
    "c" #'avy-goto-char-in-line
+   "f" #'avy-goto-char-2
    "g" #'avy-goto-line))
 
 ;; Stolen from modal editing experiment
 
-(defun vz/jump-to-char--forward (char)
-  (message "Search for %s" char)
-  (-when-let (point (save-excursion
-                      (condition-case nil
-                          (re-search-forward char (line-end-position))
-                        (error
-                         (beginning-of-line)
-                         (re-search-forward char (line-end-position))))))
-    (goto-char point)))
-
-(defun vz/jump-to-char--backward (char)
-  (message "Search for %s" char)
-  (-when-let (point (save-excursion
-                      (condition-case nil
-                          (re-search-backward char (line-beginning-position))
-                        (error
-                         (end-of-line)
-                         (re-search-backward char (line-beginning-position))))))
-    (goto-char point)))
-
 (defun vz/jump-to-char (direction char)
   "Jump to CHAR in DIRECTION. If CHAR is not found after cursor till EOL, then
 loop around and look for occurence for CHAR from the start of line."
-  (pcase direction
-    ('forward (vz/jump-to-char--forward char))
-    ('backward (vz/jump-to-char--backward char))))
+  (interactive
+   (list (if current-prefix-arg 'backward 'forward)
+         (string (read-key "Search for: "))))
+  (message "Searching for %s" char)
+  (let* ((end    (if (eq direction 'forward) #'beginning-of-line #'end-of-line))
+         (search (if (eq direction 'forward) #'re-search-forward #'re-search-backward))
+         (limit  (if (eq direction 'forward) (line-end-position) (line-beginning-position)))
+         (point (save-excursion
+                  (condition-case nil
+                      (funcall search char limit)
+                    (error
+                     (funcall end)
+                     (funcall search char limit))))))
+    (when point
+      (goto-char point))))
 
 (defvar vz/jump-to-char-forward-map (make-keymap)
   "Keymap for `vz/jump-to-char' forwards.")
@@ -150,16 +149,16 @@ loop around and look for occurence for CHAR from the start of line."
   "Keymap for `vz/jump-to-char' backwards.")
 
 (vz/bind
- "M-g f" (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
+ "M-g F" (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
 
  :map vz/jump-to-char-forward-map
- [remap self-insert-command] (fn! (vz/jump-to-char 'forward (this-command-keys)))
- "C-," (fn! (setq overriding-local-map vz/jump-to-char-backward-map))
- "C-g" (fn! (setq overriding-local-map nil))
- "<escape>" (fn! (setq overriding-local-map nil))
+ [remap self-insert-command]  (fn! (vz/jump-to-char 'forward (this-command-keys)))
+ "C-,"                        (fn! (setq overriding-local-map vz/jump-to-char-backward-map))
+ "C-g"                        (fn! (setq overriding-local-map nil))
+ "<escape>"                   (fn! (setq overriding-local-map nil))
 
  :map vz/jump-to-char-backward-map
- [remap self-insert-command] (fn! (vz/jump-to-char 'backward (this-command-keys)))
- "C-," (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
- "<escape>" (fn! (setq overriding-local-map nil))
- "C-g" (fn! (setq overriding-local-map nil)))
+ [remap self-insert-command]  (fn! (vz/jump-to-char 'backward (this-command-keys)))
+ "C-,"                        (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
+ "<escape>"                   (fn! (setq overriding-local-map nil))
+ "C-g"                        (fn! (setq overriding-local-map nil)))

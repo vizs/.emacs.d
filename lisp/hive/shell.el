@@ -50,7 +50,7 @@
   (let* ((buffer (or buffer (current-buffer)))
          (child  (process-running-child-p (get-buffer-process buffer))))
     (or (null child)
-        (s-equals? (asoc-get (process-attributes child) 'comm)
+        (f-equal? (asoc-get (process-attributes child) 'comm)
                    (f-filename explicit-shell-file-name)))))
 
 ;; * Shell history tracking
@@ -89,7 +89,7 @@
    (append (asoc-get it cwd '())
            (->>
             it
-            (asoc-filter (fn: not (s-equals? <> cwd)))
+            (asoc-filter (fn (not (f-equal? <> cwd))))
             (asoc-values)
             (-flatten)))))
 
@@ -223,9 +223,7 @@ to it. If nothing is found, create a new buffer"
          ((and (null cwd-buffers) free-buffers)
           (vz/popup-shell--switch (car free-buffers) cwd))
          (t
-          (vz/popup-shell--add
-           (shell (format "%s*" (make-temp-name "*shell-")))
-           cwd)))))))
+          (vz/popup-shell--add (shell (vz/uniqify "*shell")) cwd)))))))
 
 ;; * Jump to prompt
 
