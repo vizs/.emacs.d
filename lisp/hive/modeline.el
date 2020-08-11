@@ -15,9 +15,9 @@
     ""))
 
 (defun vz/mode-line-file-short-dir ()
-  (--if-let (if (derived-mode-p 'comint-mode)
-                (concat default-directory "/a")
-              (buffer-file-name))
+  (if-let ((it (if (derived-mode-p 'comint-mode)
+                   (concat default-directory "/a")
+                 (buffer-file-name))))
       (let* ((dir (->>
                    (f-dirname it)
                    (f-short)
@@ -35,13 +35,14 @@
     ""))
 
 (defun vz/mode-line-git-branch ()
-  (-if-let (branch (when (or (buffer-file-name) (derived-mode-p 'comint-mode))
-                     (car (vc-git-branches))))
+  (if-let ((branch (when (or (buffer-file-name)
+                             (derived-mode-p 'comint-mode))
+                     (car (vc-git-branches)))))
       (format "(%s)" branch)
     ""))
 
-(defun vz/mode-line-roundize-text (text)
-  "Return an image object with text surrounded by arcs on either side."
+(defun vz/mode-line-roundise-text (text)
+  "Return an image object with TEXT surrounded by arcs on either side."
   (require 'svg)
   (if (s-blank? text)
       ""
@@ -56,7 +57,7 @@
                      :fill (if (moody-window-active-p) vz/mode-line-bg vz/mode-line-bgi))
       (svg-text svg (format " %s " text)
                 :font-family (font-get f :family)
-                :font-size (font-get f :size)
+                :font-size   (font-get f :size)
                 :font-weight (font-get f :weight)
                 :fill (if (moody-window-active-p) vz/mode-line-fg vz/mode-line-fgi)
                 :x (/ h 2)
@@ -73,17 +74,20 @@
 (setq-default
  battery-update-interval 360
  vz/mode-line-format `("    "
-                       (:eval (vz/mode-line-roundize-text
-                               (concat
-                                (vz/mode-line-file-short-dir)
-                                (buffer-name)
-                                (vz/mode-line-file-state))))
+                       (:eval (vz/mode-line-roundise-text
+                               (concat (vz/mode-line-file-short-dir)
+                                       (buffer-name)
+                                       (vz/mode-line-file-state))))
                        " "
-                       (:eval (vz/mode-line-roundize-text (vz/mode-line-git-branch)))
+                       (:eval (vz/mode-line-roundise-text (vz/mode-line-git-branch)))
                        (:eval (vz/mode-line-fill 'mode-line 20))
-                       (:eval (vz/mode-line-roundize-text (format-time-string "%H:%M")))
-                       " "
-                       (:eval (vz/mode-line-roundize-text (battery-format "%b%p%%" (funcall battery-status-function)))))
+                       (:eval (and (window-at-side-p nil 'right)
+                                   (window-at-side-p nil 'bottom)
+                                   (concat
+                                    (vz/mode-line-roundise-text (format-time-string "%H:%M"))
+                                    " "
+                                    (vz/mode-line-roundise-text (battery-format "%p%%%b"
+                                                                                (funcall battery-status-function)))))))
  mode-line-format vz/mode-line-format)
 
 (-each '(:background :foreground)
