@@ -140,10 +140,10 @@ behaviour is similar to that of in `bind-keys`."
     (if (use-region-p)
         (let ((cmd (buffer-substring-no-properties (region-beginning)
                                                    (region-end))))
-          (message "yes")
           (comint-send-string (get-buffer-process (current-buffer))
                               (concat cmd "\n"))
-          (comint-add-to-input-history cmd))
+          (comint-add-to-input-history cmd)
+          (deactivate-mark))
       (let ((after (comint-after-pmark-p)))
         (save-excursion (comint-send-input))
         (when after
@@ -364,7 +364,20 @@ behaviour is similar to that of in `bind-keys`."
           nil
         s)))
   (advice-add 'racket--symbol-at-point-or-prompt
-              :override #'vz/racket--symbol-at-point-or-prompt))
+              :override #'vz/racket--symbol-at-point-or-prompt)
+  (defun vz/racket-eros-eval-last-sexp ()
+    "Eval the previous sexp asynchronously and create an eros overlay"
+    (interactive)
+    (unless (racket--repl-live-p)
+      (user-error "No REPL session available."))
+    (racket--cmd/async
+     (racket--repl-session-id)
+     `(eval ,(buffer-substring-no-properties (racket--repl-last-sexp-start) (point)))
+     (fn (eros--make-result-overlay <>
+           :where (point)
+           :duration eros-eval-result-duration))))
+  (vz/bind :map racket-mode-map
+           [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp))
 
 ;; ** Nix
 
