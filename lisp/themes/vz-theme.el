@@ -147,13 +147,17 @@
    `(circe-server-face                ((,class :background ,bg :foreground ,lf)))
    `(circe-originator-face            ((,class :background ,bg :foreground ,lf)))
 
-   `(edit-indirect-edited-region      ((,class :background ,ac :foregroung ,fg))))
+   `(edit-indirect-edited-region      ((,class :background ,ac :foreground ,fg))))
 
   (setq hl-todo-keyword-faces
         `(("TODO"   . ,re)
           ("FIXME"  . ,re)
           ("BROKEN" . ,re)
-          ("NOTE"   . ,fg)))
+          ("NOTE"   . ,fg))
+        vz/mode-line-fg fg
+        vz/mode-line-bg bu
+        vz/mode-line-bgi bu
+        vz/mode-line-fgi lf)
   (add-to-list 'default-frame-alist `(cursor-color . ,gr))
 
   (dolist (f '(lui-irc-colors-bg-0-face
