@@ -16,7 +16,7 @@ on the position of the cursor."
   (interactive "p")
   (if (use-region-p)
       (kill-region (region-beginning) (region-end))
-    (if paredit-mode
+    (if (bound-and-true-p paredit-mode)
         (paredit-backward-delete arg)
       (backward-delete-char arg))))
 
@@ -26,7 +26,7 @@ on the position of the cursor."
   (interactive "p")
   (if (use-region-p)
       (kill-ring-save (region-beginning) (region-end))
-    (if paredit-mode
+    (if (bound-and-true-p paredit-mode)
         (paredit-backward-kill-word)
       (backward-kill-word arg))))
 
