@@ -33,7 +33,7 @@ on the position of the cursor."
 (defun vz/increase-number-at-point (arg)
   "Increase the number at point by ARG."
   (interactive "p")
-  (-when-let (num (thing-at-point 'number))
+  (when-let ((num (thing-at-point 'number)))
     (-let* (((beg . end) (bounds-of-thing-at-point 'word))
             (n (- end beg)))
       (delete-region beg end)
@@ -94,7 +94,7 @@ on the position of the cursor."
 
 (use-package expand-region
   :defer t
-  :functions er/expand-region
+  :functions (er/expand-region)
   :bind ("C-M-SPC" . er/expand-region)
   :config
   (setq-ns expand-region
