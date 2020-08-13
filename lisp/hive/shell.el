@@ -65,33 +65,30 @@
 ;; ** Functions
 
 (defun vz/shell-history--get ()
-  "Get shell history"
+  "Get shell history."
   (if (f-exists? vz/shell-history-cache-file)
       (read-from-whole-string (f-read vz/shell-history-cache-file))
     '()))
 
 (defun vz/shell-history--write (string)
-  "Add STRING to `default-directory' entry"
-  (let* ((string  (s-trim (substring-no-properties string)))
-         (history (vz/shell-history--get))
-         (oentry  (asoc-get history default-directory '())))
+  "Add STRING to `default-directory' entry."
+  (let ((string  (s-trim (substring-no-properties string)))
+        (history (vz/shell-history--get)))
     (unless (s-blank? string)
-      (-->
-       (asoc-put! history default-directory
-                  (cons string oentry)
-                  t)
-       (f-write (format "%S" it) 'utf-8 vz/shell-history-cache-file)))))
+      (f-write (format "%S"
+                       (asoc-put! history
+                                  default-directory
+                                  (cons string
+                                        (asoc-get history default-directory '()))
+                                  t))
+               'utf-8 vz/shell-history-cache-file))))
 
 (defun vz/shell-history--sort (cwd)
-  "Sort shell-history according to CWD"
-  (-->
-   (vz/shell-history--get)
-   (append (asoc-get it cwd '())
-           (->>
-            it
-            (asoc-filter (fn (not (f-equal? <> cwd))))
-            (asoc-values)
-            (-flatten)))))
+  "Sort shell-history according to CWD."
+  (let ((history (vz/shell-history--get)))
+    (append (asoc-get history cwd '())
+            (-flatten (asoc-filter (fn (not (f-equal? <> cwd)))
+                                   (asoc-values history))))))
 
 (add-hook 'comint-input-filter-functions
           (defun vz/shell-history-input-hook (string)
@@ -102,7 +99,7 @@
             t))
 
 (defun vz/shell-insert-from-hist ()
-  "Search for command in history and run it"
+  "Search for command in history and run it."
   (interactive)
   (let ((process (get-buffer-process (current-buffer))))
     (when (vz/inside-shell?)
@@ -231,11 +228,11 @@ to it. If nothing is found, create a new buffer"
   "Return all prompts as a propertized string"
   (save-excursion
     (goto-char point)
-    (-if-let (pt (re-search-forward (rx (zero-or-one "!")
+    (if-let ((pt (re-search-forward (rx (zero-or-one "!")
                                         (= 1 (or "$" "μ" "#" "%"))
                                         (0+ any)
                                         eol)
-                                    nil t 1))
+                                    nil t 1)))
         (vz/shell--get-prompts (cons (propertize
                                     (s-replace-regexp "\n$" "" (thing-at-point 'line t))
                                     'pos pt) prompts)
