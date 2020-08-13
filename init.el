@@ -10,3 +10,7 @@
   (vz/disable-bold-italic))
 
 (defvar vz/initial-loaded t)
+
+;; Add `Info-default-directory-list' to `Info-directory-list'
+
+(setq Info-directory-list (append Info-directory-list Info-default-directory-list))
