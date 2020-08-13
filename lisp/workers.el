@@ -40,9 +40,9 @@ If STRING starts with a *, add * at the end of the resultant string."
           (when (s-starts-with? "*" string) "*")))
 
 (defmacro vz/bind (&rest args)
-  "This sort of works like `general` and `bind-keys`.
-The arguments to function is given like in `general` and :map <>
-behaviour is similar to that of in `bind-keys`."
+  "This sort of works like `general' and `bind-keys'.
+The arguments to function is given like in `general' and :map <>
+behaviour is similar to that of in `bind-keys'."
   (let ((map 'global-map)
         (prefix ""))
     `(progn
@@ -53,7 +53,7 @@ behaviour is similar to that of in `bind-keys`."
                 (:prefix (setq prefix fun) '())
                 (_ (list 'define-key
                     map
-                    (if (stringp key) (kbd (concat prefix " " key)) key)
+                    (if (stringp key) `(kbd ,(concat prefix " " key)) key)
                     fun)))))
           (-partition 2 args)))))
 
@@ -106,13 +106,11 @@ behaviour is similar to that of in `bind-keys`."
   :hook (sh-mode . flymake-mode)
   :config
   (define-fringe-bitmap 'vz/fringe-left-arrow
-    [#b11000000
-     #b01100000
+    [#b01100000
      #b00110000
      #b00011000
      #b00110000
-     #b01100000
-     #b11000000]
+     #b01100000]
     nil nil 'center)
   (setq-ns flymake
     error-bitmap   '(vz/fringe-left-arrow error)
@@ -121,8 +119,10 @@ behaviour is similar to that of in `bind-keys`."
 
 ;; * Modeline
 
-(load-file (expand-file-name "lisp/hive/modeline.el"
-			     user-emacs-directory))
+(eval-after-load user-init-file
+  (load-file (expand-file-name "lisp/hive/modeline.el"
+			                         user-emacs-directory)))
+
 ;; * Shell
 
 (use-package comint
@@ -132,7 +132,8 @@ behaviour is similar to that of in `bind-keys`."
   :bind
   (:map comint-mode-map
         ("<S-return>" . comint-accumulate)
-	      ("<return>"   . vz/comint-send-input))
+	      ("<return>"   . vz/comint-send-input)
+        ("RET" . vz/comint-send-input))
   :config
   (defun vz/comint-send-input ()
     "Send region if present, otherwise current line to current buffer's process"
@@ -201,7 +202,7 @@ behaviour is similar to that of in `bind-keys`."
 
 (use-package edit-indirect
   :defer t
-  :functions vz/edit-indirect-paragraph
+  :functions (vz/edit-indirect-paragraph)
   :config
   (setq edit-indirect-guess-mode-function
         (fn: funcall (with-current-buffer <> major-mode)))
@@ -376,8 +377,9 @@ behaviour is similar to that of in `bind-keys`."
      (fn (eros--make-result-overlay <>
            :where (point)
            :duration eros-eval-result-duration))))
-  (vz/bind :map racket-mode-map
-           [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp))
+  (vz/bind
+   :map racket-mode-map
+   [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp))
 
 ;; ** Nix
 

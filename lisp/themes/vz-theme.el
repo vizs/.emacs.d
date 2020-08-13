@@ -128,9 +128,9 @@
 
    `(header-line                      ((,class :background ,bu :foreground ,lf)))
    `(header-line-highlight            ((,class :background ,bu :foreground ,fg)))
-   `(mode-line                        ((,class :background ,bu :foreground ,fg)))
+   `(mode-line                        ((,class :background ,bg :foreground ,fg)))
    `(mode-line-highlight              ((,class :background ,bu :foreground ,fg)))
-   `(mode-line-inactive               ((,class :background ,bu :foreground ,lf)))
+   `(mode-line-inactive               ((,class :background ,bg :foreground ,lf)))
 
    `(comint-highlight-prompt          ((,class :backgorund ,bg :foreground ,lf)))
 

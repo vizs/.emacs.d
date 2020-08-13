@@ -41,7 +41,14 @@
       (format "(%s)" branch)
     ""))
 
-(defun vz/mode-line-roundise-text (text)
+;; From https://0x0.st/oYX8
+(defun vz/mode-line-fill (face except)
+  (propertize " "
+              'display `((space :align-to (- (+ right right-fringe right-margin)
+                                           ,except)))
+              'face face))
+
+(defun vz/mode-line-roundise-text (text &optional foreground background)
   "Return an image object with TEXT surrounded by arcs on either side."
   (require 'svg)
   (if (s-blank? text)
@@ -54,42 +61,35 @@
       (svg-rectangle svg 0 0 w h
                      :rx (/ h 2)
                      :ry (/ h 2)
-                     :fill (if (moody-window-active-p) vz/mode-line-bg vz/mode-line-bgi))
+                     :fill (or background
+                               (if (moody-window-active-p) vz/mode-line-bg vz/mode-line-bgi)))
       (svg-text svg (format " %s " text)
                 :font-family (font-get f :family)
                 :font-size   (font-get f :size)
                 :font-weight (font-get f :weight)
-                :fill (if (moody-window-active-p) vz/mode-line-fg vz/mode-line-fgi)
+                :fill (or foreground
+                          (if (moody-window-active-p) vz/mode-line-fg vz/mode-line-fgi))
                 :x (/ h 2)
                 :y (1+ (font-get f :size)))
       (propertize " " 'display (svg-image svg :ascent 'center)))))
 
-;; From https://0x0.st/oYX8
-(defun vz/mode-line-fill (face except)
-  (propertize " "
-              'display `((space :align-to (- (+ right right-fringe right-margin)
-                                           ,except)))
-              'face face))
-
 (setq-default
  battery-update-interval 360
- vz/mode-line-format `("    "
+ vz/mode-line-extra-info '(:eval (and
+                                  (window-at-side-p nil 'right)
+                                  (window-at-side-p nil 'bottom)
+                                  (concat
+                                   (vz/mode-line-roundise-text (format-time-string "%H:%M"))
+                                   " "
+                                   (vz/mode-line-roundise-text (battery-format "%p%%%b"
+                                                                (funcall battery-status-function))))))
+ vz/mode-line-format `("  "
                        (:eval (vz/mode-line-roundise-text
                                (concat (vz/mode-line-file-short-dir)
-                                       (buffer-name)
-                                       (vz/mode-line-file-state))))
+                                (buffer-name)
+                                (vz/mode-line-file-state))))
                        " "
                        (:eval (vz/mode-line-roundise-text (vz/mode-line-git-branch)))
-                       (:eval (vz/mode-line-fill 'mode-line 20))
-                       (:eval (and (window-at-side-p nil 'right)
-                                   (window-at-side-p nil 'bottom)
-                                   (concat
-                                    (vz/mode-line-roundise-text (format-time-string "%H:%M"))
-                                    " "
-                                    (vz/mode-line-roundise-text (battery-format "%p%%%b"
-                                                                                (funcall battery-status-function)))))))
+                       (:eval (vz/mode-line-fill 'mode-line 18))
+                       ,vz/mode-line-extra-info)
  mode-line-format vz/mode-line-format)
-
-(-each '(:background :foreground)
-  (fn (set-face-attribute 'mode-line nil <> (face-attribute 'default <>))
-      (set-face-attribute 'mode-line-inactive nil <> (face-attribute 'default <>))))
