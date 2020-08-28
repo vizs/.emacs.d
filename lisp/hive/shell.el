@@ -66,20 +66,18 @@
 
 (defun vz/shell-history--get ()
   "Get shell history."
-  (if (f-exists? vz/shell-history-cache-file)
-      (read-from-whole-string (f-read vz/shell-history-cache-file))
-    '()))
+  (when (f-exists? vz/shell-history-cache-file)
+      (read-from-whole-string (f-read vz/shell-history-cache-file))))
 
 (defun vz/shell-history--write (string)
   "Add STRING to `default-directory' entry."
-  (let ((string  (s-trim (substring-no-properties string)))
-        (history (vz/shell-history--get)))
+  (let* ((string  (s-trim (substring-no-properties string)))
+         (history (vz/shell-history--get))
+         (old     (asoc-get history default-directory '())))
     (unless (s-blank? string)
       (f-write (format "%S"
-                       (asoc-put! history
-                                  default-directory
-                                  (cons string
-                                        (asoc-get history default-directory '()))
+                       (asoc-put! history default-directory
+                                  (cons string old)
                                   t))
                'utf-8 vz/shell-history-cache-file))))
 
@@ -87,8 +85,8 @@
   "Sort shell-history according to CWD."
   (let ((history (vz/shell-history--get)))
     (append (asoc-get history cwd '())
-            (-flatten (asoc-filter (fn (not (f-equal? <> cwd)))
-                                   (asoc-values history))))))
+            (-flatten (asoc-values (asoc-filter (fn (not (f-equal? <> cwd)))
+                                                history))))))
 
 (add-hook 'comint-input-filter-functions
           (defun vz/shell-history-input-hook (string)
@@ -320,12 +318,14 @@ term buffer associated with it"
   (comint-send-string (get-buffer-process (current-buffer)) key))
 
 (vz/bind
- "C-c p" #'vz/popup-shell
+ :prefix "C-c"
+ "p" #'vz/popup-shell
  :map shell-mode-map
- "C-c j" #'vz/shell-jump-to-dir
- "C-c ?" #'vz/shell-insert-from-mksh-hist
- "C-c /" #'vz/shell-insert-from-hist
- "C-c J" #'vz/shell-jump-to-prompt)
+ "j" #'vz/shell-jump-to-dir
+ "?" #'vz/shell-insert-from-mksh-hist
+ "/" #'vz/shell-insert-from-hist
+ "J" #'vz/shell-jump-to-prompt
+ "k" #'vz/shell-send-keysequence-to-process)
 
 ;; Local Variables:
 ;; eval: (outline-minor-mode)
