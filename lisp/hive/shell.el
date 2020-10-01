@@ -112,21 +112,26 @@
         (comint-add-to-input-history cmd)))))
 ;; (vz/term-minor-mode-set-title cmd)))))
 
-;; * History from mksh
+;; * History from shell
 
-(defun vz/shell-mksh-history ()
+(defun vz/shell-shell-history ()
   "Returns current shell's history as a list"
-  (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
-  (split-string (f-read "/tmp/shhist") "\n" nil "\t"))
+  (split-string (f-read
+                 (if (s-equals? (f-filename explicit-shell-file-name) "mksh")
+                     (progn
+                       (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
+                       "/tmp/shhist")
+                   (~ ".cache/bash_history")))
+                "\n" nil "\t"))
 
-(defun vz/shell-insert-from-mksh-hist ()
-  "Search for command in mksh history and run it"
+(defun vz/shell-insert-from-shell-hist ()
+  "Search for command in shell history and run it"
   (interactive)
   (let ((proc (get-buffer-process (current-buffer))))
     (when (vz/inside-shell?)
       (let* ((input (comint-get-old-input-default))
              (init-input (unless (string-empty-p input) (concat "^" input)))
-             (cmd (ivy-read "> " (vz/shell-mksh-history)
+             (cmd (ivy-read "> " (vz/shell-shell-history)
                             :initial-input init-input :sort nil)))
         (unless (s-blank? input)
           (comint-delete-input))
@@ -138,11 +143,16 @@
 ;; * Jump to directory alias
 
 (defun vz/shell-get-dir-alias ()
-  (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
   (-map (fn (cadr (s-split "=" <>)))
         (-drop-last
          1
-         (s-split "\n" (f-read "/tmp/diralias")))))
+         (s-split "\n"
+                  (f-read
+                   (if (s-equals? (f-filename explicit-shell-file-name) "mksh")
+                       (progn
+                         (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
+                         "/tmp/diralias")
+                       (~ "lib/directory-aliases")))))))
 
 (defun vz/shell-jump-to-dir ()
   "Jump to directory alias"
