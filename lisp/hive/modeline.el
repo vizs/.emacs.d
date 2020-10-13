@@ -15,23 +15,16 @@
     ""))
 
 (defun vz/mode-line-file-short-dir ()
-  (if-let ((it (if (derived-mode-p 'comint-mode)
+  (if-let ((path (if (derived-mode-p 'comint-mode)
                    (concat default-directory "/a")
                  (buffer-file-name))))
-      (let* ((dir (->>
-                   (f-dirname it)
+      (let ((dir (->>
+                   (f-dirname path)
                    (f-short)
-                   (f-split)))
-             (length (1- (length dir))))
+                   (f-split))))
         (concat
-         (->>
-          dir
-          (-map-indexed (fn (if (eq <1> length)
-                                <2>
-                              (substring <2> 0 1))))
-          (apply #'f-join)
-          (f-short))
-         "|"))
+         (f-short (apply #'f-join (-map (fn (substring <> 0 1)) (-drop-last 1 dir))))
+         "/" (-last-item dir) "|"))
     ""))
 
 (defun vz/mode-line-git-branch ()
@@ -73,16 +66,33 @@
                 :y (1+ (font-get f :size)))
       (propertize " " 'display (svg-image svg :ascent 'center)))))
 
+;; Update battery and time at intervals
+(setq-default vz/mode-line-battery nil
+              vz/mode-line-time nil)
+
+(make-thread
+ (fn (while t
+       (setq-default
+        vz/mode-line-battery (vz/mode-line-roundise-text
+                              (battery-format "%p%%%b" (funcall battery-status-function))))
+       (sleep-for battery-update-interval)))
+ "vz/mode-line-battery setter")
+
+(make-thread
+ (fn (while t
+       (setq-default vz/mode-line-time (vz/mode-line-roundise-text (format-time-string "%H:%M")))
+       (sleep-for display-time-interval)))
+ "vz/mode-line-time setter")
+
 (setq-default
  battery-update-interval 360
  vz/mode-line-extra-info '(:eval (and
                                   (window-at-side-p nil 'right)
                                   (window-at-side-p nil 'bottom)
                                   (concat
-                                   (vz/mode-line-roundise-text (format-time-string "%H:%M"))
+                                   vz/mode-line-time
                                    " "
-                                   (vz/mode-line-roundise-text (battery-format "%p%%%b"
-                                                                (funcall battery-status-function))))))
+                                   vz/mode-line-battery)))
  vz/mode-line-format `("  "
                        (:eval (vz/mode-line-roundise-text
                                (concat (vz/mode-line-file-short-dir)
