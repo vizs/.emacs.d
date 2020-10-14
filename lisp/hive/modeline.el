@@ -67,25 +67,40 @@
       (propertize " " 'display (svg-image svg :ascent 'center)))))
 
 ;; Update battery and time at intervals
-(setq-default vz/mode-line-battery nil
-              vz/mode-line-time nil)
+(cancel-timer battery-update-timer)
+(cancel-timer display-time-timer)
 
-(make-thread
- (fn (while t
-       (setq-default
-        vz/mode-line-battery (vz/mode-line-roundise-text
-                              (battery-format "%p%%%b" (funcall battery-status-function))))
-       (sleep-for battery-update-interval)))
- "vz/mode-line-battery setter")
+(setq-default battery-update-interval 360)
+(defvar vz/mode-line-battery nil)
+(defvar vz/mode-line-time nil)
 
-(make-thread
- (fn (while t
-       (setq-default vz/mode-line-time (vz/mode-line-roundise-text (format-time-string "%H:%M")))
-       (sleep-for display-time-interval)))
- "vz/mode-line-time setter")
+(defun vz/mode-line-battery-updater ()
+  (setq vz/mode-line-battery
+        (vz/mode-line-roundise-text
+         (battery-format "%p%%%b" (funcall battery-status-function))))
+  (force-mode-line-update))
+
+(run-with-timer
+ nil battery-update-interval
+ #'vz/mode-line-battery-updater)
+
+(defun vz/mode-line-time-updater ()
+  (setq vz/mode-line-time (vz/mode-line-roundise-text
+                           (format-time-string "%H:%M")))
+  (force-mode-line-update))
+
+(run-with-timer
+ t display-time-interval
+ #'vz/mode-line-time-updater)
+
+;; Hacky solution to update the mode-line variables when
+;; making the first graphical frame.
+(make-thread (fn (while (eq (length (visible-frame-list)) 1) ; F1 frame
+                   (sleep-for 1))
+                 (vz/mode-line-time-updater)
+                 (vz/mode-line-battery-updater)))
 
 (setq-default
- battery-update-interval 360
  vz/mode-line-extra-info '(:eval (and
                                   (window-at-side-p nil 'right)
                                   (window-at-side-p nil 'bottom)
