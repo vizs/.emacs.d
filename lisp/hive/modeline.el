@@ -78,7 +78,7 @@
   (setq vz/mode-line-battery
         (vz/mode-line-roundise-text
          (battery-format "%p%%%b" (funcall battery-status-function))))
-  (force-mode-line-update))
+  (force-mode-line-update t))
 
 (run-with-timer
  nil battery-update-interval
@@ -87,7 +87,7 @@
 (defun vz/mode-line-time-updater ()
   (setq vz/mode-line-time (vz/mode-line-roundise-text
                            (format-time-string "%H:%M")))
-  (force-mode-line-update))
+  (force-mode-line-update t))
 
 (run-with-timer
  t display-time-interval
@@ -104,8 +104,7 @@
  vz/mode-line-extra-info '(:eval (and
                                   (window-at-side-p nil 'right)
                                   (window-at-side-p nil 'bottom)
-                                  (concat
-                                   vz/mode-line-time
+                                  (concat vz/mode-line-time
                                    " "
                                    vz/mode-line-battery)))
  vz/mode-line-format `("  "
