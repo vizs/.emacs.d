@@ -3,9 +3,6 @@
 (use-package moody
   :demand t)
 
-(-each '(display-time-mode display-battery-mode)
-  (fn: funcall <> t))
-
 (defun vz/mode-line-file-state ()
   (if (buffer-file-name)
       (cond
@@ -67,38 +64,54 @@
       (propertize " " 'display (svg-image svg :ascent 'center)))))
 
 ;; Update battery and time at intervals
-(cancel-timer battery-update-timer)
-(cancel-timer display-time-timer)
+(setq-default battery-update-interval 240)
 
-(setq-default battery-update-interval 360)
-(defvar vz/mode-line-battery nil)
-(defvar vz/mode-line-time nil)
+(require 'battery)
+(require 'time)
 
-(defun vz/mode-line-battery-updater ()
+(defvar vz/mode-line-battery ""
+  "Variable that stores the svg image of battery information.")
+(defvar vz/mode-line-time ""
+  "Variable that stores the svg image of current time.")
+
+(let ((fun (fn (when (eq <3> 'set)
+                 (force-mode-line-update t)))))
+  (add-variable-watcher 'vz/mode-line-battery fun)
+  (add-variable-watcher 'vz/mode-line-time fun))
+
+;; TODO: Maybe send a notification when it's 100% and lock screen when it's <20%?
+(defun vz/mode-line-update-battery ()
+  "Update battery status in mode-line."
+  (interactive)
   (setq vz/mode-line-battery
         (vz/mode-line-roundise-text
-         (battery-format "%p%%%b" (funcall battery-status-function))))
-  (force-mode-line-update t))
+         (let ((battery-status (funcall battery-status-function)))
+           (format "%s%%%s"
+                   (car (s-slice-at "\.[0-9]+$" (asoc-get battery-status ?p)))
+                   (if (s-equals? (asoc-get battery-status ?B) "Charging")
+                       "+"
+                     ""))))))
 
-(run-with-timer
- nil battery-update-interval
- #'vz/mode-line-battery-updater)
+(defun vz/mode-line-update-time ()
+  "Update time in mode-line."
+  (interactive)
+  (setq vz/mode-line-time
+        (vz/mode-line-roundise-text (format-time-string "%H:%M"))))
 
-(defun vz/mode-line-time-updater ()
-  (setq vz/mode-line-time (vz/mode-line-roundise-text
-                           (format-time-string "%H:%M")))
-  (force-mode-line-update t))
+(run-at-time t display-time-interval #'vz/mode-line-update-time)
+(run-at-time nil battery-update-interval #'vz/mode-line-update-battery)
 
-(run-with-timer
- t display-time-interval
- #'vz/mode-line-time-updater)
-
-;; Hacky solution to update the mode-line variables when
-;; making the first graphical frame.
-(make-thread (fn (while (eq (length (visible-frame-list)) 1) ; F1 frame
+;; When no graphical frames are on screen, the modeline images does not
+;; get updated, so whenever a frame is created, recreate the image
+;; to make sure the info is up-to-date.
+(add-hook 'server-after-make-frame-hook
+          (defun vz/mode-line-update-after-make-frame ()
+            (vz/mode-line-update-battery)
+            (vz/mode-line-update-time)))
+(make-thread (fn (while (eq (length (visible-frame-list)) 1)
                    (sleep-for 1))
-                 (vz/mode-line-time-updater)
-                 (vz/mode-line-battery-updater)))
+                 (vz/mode-line-update-time)
+                 (vz/mode-line-update-battery)))
 
 (setq-default
  vz/mode-line-extra-info '(:eval (and
