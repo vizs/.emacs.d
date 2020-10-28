@@ -1,5 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 
+(require 'battery)
+(require 'time)
 (use-package moody
   :demand t)
 
@@ -13,15 +15,15 @@
 
 (defun vz/mode-line-file-short-dir ()
   (if-let ((path (if (derived-mode-p 'comint-mode)
-                   (concat default-directory "/a")
-                 (buffer-file-name))))
-      (let ((dir (->>
-                   (f-dirname path)
-                   (f-short)
-                   (f-split))))
-        (concat
-         (f-short (apply #'f-join (-map (fn (substring <> 0 1)) (-drop-last 1 dir))))
-         "/" (-last-item dir) "|"))
+                     (concat default-directory "/a")
+                   (buffer-file-name)))
+           (dir (let* ((dir (f-split (f-short (f-dirname path))))
+                       (dir* (cdr dir)))
+                  (if (s-equals? (car dir*) "~") dir* dir)))
+           (shortened-dir (apply #'f-join
+                                  (append (-map (fn (substring <> 0 1)) (-drop-last 1 dir))
+                                          (list (-last-item dir))))))
+      (concat (f-short shortened-dir) "|")
     ""))
 
 (defun vz/mode-line-git-branch ()
@@ -66,18 +68,16 @@
 ;; Update battery and time at intervals
 (setq-default battery-update-interval 240)
 
-(require 'battery)
-(require 'time)
 
 (defvar vz/mode-line-battery ""
   "Variable that stores the svg image of battery information.")
 (defvar vz/mode-line-time ""
   "Variable that stores the svg image of current time.")
 
-(let ((fun (fn (when (eq <3> 'set)
+(let ((fn (fn (when (eq <3> 'set)
                  (force-mode-line-update t)))))
-  (add-variable-watcher 'vz/mode-line-battery fun)
-  (add-variable-watcher 'vz/mode-line-time fun))
+  (add-variable-watcher 'vz/mode-line-battery fn)
+  (add-variable-watcher 'vz/mode-line-time fn))
 
 ;; TODO: Maybe send a notification when it's 100% and lock screen when it's <20%?
 (defun vz/mode-line-update-battery ()
@@ -90,13 +90,15 @@
                    (car (s-slice-at "\.[0-9]+$" (asoc-get battery-status ?p)))
                    (if (s-equals? (asoc-get battery-status ?B) "Charging")
                        "+"
-                     ""))))))
+                     "")))
+         vz/mode-line-fg vz/mode-line-bg)))
 
 (defun vz/mode-line-update-time ()
   "Update time in mode-line."
   (interactive)
   (setq vz/mode-line-time
-        (vz/mode-line-roundise-text (format-time-string "%H:%M"))))
+        (vz/mode-line-roundise-text (format-time-string "%H:%M")
+                                    vz/mode-line-fg vz/mode-line-bg)))
 
 (run-at-time t display-time-interval #'vz/mode-line-update-time)
 (run-at-time nil battery-update-interval #'vz/mode-line-update-battery)
