@@ -1,7 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 
 ;; * Functions
-
 (defun pass (passwd)
   "Get password using `pass'"
   (s-replace-regexp "\n$" "" (shell-command-to-string
@@ -63,7 +62,6 @@ behaviour is similar to that of in `bind-keys'."
 
 ;; * Builtin stuff that doesn't depend on anything else
 ;; ** Fringe
-
 (use-package fringe
   :straight (:type built-in)
   :config
@@ -73,7 +71,6 @@ behaviour is similar to that of in `bind-keys'."
   (fringe-mode '(8 . 0)))
 
 ;; ** Highlighting parenthesis
-
 (use-package show-paren
   :defer t
   :hook (prog-mode . show-paren-mode)
@@ -84,7 +81,6 @@ behaviour is similar to that of in `bind-keys'."
     when-point-inside-paren t))
 
 ;; ** Spell check
-
 ;; Enabled on major-mode basis
 (use-package flyspell
   :straight (:type built-in)
@@ -99,7 +95,6 @@ behaviour is similar to that of in `bind-keys'."
     program-name "hunspell"))
 
 ;; ** On the fly syntax checker
-
 (use-package flymake
   :straight (:type built-in)
   :defer t
@@ -117,14 +112,21 @@ behaviour is similar to that of in `bind-keys'."
     warning-bitmap '(vz/fringe-left-arrow warning)
     note-bitmap    '(vz/fringe-left-arrow compilation-info)))
 
-;; * Modeline
+;; * Dired
+(use-package dired
+  :straight (:type built-in)
+  :defer t
+  :config
+  (setq
+   ;; Human readable size
+   dired-listing-switches "-alh"))
 
-(eval-after-load user-init-file
+;; * Modeline
+(with-eval-after-load user-init-file
   (load-file (expand-file-name "lisp/hive/modeline.el"
 			                         user-emacs-directory)))
 
 ;; * Shell
-
 (use-package comint
   :defer t
   :straight (:type built-in)
@@ -156,19 +158,16 @@ behaviour is similar to that of in `bind-keys'."
 
 ;; * External packages
 ;; ** pos-tip
-
 ;; Used by quite a lot of packages
 ;; Might as well install it explicitly
 (use-package pos-tip
   :defer t)
 
 ;; ** Whitespace
-
 (use-package ws-butler
   :config (ws-butler-global-mode))
 
 ;; ** Highlight keywords and jump between them
-
 (use-package hl-todo
   :defer t
   :hook (prog-mode . hl-todo-mode)
@@ -180,10 +179,8 @@ behaviour is similar to that of in `bind-keys'."
   (setq hl-todo-highlight-punctuation ":"))
 
 ;; ** Center buffer
-
 (use-package olivetti
   :defer t
-  :hook ((Man-mode org-mode) . olivetti-mode)
   :bind ("C-c C" . olivetti-mode)
   :config
   (setq-ns olivetti
@@ -191,7 +188,6 @@ behaviour is similar to that of in `bind-keys'."
     enable-visual-line-mode nil))
 
 ;; ** Folding text
-
 (use-package bicycle
   :after outline
   :bind (:map outline-minor-mode-map
@@ -199,7 +195,6 @@ behaviour is similar to that of in `bind-keys'."
               ("<backtab>" . bicycle-cycle-global)))
 
 ;; ** Edit a part of a buffer in separate window
-
 (use-package edit-indirect
   :defer t
   :functions (vz/edit-indirect-paragraph)
@@ -212,7 +207,6 @@ behaviour is similar to that of in `bind-keys'."
     (command-execute #'edit-indirect-region)))
 
 ;; ** Execute actions based on text
-
 ;; Desperately needs a rewrite
 (vz/use-package wand "plumb"
   :straight (:type git :host github
@@ -220,11 +214,9 @@ behaviour is similar to that of in `bind-keys'."
                    :fork (:repo "vizs/wand")))
 
 ;; * Org-mode
-
 ;; You don't need any explanation
 (vz/use-package org nil
   :straight (:type built-in)
-  :defer t
   :bind
   (("C-c oc" . org-capture)
    ("C-c oa" . org-agenda)
@@ -234,7 +226,6 @@ behaviour is similar to that of in `bind-keys'."
   (straight-use-package 'cdlatex))
 
 ;; * Communication
-
 ;; IRC and Discord using ircdiscord
 (vz/use-package circe "irc"
   :defer t
@@ -250,7 +241,6 @@ behaviour is similar to that of in `bind-keys'."
         (format "%s:%d" (pass "misc/discord") serv))))
 
 ;; * Programming Languages
-
 (use-package company
   :demand t
 	:functions (company-complete-common-or-cycle
@@ -286,7 +276,6 @@ behaviour is similar to that of in `bind-keys'."
   :defer t)
 
 ;; ** Shellcheck
-
 (use-package flymake-shellcheck
   :after flymake
   :defer t
@@ -294,7 +283,6 @@ behaviour is similar to that of in `bind-keys'."
   :hook (sh-mode . flymake-shellcheck-load))
 
 ;; ** Python
-
 (use-package python
   :defer t
   :straight (:type built-in)
@@ -306,7 +294,6 @@ behaviour is similar to that of in `bind-keys'."
     interpreter-args "-i"))
 
 ;; ** Scheme
-
 ;; Depends on chicken
 (use-package scheme
   :defer t
@@ -316,14 +303,12 @@ behaviour is similar to that of in `bind-keys'."
   (setq scheme-program-name "csi"))
 
 ;; ** Emacs Lisp
-
 ;; Has a separate file
 (vz/use-package elisp-mode "elisp"
   :straight (:type built-in)
   :functions (vz/emacs-lisp-indent-function))
 
 ;; ** Go
-
 (use-package go-mode
   :defer t
   :hook
@@ -342,7 +327,6 @@ behaviour is similar to that of in `bind-keys'."
   ;;          nil t))
 
 ;; ** Racket
-
 (use-package racket-mode
   :defer t
   :hook
@@ -382,7 +366,6 @@ behaviour is similar to that of in `bind-keys'."
    [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp))
 
 ;; ** Nix
-
 (use-package nix-mode
   :defer t
   :mode "\\.nix\\'")
@@ -396,7 +379,6 @@ behaviour is similar to that of in `bind-keys'."
 (use-package fennel-mode)
 
 ;; * Sorting entries
-
 ;; Save and sort entries in ivy and company
 (use-package prescient
   :config
@@ -419,16 +401,13 @@ behaviour is similar to that of in `bind-keys'."
 
 ;; * Fun
 ;; ** Dad Jokes
-
 (use-package dad-joke)
 
 ;; * Improve(?) editing experience
-
 (load-file (expand-file-name "lisp/hive/editing.el" user-emacs-directory))
 
 ;; * Interface
 ;; ** Transmission
-
 (use-package transmission
   :demand t
   :bind ("C-c T" . transmission)

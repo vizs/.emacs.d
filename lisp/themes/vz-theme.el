@@ -13,7 +13,8 @@
       (lf "#434343")
       (yw "#99994c")
       (bu "#eaffff")
-      (ac "#eaed8d"))
+      (ac "#eaed8d")
+      (BG "#ebebdf"))
   (custom-theme-set-faces
    'vz
    `(default                          ((,class :background ,bg :foreground ,fg)))
@@ -113,6 +114,7 @@
    `(avy-lead-face-2                  ((,class :background ,bg :foreground ,re)))
 
    `(org-todo                         ((,class :background ,bg :foreground ,re)))
+   `(org-done                         ((,class :background ,bg :foreground ,fg)))
    `(org-table                        ((,class :background ,bg :foreground ,fg)))
    `(org-block                        ((,class :background ,bg :foreground ,fg)))
    `(org-code                         ((,class :background ,bg :foreground ,fg)))
@@ -147,7 +149,9 @@
    `(circe-server-face                ((,class :background ,bg :foreground ,lf)))
    `(circe-originator-face            ((,class :background ,bg :foreground ,lf)))
 
-   `(edit-indirect-edited-region      ((,class :background ,ac :foreground ,fg))))
+   `(edit-indirect-edited-region      ((,class :background ,ac :foreground ,fg)))
+
+   `(org-transclusion-source-block    ((,class :background ,BG :foreground ,fg))))
 
   (setq hl-todo-keyword-faces
         `(("TODO"   . ,re)

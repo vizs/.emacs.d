@@ -220,7 +220,7 @@
 
 ;; ** Bind
 
-(bind-keys
+(vz/bind
  :map circe-mode-map
  "C-c j" #'vz/jump-to-mention)
 

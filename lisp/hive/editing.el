@@ -54,6 +54,7 @@ on the position of the cursor."
  "C-c M--" #'vz/decrease-number-at-point
 
  "C-a" #'vz/beginning-of-line
+ "C-j" #'newline
  "M-j" #'vz/join-line
 
  "C-w" #'vz/backward-delete-or-kill-region
@@ -61,10 +62,7 @@ on the position of the cursor."
  "C-S-k" #'kill-whole-line
  "M-k" (fn! (kill-ring-save (point) (line-end-position)))
 
- ;; electric-indent-mode is considered
- "C-j" #'newline
-
- ;; C-x z and C-x M-ESC are hard to press
+  ;; C-x z and C-x M-ESC are hard to press
  "C-." #'repeat
  "C->" #'repeat-complex-command
 
@@ -78,7 +76,7 @@ on the position of the cursor."
  ;; X Clipboard
  "C-S-y" #'clipboard-yank
  "C-S-w" #'clipboard-kill-region
- "M-S-w" #'clipboard-kill-ring-save
+ "M-W" #'clipboard-kill-ring-save
  "M-K" (fn! (clipboard-kill-ring-save (point) (line-end-position)))
 
  ;; Use isearch regexp

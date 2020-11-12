@@ -332,7 +332,7 @@ term buffer associated with it"
  "p" #'vz/popup-shell
  :map shell-mode-map
  "j" #'vz/shell-jump-to-dir
- "?" #'vz/shell-insert-from-mksh-hist
+ "?" #'vz/shell-insert-from-shell-hist
  "/" #'vz/shell-insert-from-hist
  "J" #'vz/shell-jump-to-prompt
  "k" #'vz/shell-send-keysequence-to-process)

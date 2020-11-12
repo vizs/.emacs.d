@@ -2,7 +2,6 @@
 
 ;; * Set variables and sane defaults
 ;; ** Sanity
-
 (setq-default
  vz/monospace-font (replace-regexp-in-string
                     "\n$" ""
@@ -63,11 +62,9 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; *** Delete region when inserting text
-
 ;; (delete-selection-mode t)
 
 ;; ** Indentation
-
 (defvar c-basic-offset 4)
 (defvar cperl-basic-offset 4)
 (defvar python-indent 4)
@@ -80,11 +77,9 @@
 
 ;; * Niceties
 ;; ** Helper macros
-
 (require 'seq)
 
 ;; *** setq but with namespace
-
 ;; inspo: https://github.com/neeasade/emacs.d
 (defmacro setq-ns (ns &rest args)
   "`setq' but with the namespace as NS.
@@ -103,7 +98,6 @@ as (name-without-ns . local)."
         (seq-partition args 2))))
 
 ;; *** setq but for a hook
-
 ;; inspo: doom-emacs
 
 (defmacro setq-hook--create-fun (mode &rest body)
@@ -118,18 +112,15 @@ as (name-without-ns . local)."
     `(add-hook ',mode ,f nil t)))
 
 ;; *** Formating s-expressions?
-
 ;; from u/b3n
 (defmacro vz/format-sexp (sexp &rest format-args)
   "Format SEXP and eval it."
   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
 
 ;; ** Automatically chmod +x file if it has a shebang
-
 (add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
 
 ;; ** Auto-revert buffer if file is modified
-
 ;; From u/redblobgames
 (setq-ns auto-revert
   use-notify t
@@ -138,21 +129,17 @@ as (name-without-ns . local)."
 (global-auto-revert-mode)
 
 ;; ** Fonts
-
 (add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
                                              vz/monospace-font)))
 
 ;; ** Display … instead of $ at the visual end of truncated line
-
 (set-display-table-slot standard-display-table 'truncation ?…)
 
 ;; ** Inner border
-
 (add-to-list 'default-frame-alist '(internal-border-width . 4))
 
 ;; * Straight
 ;; ** Bootstrap straight
-
 (defvar bootstrap-version)
 (let ((bootstrap-file (expand-file-name
                        "straight/repos/straight.el/bootstrap.el"
@@ -168,7 +155,6 @@ as (name-without-ns . local)."
   (load bootstrap-file nil 'nomessage))
 
 ;; ** Setup straight variables
-
 (straight-use-package 'use-package)
 (setq-ns straight
   use-package-by-default t
@@ -177,7 +163,6 @@ as (name-without-ns . local)."
 
 ;; * Major helper functions
 ;; ** Emacs Lisp enhancers
-
 ;; dash | list
 ;; s    | string
 ;; f    | file
@@ -207,7 +192,6 @@ as (name-without-ns . local)."
   :straight (:type git :host github :repo "troyp/asoc.el"))
 
 ;; ** use-packge but also load a file
-
 (defmacro vz/use-package (name file &rest body)
   "Like `use-package' but also load file located lisp/hive/FILE.el."
   (declare (indent 2))
@@ -219,13 +203,11 @@ as (name-without-ns . local)."
                  (or ,file ',name)))))
 
 ;; ** Random helper functions
-
 (defun ~ (file)
   "Path to FILE respective to $HOME"
   (expand-file-name file (getenv "HOME")))
 
 ;; ** Font related functions
-
 (defun vz/set-monospace-faces (faces)
   (-each faces
     (fn: set-face-attribute <> nil :family vz/monospace-font)))
@@ -236,7 +218,6 @@ as (name-without-ns . local)."
 
 ;; ** Quality of life packages
 ;; *** Saner switch window and goto-char motion
-
 (use-package avy
   :bind
   (("C-S-n" . avy-goto-line-below)
@@ -261,7 +242,6 @@ as (name-without-ns . local)."
     scope 'frame))
 
 ;; *** Selection engine
-
 (use-package ivy
   :functions vz/ivy-minibuffer-insert-at-point
   :bind (:map ivy-minibuffer-map
@@ -326,7 +306,6 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
   (counsel-mode t))
 
 ;; *** Blink cursor on certain actions
-
 (use-package beacon
   :config
   (beacon-mode 1)
@@ -340,7 +319,6 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
       (beacon-blink))))
 
 ;; * Custom theme
-
 (add-to-list 'custom-theme-load-path
              (expand-file-name "lisp/themes" user-emacs-directory))
 

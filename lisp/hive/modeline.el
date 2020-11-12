@@ -40,7 +40,7 @@
                                            ,except)))
               'face face))
 
-(defun vz/mode-line-roundise-text (text &optional foreground background)
+(defun vz/mode-line-roundise-text (text &optional foreground background raw-image?)
   "Return an image object with TEXT surrounded by arcs on either side."
   (require 'svg)
   (if (s-blank? text)
@@ -63,11 +63,13 @@
                           (if (moody-window-active-p) vz/mode-line-fg vz/mode-line-fgi))
                 :x (/ h 2)
                 :y (1+ (font-get f :size)))
-      (propertize " " 'display (svg-image svg :ascent 'center)))))
+      (if-let ((img (svg-image svg :ascent 'center))
+               raw-image?)
+          img
+        (propertize " " 'display img)))))
 
 ;; Update battery and time at intervals
 (setq-default battery-update-interval 240)
-
 
 (defvar vz/mode-line-battery ""
   "Variable that stores the svg image of battery information.")
@@ -115,6 +117,18 @@
                  (vz/mode-line-update-time)
                  (vz/mode-line-update-battery)))
 
+(defvar-local vz/mode-line-file-include-file-status? t
+  "If non-nil, include the value of `vz/mode-line-file-state'
+  after buffer-name.")
+
+(defvar-local vz/mode-line-file-include-file-short-path? t
+  "If non-nil, include the short path to file before
+  buffer-name.")
+
+(defvar-local vz/mode-line-file-extra-info nil
+  "If non-nil, include (:eval vz/mode-line-file-extra-info) after
+  file name image.")
+
 (setq-default
  vz/mode-line-extra-info '(:eval (and
                                   (window-at-side-p nil 'right)
@@ -124,9 +138,13 @@
                                    vz/mode-line-battery)))
  vz/mode-line-format `("  "
                        (:eval (vz/mode-line-roundise-text
-                               (concat (vz/mode-line-file-short-dir)
+                               (concat (when vz/mode-line-file-include-file-short-path?
+                                        (vz/mode-line-file-short-dir))
                                 (buffer-name)
-                                (vz/mode-line-file-state))))
+                                (when vz/mode-line-file-include-file-status? (vz/mode-line-file-state)))))
+                       (:eval (when vz/mode-line-file-extra-info
+                               (concat " "
+                                (eval `(vz/mode-line-roundise-text ,vz/mode-line-file-extra-info)))))
                        " "
                        (:eval (vz/mode-line-roundise-text (vz/mode-line-git-branch)))
                        (:eval (vz/mode-line-fill 'mode-line 18))
