@@ -108,7 +108,12 @@
  ;; Timestamp format
  org-time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %k:%M>")
 
- org-preview-latex-default-process 'dvisvgm)
+ org-preview-latex-default-process 'dvisvgm
+
+ org-special-ctrl-a/e t
+
+ ;; From org 9.3, it is set to 'show-everything
+ org-startup-folded t)
 
 (setq-default org-display-custom-times t)
 
@@ -204,7 +209,7 @@ markers for sub/super scripts but fontify them."
       ;; Handle a_b^c
       (when (member (char-after) '(?_ ?^)) (goto-char (1- pos)))
       (unless (or comment-p emph-p link-p keyw-p)
-	      (put-text-property (match-beginning 2) (match-end 0)
+	      (put-text-property (match-beginning 3) (match-end 0)
 			                     'display
 			                     (if (equal (char-after (match-beginning 2)) ?^)
 			                         (nth (if table-p 3 1) org-script-display)
@@ -224,7 +229,7 @@ markers for sub/super scripts but fontify them."
 
 ;; `org-pretty-entities' is quite tedious to use compared to
 ;; `prettify-symbols-mode'. That is, you can't unprettify the symbol
-;; when your cursor over it. There's a patch[1] to do it but it hasn't
+;; when the cursor is over it. There's a patch[1] to do it but it hasn't
 ;; been merged yet. Until then, I'm going to make a subsitute using
 ;; `prettify-symbols-mode'.
 ;; 1. https://orgmode.org/list/CAGEgU=j+UJoWwoRKChkVxN5dmwbD4YaNTWdLS6Qgj57osZLRJA@mail.gmail.com

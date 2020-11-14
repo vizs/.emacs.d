@@ -216,7 +216,8 @@ behaviour is similar to that of in `bind-keys'."
 ;; * Org-mode
 ;; You don't need any explanation
 (vz/use-package org nil
-  :straight (:type built-in)
+  :straight (:type git
+             :host github :repo "emacsmirror/org")
   :bind
   (("C-c oc" . org-capture)
    ("C-c oa" . org-agenda)
