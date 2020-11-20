@@ -84,7 +84,7 @@
    org-noter-doc-split-fraction '(0.6 . 0.4)
    org-noter-auto-save-last-location t
    org-noter-default-notes-file-names '("annotations.org")
-   org-noter-notes-search-path (-map (fn (~ <>)) '("doc/org" "doc/uni"))
+   org-noter-notes-search-path (-map (fn (~ <>)) '("doc/org" "doc/uni/notes"))
    org-noter-doc-property-in-notes t)
   ;; I really don't need org-noter to add stuff to my modeline
   (advice-add 'org-noter--mode-line-text :override (fn "")))
@@ -123,10 +123,44 @@
   (setq
    cdlatex-command-alist
    '(("d" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
-     ("p" "Insert partial derivative" "\\frac{\\partial ?}{\\partial}" cdlatex-position-cursor nil nil t))))
+     ("p" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
+     ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
+     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t))))
 
 ;; ** TODO: Custom latex macros
 ;; Look into using this https://www.reddit.com/r/orgmode/comments/7u2n0h/tip_for_defining_latex_macros_for_use_in_both/
+
+;; * Racket-plot template
+;; I prefer to use racket for drawing plots.
+
+(use-package ob-racket
+  :demand t
+  :straight (:host github :repo "hasu/emacs-ob-racket")
+  :config
+  ;; This will do the boilerplate
+  (tempo-define-template
+   "racket-plot"
+   '("#+begin_src racket :lang racket/base :require plot :var out-file=\""
+     (p "Path to file: ") "\" :results file :exports results" n
+     r n
+     "(string->symbol out-file)" ; This dirty thing is here because of how write works in racket
+     n "#+end_src")
+   "<plt")
+  (add-to-list 'org-tempo-tags '("<plt" . tempo-template-racket-plot))
+  (setq tempo-interactive t))
+
+;; * Special abbreviation option
+
+(defvar-local vz/org-abbrev-mode nil
+  "Enable abbreviations in org-mode buffer.")
+
+(add-hook 'org-mode-hook
+          (defun vz/org-turn-on-abbrev-mode-maybe? ()
+            (when vz/org-abbrev-mode
+              (abbrev-mode t)
+              (read-abbrev-file (~ "doc/uni/notes/.abbrevs")))))
+
+(add-to-list 'org-startup-options '("abbrev" vz/org-abbrev-mode t))
 
 ;; * -*-
 ;; Local Variables:

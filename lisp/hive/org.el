@@ -18,19 +18,18 @@
 (plist-put org-format-latex-options :foreground "Black")
 
 (use-package cdlatex
-  :defer t
+  :demand t
   :config
   ;; Decrease cdlatex popup helper timeout
   (setq-default cdlatex-auto-help-delay 0.50)
-
-  ;; Add a 'cdlatex' startup option to autostart `org-cdlatex-mode'
-  (add-to-list 'org-startup-options '("cdlatex" org-cdlatex-mode t))
-
   (setq
    ;; Disable simplification of super- and sub-scripts
    cdlatex-simplify-sub-super-scripts nil
    ;; Romanise sub/superscript if _,^ is pressed twice
    cdlatex-make-sub-superscript-roman-if-pressed-twice t))
+
+;; Add a 'cdlatex' startup option to autostart `org-cdlatex-mode'
+(add-to-list 'org-startup-options '("cdlatex" org-cdlatex-mode t))
 
 ;; Completey hide headline stars
 (use-package org-starless
@@ -103,17 +102,18 @@
  ;; Path to various stuff
  org-directory (~ "doc/org")
  org-default-notes-file (~ "doc/org/notes.org")
- org-preview-latex-image-directory (~ ".cache/org-ltximg")
+ org-preview-latex-image-directory (~ ".cache/org-ltximg/")
 
  ;; Timestamp format
  org-time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %k:%M>")
 
  org-preview-latex-default-process 'dvisvgm
 
- org-special-ctrl-a/e t
-
  ;; From org 9.3, it is set to 'show-everything
- org-startup-folded t)
+ org-startup-folded t
+
+ ;; Avoid editing invisible part
+ org-catch-invisible-edits t)
 
 (setq-default org-display-custom-times t)
 
@@ -171,7 +171,8 @@
 
 (vz/bind
  :map org-mode-map
- "C-c j" #'vz/counsel-org-goto)
+ "C-c j" #'vz/counsel-org-goto
+ "C-c l" #'org-store-link)
 
 ;; Advice around `org-set-tags-command' to use `counsel-org-tag'
 (advice-add 'org-set-tags-command
@@ -234,21 +235,32 @@ markers for sub/super scripts but fontify them."
 ;; `prettify-symbols-mode'.
 ;; 1. https://orgmode.org/list/CAGEgU=j+UJoWwoRKChkVxN5dmwbD4YaNTWdLS6Qgj57osZLRJA@mail.gmail.com
 
+(defvar vz/org-prettify-symbols nil
+  "Alist for `prettify-symbols-mode'.")
+
 (defun vz/org-prettify--set-prettify-symbols-alist ()
   (dolist (entity (append org-entities-user org-entities))
     (when (listp entity)              ; `org-entities' has strings too
-      (let ((match-for (car entity))
-            (replace-with (-last-item entity)))
-        (when (= (length replace-with) 1)
-          (add-to-list 'prettify-symbols-alist
-                       (cons (concat "\\" match-for) replace-with)))))))
+      (when-let* ((match-for (car entity))
+                  (replace-with (-last-item entity))
+                  (_ (= 1 (length replace-with))))
+        (add-to-list 'vz/org-prettify-symbols
+                     (cons (concat "\\" match-for) replace-with))))))
 
-(defun vz/org-prettify--predicate (start end _match)
-  (let ((char-before (char-before start))
-                      (char-after (char-after end))
-                      (allowed-surr-chars '(?} ?{ ?\\ ?_ ?^ ?( ?) ?$ ? )))
-                  (or (memq char-before allowed-surr-chars)
-                      (memq char-after allowed-surr-chars))))
+(with-eval-after-load 'org
+  (vz/org-prettify--set-prettify-symbols-alist))
+
+(defun vz/org-prettify--predicate (_start end _match)
+  ;; There's no need to check the previous character since
+  ;; `org-pretty-entities' works outside of math environments and all
+  ;; entities start with a \ so there's no meaning in checking the
+  ;; character before the \ unlike the character after the entity.
+  ;;
+  ;; The character after the entity is checked because \asdf and
+  ;; \asdfb both could be in `org-entites' and \asdfb should not be
+  ;; falsely prettified as <asdf>b.
+  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?^ ?( ?) ?$ ? )
+              (char-after end)))
 
 (define-minor-mode vz/org-prettify-mode
   "When non-nil, use `prettify-symbols-mode' to prettify
@@ -257,8 +269,8 @@ markers for sub/super scripts but fontify them."
   (if vz/org-prettify-mode
       (progn
         (setq-local prettify-symbols-compose-predicate #'vz/org-prettify--predicate
-                    prettify-symbols-unprettify-at-point 'right-edge)
-        (vz/org-prettify--set-prettify-symbols-alist))
+                    prettify-symbols-unprettify-at-point 'right-edge
+                    prettify-symbols-alist vz/org-prettify-symbols))
     (setq-local prettify-symbols-alist nil
                 prettify-symbols-unprettify-at-point nil
                 prettify-symbols-compose-predicate #'prettify-symbols-default-compose-p))
@@ -268,3 +280,11 @@ markers for sub/super scripts but fontify them."
 
 ;; Load in notes.el
 (load-file (expand-file-name "lisp/hive/notes.el" user-emacs-directory))
+
+;; Special C-{a,e} movements
+(setq org-special-ctrl-a/e t)
+
+(when org-special-ctrl-a/e
+  (vz/bind
+   :map org-mode-map
+   [remap vz/beginning-of-line] #'org-beginning-of-line))
