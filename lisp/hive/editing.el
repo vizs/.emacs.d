@@ -62,14 +62,17 @@ on the position of the cursor."
  "C-S-k" #'kill-whole-line
  "M-k" (fn! (kill-ring-save (point) (line-end-position)))
 
-  ;; C-x z and C-x M-ESC are hard to press
+ ;; `hippie-expand' also takes care of `dabbrev-expand' suggestions
+ "M-/" #'hippie-expand
+
+ ;; C-x z and C-x M-ESC are hard to press
  "C-." #'repeat
  "C->" #'repeat-complex-command
 
  ;; I never use Emacs in a terminal
  "C-z" #'zap-up-to-char
 
- ;; Swap `query-replace` and `query-replace-regexp`
+ ;; Swap `query-replace' and `query-replace-regexp'
  "M-%" #'query-replace-regexp
  "C-M-%" #'query-replace
 
