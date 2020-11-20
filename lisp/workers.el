@@ -112,6 +112,12 @@ behaviour is similar to that of in `bind-keys'."
     warning-bitmap '(vz/fringe-left-arrow warning)
     note-bitmap    '(vz/fringe-left-arrow compilation-info)))
 
+;; ** Occur menu styling
+;; I don't like the underline face at the top...
+(add-hook 'occur-mode-hook
+          (defun vz/occur-style-menu ()
+            (face-remap-add-relative 'underline :underline nil)))
+
 ;; * Dired
 (use-package dired
   :straight (:type built-in)
