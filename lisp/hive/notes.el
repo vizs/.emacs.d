@@ -13,48 +13,96 @@
   (pdf-tools-install))
 
 ;; ** Set `header-line-format'
-;; To let me be lazy and use the mouse for highlighting, a header-line
-;; with commands will be added for pdf buffers; think org-caputre's
-;; headerline but with clickable text instead. ALso, I think it's
-;; faster this way.
+;; Highlighting text in pdf-tools is really tedious. I
+;; prefer ephiphany's way of highlighting where you click a button and
+;; whenever you drag and release your mouse, it highlights the
+;; text. So, here's my attempt at making it.
 
-(defvar vz/pdf-tools-header-line-functions
-  '(("text" . #'pdf-annot-add-text-annotation)
-    ("underline" . #'pdf-annot-add-underline-markup-annotation)
-    ("highlight" . #'pdf-annot-add-highlight-markup-annotation)
-    ("remove" . #'pdf-annot-delete))
-  "An alist of text to be displayed and the function to be run
-  when pressing mouse-1 on text.")
+(defvar vz/pdf-annot-highlight-functions
+  '(underline
+    highlight)
+  "A list of description of highlight functions.")
 
-(defun vz/pdf-tools-header-line--generate-event-function (cmd)
-  `(lambda (_)
-    (interactive "e")
-    (call-interactively ,cmd)))
+(defvar vz/pdf-annot-header-line-functions
+  '((text . #'pdf-annot-add-text-annotation)
+    (highlight . #'pdf-annot-add-highlight-markup-annotation)
+    (underline . #'pdf-annot-add-underline-markup-annotation)
+    (remove . #'pdf-annot-delete))
+  "An alist of annotation functions that are to be run when clicking on it.
+Highlight functions are handled specially.")
 
-(defun vz/pdf-tools-header-line--generate-images ()
-  (-map (fn
-         (-let (((txt . cmd) <>))
-           (message "%s" cmd)
-           (propertize (format " %s " txt)
-                       'display (vz/mode-line-roundise-text txt nil nil t)
-                       'local-map (let ((map (make-sparse-keymap)))
-                                    (define-key map
-                                      [header-line mouse-1]
-                                      (vz/pdf-tools-header-line--generate-event-function cmd))
-                                    map))))
-        vz/pdf-tools-header-line-functions))
+(defvar-local vz/pdf-annot-highlight-function-on-mouse-release nil
+  "Highlight function to be run when releasing the mouse.")
+
+(define-minor-mode vz/pdf-annot-highlight-on-mouse-release-mode
+  "Runs `vz/pdf-annot-highlight-function-on-mouse-release' after
+  `pdf-view-mouse-set-region' when active."
+  nil nil nil
+  (if vz/pdf-annot-highlight-on-mouse-release-mode
+      (advice-add 'pdf-view-mouse-set-region :after
+                  (defun vz/pdf-annot-highlight-on-mouse-release (&rest _)
+                    (when (and vz/pdf-annot-highlight-on-mouse-release-mode
+                               pdf-annot-minor-mode
+                               (not (null vz/pdf-annot-highlight-function-on-mouse-release)))
+                      ;; TODO: Find out how to remove eval
+                      (eval `(call-interactively
+                              ,(asoc-get vz/pdf-annot-header-line-functions
+                                vz/pdf-annot-highlight-function-on-mouse-release))))))
+    (advice-remove 'pdf-view-mouse-set-region #'vz/pdf-annot-highlight-on-mouse-release)))
+
+(defun vz/pdf-annot-header-line--update-images ()
+  (setq-local
+   header-line-format
+   (-map (fn (when-let ((func (get-text-property 0 'func <>))
+                        (_ (-contains? vz/pdf-annot-highlight-functions func)))
+               (set-text-properties
+                0 (length <>)
+                `(display
+                  ,(vz/mode-line-roundise-text (symbol-name func)
+                    (unless (eq func vz/pdf-annot-highlight-function-on-mouse-release)
+                     vz/mode-line-fgi)
+                    nil t)) <>))
+             <>)
+         header-line-format))
+  (force-mode-line-update))
+
+(defun vz/pdf-annot-update-highlight-function (fn)
+  (if vz/pdf-annot-highlight-on-mouse-release-mode
+      (progn
+        (setq-local vz/pdf-annot-highlight-function-on-mouse-release
+                    (unless (eq vz/pdf-annot-highlight-function-on-mouse-release fn)
+                      fn))
+        (vz/pdf-annot-header-line--update-images))
+    (eval `(call-interactively ,(asoc-get vz/pdf-annot-header-line-functions fn)))))
+
+(defun vz/pdf-annot-header-line--generate-images ()
+  (-map (fn (propertize
+             (format " %s " (car <>))
+             'display (vz/mode-line-roundise-text (symbol-name (car <>)) vz/mode-line-fgi nil t)
+             'func (car <>)
+             'local-map
+             (let ((map (make-sparse-keymap)))
+               (define-key map [header-line mouse-1]
+                 `(lambda (_)
+                    (interactive "e")
+                    ,(if (member (car <>) vz/pdf-annot-highlight-functions)
+                         `(vz/pdf-annot-update-highlight-function ',(car <>))
+                       `(call-interactively ,(cdr <>)))))
+               map)))
+        vz/pdf-annot-header-line-functions))
 
 (add-hook 'pdf-annot-minor-mode-hook
-          (defun vz/pdf-tools-pdf-annot-set-header-line-format ()
-            (face-remap-add-relative 'header-line `(:inherit mode-line
-                                                    :box (:line-width 2 :color ,(face-attribute 'mode-line :background))))
-            (let* ((images (vz/pdf-tools-header-line--generate-images))
+          (defun vz/pdf-annot--set-header-line-format ()
+            (face-remap-add-relative 'header-line '(:inherit mode-line))
+            (let* ((images (vz/pdf-annot-header-line--generate-images))
                    (length (-reduce-from (fn (+ (length <2>) <1>))
                                          0 images)))
               (setq-local header-line-format
                           (cons (propertize " " 'display `((space :align-to (- center (0.5 . ,length))))
                                             'face 'header-line)
                                 images)))))
+
+(add-hook 'pdf-annot-minor-mode-hook #'vz/pdf-annot-highlight-on-mouse-release-mode)
 
 ;; ** Remove file status from mode-line and page number
 ;; The file status is always going to be the same so having it is pointless.
@@ -125,7 +173,8 @@
    '(("d" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
      ("p" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
      ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
-     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t))))
+     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)))
+  (cdlatex-compute-tables))
 
 ;; ** TODO: Custom latex macros
 ;; Look into using this https://www.reddit.com/r/orgmode/comments/7u2n0h/tip_for_defining_latex_macros_for_use_in_both/
