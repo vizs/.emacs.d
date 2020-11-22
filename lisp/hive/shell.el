@@ -9,18 +9,25 @@
 (setq-default shell-font-lock-keywords nil
               comint-buffer-maximum-size 2000)
 
+;; ** Add doas prompt to password regexp
+(when (version< emacs-version 28)
+  (setq comint-password-prompt-regexp
+        (format "%s\\|%s"
+                comint-password-prompt-regexp
+                "doas (.*) password: ")))
+
 ;; ** Track $PWD more effectively
 ;; from http://0x0.st/Hroa
-(defun shell-sync-dir-with-prompt (string)
-  "Set prompt to `|Pr0mPT|${PWD}|...'"
-  (if (string-match "|Pr0mPT|\\([^|]*\\)|" string)
-      (let ((cwd (match-string 1 string)))
-        (setq default-directory
-              (if (string-equal "/" (substring cwd -1))
-                  cwd
-                (setq cwd (concat cwd "/"))))
-        (replace-match "" t t string 0))
-    string))
+;; (defun shell-sync-dir-with-prompt (string)
+;;   "Set prompt to `|Pr0mPT|${PWD}|...'"
+;;   (if (string-match "|Pr0mPT|\\([^|]*\\)|" string)
+;;       (let ((cwd (match-string 1 string)))
+;;         (setq default-directory
+;;               (if (string-equal "/" (substring cwd -1))
+;;                   cwd
+;;                 (setq cwd (concat cwd "/"))))
+;;         (replace-match "" t t string 0))
+;;     string))
 
 ;; ** Initialise
 (defun vz/shell-mode-init ()
@@ -33,9 +40,7 @@
    ;; comint-prompt-read-only t
    inhibit-field-text-motion t
    comint-process-echoes t)
-  (setq Man-notify-method 'quiet)
-  (add-hook 'comint-preoutput-filter-functions
-            #'shell-sync-dir-with-prompt nil t))
+  (setq Man-notify-method 'quiet))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
@@ -43,16 +48,17 @@
 ;; ** Are we inside a shell?
 (defun vz/inside-shell? (&optional buffer)
   "Is the current ``active'' process a shell?"
-  (let* ((buffer (or buffer (current-buffer)))
-         (child  (process-running-child-p (get-buffer-process buffer))))
+  (let ((child  (process-running-child-p (get-buffer-process
+                                          (or buffer (current-buffer))))))
     (or (null child)
-        (f-equal? (asoc-get (process-attributes child) 'comm)
-                  (f-filename explicit-shell-file-name)))))
+        (s-equals? (asoc-get (process-attributes child) 'comm)
+                   (f-base explicit-shell-file-name)))))
 
 ;; ** Ivy action for running commands from shell history
 (defun vz/shell-history--ivy-action (command)
   (comint-delete-input)
-  (comint-send-string proc (concat command "\n"))
+  (comint-send-string (get-buffer-process (current-buffer))
+                      (concat command "\n"))
   (comint-add-to-input-history command)
   (vz/shell-history--write command))
 
@@ -98,11 +104,18 @@
              (_ (vz/inside-shell?)))
     (ivy-read
      "> " (vz/shell-history--sort default-directory)
-     :initial-input (comint-get-old-input-default)
+     :preselect (comint-get-old-input-default)
      :sort nil
      :action #'vz/shell-history--ivy-action)))
 
-;; * History from shell
+(add-hook 'comint-input-filter-functions
+          (defun vz/shell-history--input-hook (string)
+            "Add string to shell history."
+            (when (and (derived-mode-p 'shell-mode)
+                       (vz/inside-shell?))
+              (vz/shell-history--write string))
+            t))
+
 (defun vz/shell-shell-history ()
   "Returns current shell's history as a list"
   (split-string (f-read
@@ -113,6 +126,7 @@
                    (~ ".cache/bash_history")))
                 "\n" nil "\t"))
 
+;; * History from shell
 (defun vz/shell-insert-from-shell-hist ()
   "Search for command in shell history and run it"
   (interactive)
@@ -120,7 +134,7 @@
              (_ (vz/inside-shell?)))
     (ivy-read
      "> " (vz/shell-shell-history)
-     :initial-input (comint-get-old-input-default)
+     :preselect (comint-get-old-input-default)
      :sort nil
      :action #'vz/shell-history--ivy-action)))
 
@@ -137,22 +151,25 @@
                          "/tmp/diralias")
                        (~ "lib/directory-aliases")))))))
 
+;; TODO: Figure out how to do this without setting directory to ""
 (defun vz/shell-jump-to-dir ()
-  "Jump to directory alias"
+  "Jump to directory alias. Calling `ivy-call' launches
+`read-directory-name', jumps to selected directory otherwise."
   (interactive)
-  (let ((proc (get-buffer-process (current-buffer)))
-        (input (comint-get-old-input-default)))
-    (when (vz/inside-shell?)
-      (comint-delete-input)
-      (let ((cmd (->>
-                  (vz/shell-get-dir-alias)
-                  (ivy-read "> ")
-                  (format "cd %s\n"))))
-        (comint-send-string proc cmd)
-        (comint-add-to-input-history cmd))
-      ;;(vz/term-minor-mode-set-title cmd))
-      (unless (s-blank? input)
-        (comint-send-string proc input)))))
+  (when-let ((input (comint-get-old-input-default))
+             (directory "")
+             (_ (vz/inside-shell?)))
+    (ivy-read
+     "> " (vz/shell-get-dir-alias)
+     :caller 'vz/shell-jump-to-dir
+     :action (fn
+              (if (eq this-command #'ivy-call)
+                  (ivy-exit-with-action
+                   (fn (setq directory (read-directory-name "> " <>))))
+                (setq directory <>))))
+    (vz/shell-history--ivy-action (concat "cd " directory))
+    (comint-send-string (get-buffer-process (current-buffer))
+                        input)))
 
 ;; * Popup a shell in `default-directory'
 ;; ** Variables
