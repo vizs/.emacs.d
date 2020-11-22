@@ -118,49 +118,7 @@
 (setq-default org-display-custom-times t)
 
 ;; Capture templates
-(use-package doct
-  :config
-  (setq org-capture-templates
-        (doct `(("Dump links, book names, w/e"
-                 :keys "d"
-                 :file "dump.org"
-                 :prepend t
-                 :template ("* %{todo-state} %{description}"
-                            ":PROPERTIES:"
-                            ":type: %{typ}"
-                            ":added: %U"
-                            "%?")
-                 :children (("Anime/Manga" :keys "a"
-                             :todo-state "TODO"
-                             :description "%^{Name|}"
-                             :typ "%^{Is it|anime|manga}")
-                            ("Emacs" :keys "e"
-                             :todo-state "TODO"
-                             :description "%^{What is it?|}"
-                             :typ "emacs")
-                            ("Quote" :keys "q"
-                             :template ("* %^{Quote|Quote %U|}"
-                                        ":PROPERTIES:"
-                                        ":type: quote"
-                                        ":END:"
-                                        "#+begin_quote\n%?\n-- %^{Author|}\n#+end_quote"))
-                            ("Music" :keys "m"
-                             :todo-state ""
-                             :description "%^{Name|}"
-                             :typ "music")
-                            ("Others" :keys "o"
-                             :todo-state "TODO"
-                             :description "%^{Description|}"
-                             :typ "%^{Type|article|book|misc}")))
-                ;; TODO: Add notes section (Should be simple enough
-                ;; since TAGS are declared in the note file)
-                ("University Schedule for quizzes and assignments"
-                 :file ,(~ "doc/uni/schedule.org")
-                 :olp ("Semester I" "Changes/Quizzes/Assignments")
-                 :prepend t
-                 :type item
-                 :keys "u"
-                 :template ("- %(org-time-stamp '(1)) :: %?"))))))
+(vz/use-package doct "captures")
 
 ;; Setup `counsel-org-goto'
 (defun vz/counsel-org-goto ()
@@ -259,7 +217,7 @@ markers for sub/super scripts but fontify them."
   ;; The character after the entity is checked because \asdf and
   ;; \asdfb both could be in `org-entites' and \asdfb should not be
   ;; falsely prettified as <asdf>b.
-  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?^ ?( ?) ?$ ? )
+  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? )
               (char-after end)))
 
 (define-minor-mode vz/org-prettify-mode
@@ -284,7 +242,16 @@ markers for sub/super scripts but fontify them."
 ;; Special C-{a,e} movements
 (setq org-special-ctrl-a/e t)
 
-(when org-special-ctrl-a/e
+(with-eval-after-load 'org
+  (when org-special-ctrl-a/e
+    (vz/bind
+     :map org-mode-map
+     [remap vz/beginning-of-line] #'org-beginning-of-line)))
+
+;; This is convenient to have
+(use-package math-delimiters
+  :straight (:type git :host github :repo "oantolin/math-delimiters")
+  :config
   (vz/bind
-   :map org-mode-map
-   [remap vz/beginning-of-line] #'org-beginning-of-line))
+   :map org-cdlatex-mode-map
+   "$" #'math-delimiters-insert))
