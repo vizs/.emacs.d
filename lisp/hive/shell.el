@@ -10,7 +10,7 @@
               comint-buffer-maximum-size 2000)
 
 ;; ** Add doas prompt to password regexp
-(when (version< emacs-version 28)
+(when (< emacs-major-version 28)
   (setq comint-password-prompt-regexp
         (format "%s\\|%s"
                 comint-password-prompt-regexp
