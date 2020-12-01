@@ -23,8 +23,8 @@
   ;; Decrease cdlatex popup helper timeout
   (setq-default cdlatex-auto-help-delay 0.50)
   (setq
-   ;; Disable simplification of super- and sub-scripts
-   cdlatex-simplify-sub-super-scripts nil
+   ;; +Disable simplification of super- and sub-scripts+
+   cdlatex-simplify-sub-super-scripts t
    ;; Romanise sub/superscript if _,^ is pressed twice
    cdlatex-make-sub-superscript-roman-if-pressed-twice t))
 
@@ -217,7 +217,7 @@ markers for sub/super scripts but fontify them."
   ;; The character after the entity is checked because \asdf and
   ;; \asdfb both could be in `org-entites' and \asdfb should not be
   ;; falsely prettified as <asdf>b.
-  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? )
+  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? ?/)
               (char-after end)))
 
 (define-minor-mode vz/org-prettify-mode
@@ -228,11 +228,12 @@ markers for sub/super scripts but fontify them."
       (progn
         (setq-local prettify-symbols-compose-predicate #'vz/org-prettify--predicate
                     prettify-symbols-unprettify-at-point 'right-edge
-                    prettify-symbols-alist vz/org-prettify-symbols))
+                    prettify-symbols-alist vz/org-prettify-symbols)
+        (prettify-symbols-mode t))
     (setq-local prettify-symbols-alist nil
                 prettify-symbols-unprettify-at-point nil
-                prettify-symbols-compose-predicate #'prettify-symbols-default-compose-p))
-  (prettify-symbols-mode vz/org-prettify-mode))
+                prettify-symbols-compose-predicate #'prettify-symbols-default-compose-p)
+    (prettify-symbols-mode -1)))
 
 (add-hook 'org-mode-hook #'vz/org-prettify-mode)
 
