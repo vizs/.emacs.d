@@ -2,6 +2,12 @@
 
 ;; TODO: Add functions to search through notes and add
 ;; capture-templates to insert notes.
+;;
+;; TODO: Slurping and kill-line like paredit inside math
+;; environments would be nice
+;;
+;; TODO: Inside math environment, when I remove { and if the previous
+;; character is ^ or _, I would like to remove {, } /and/ _ or ^
 
 ;; * Annotations
 
@@ -167,14 +173,15 @@ Highlight functions are handled specially.")
 
 ;; ** Custom cdlatex-commands
 
-(with-eval-after-load 'cdlatex
+(use-package cdlatex
+  :init
   (setq
    cdlatex-command-alist
    '(("d" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
      ("p" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
      ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
      ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)))
-  (cdlatex-compute-tables))
+  )
 
 ;; ** TODO: Custom latex macros
 ;; Look into using this https://www.reddit.com/r/orgmode/comments/7u2n0h/tip_for_defining_latex_macros_for_use_in_both/
@@ -188,26 +195,55 @@ Highlight functions are handled specially.")
   :config
   ;; This will do the boilerplate
   (tempo-define-template
-   "racket-plot"
+   "org-racket-plot"
    '("#+begin_src racket :lang racket/base :require plot :var out-file=\""
      (p "Path to file: ") "\" :results file :exports results" n
      r n
      "(string->symbol out-file)" ; This dirty thing is here because of how write works in racket
      n "#+end_src")
    "<plt")
-  (add-to-list 'org-tempo-tags '("<plt" . tempo-template-racket-plot))
+  (add-to-list 'org-tempo-tags '("<plt" . tempo-template-org-racket-plot))
   (setq tempo-interactive t))
 
 ;; * Special abbreviation option
+;; The expansions set this way only works in text enviroments
 
 (defvar-local vz/org-abbrev-mode nil
   "Enable abbreviations in org-mode buffer.")
 
-(add-hook 'org-mode-hook
+(defvar-local vz/org-abbrev-file nil
+  "File in which abbreviations are stored. To be used in
+  .dir-locals.el and is relative.")
+
+;; Le not safe but this shouldn't be a problem
+(put 'vz/org-abbrev-file 'safe-local-variable
+     (fn (or (null <>)
+             (stringp <>))))
+
+(defun vz/org-abbrev--expand-function ()
+  "When `vz/org-abbrev-mode' is active, then allow abbreviation expansion
+only in text environments. Otherwise, the default behaviour is
+followed."
+  (require 'texmathp)
+  (if (and (derived-mode-p 'org-mode)
+           vz/org-abbrev-mode)
+      (unless (texmathp)
+        (abbrev--default-expand))
+    (abbrev--default-expand)))
+
+(setq abbrev-expand-function #'vz/org-abbrev--expand-function)
+
+(add-hook 'hack-local-variables-hook
           (defun vz/org-turn-on-abbrev-mode-maybe? ()
-            (when vz/org-abbrev-mode
+            (when (and (derived-mode-p 'org-mode)
+                       vz/org-abbrev-mode
+                       vz/org-abbrev-file)
               (abbrev-mode t)
-              (read-abbrev-file (~ "doc/uni/notes/.abbrevs")))))
+              (read-abbrev-file (expand-file-name vz/org-abbrev-file))
+              (add-hook 'after-save-hook
+                        (defun vz/org-abbrev-mode-hook ()
+                          (write-abbrev-file (expand-file-name vz/org-abbrev-file)))
+                        nil t))))
 
 (add-to-list 'org-startup-options '("abbrev" vz/org-abbrev-mode t))
 
