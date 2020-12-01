@@ -61,13 +61,13 @@ Highlight functions are handled specially.")
    header-line-format
    (-map (fn (when-let ((func (get-text-property 0 'func <>))
                         (_ (-contains? vz/pdf-annot-highlight-functions func)))
-               (set-text-properties
+               (put-text-property
                 0 (length <>)
-                `(display
-                  ,(vz/mode-line-roundise-text (symbol-name func)
-                    (unless (eq func vz/pdf-annot-highlight-function-on-mouse-release)
-                     vz/mode-line-fgi)
-                    nil t)) <>))
+                `display
+                (vz/mode-line-roundise-text (symbol-name func)
+                                             (unless (eq func vz/pdf-annot-highlight-function-on-mouse-release)
+                                               vz/mode-line-fgi)
+                                             nil t) <>))
              <>)
          header-line-format))
   (force-mode-line-update))
@@ -75,6 +75,7 @@ Highlight functions are handled specially.")
 (defun vz/pdf-annot-update-highlight-function (fn)
   (if vz/pdf-annot-highlight-on-mouse-release-mode
       (progn
+        (message "%s" vz/pdf-annot-highlight-function-on-mouse-release)
         (setq-local vz/pdf-annot-highlight-function-on-mouse-release
                     (unless (eq vz/pdf-annot-highlight-function-on-mouse-release fn)
                       fn))
@@ -115,7 +116,14 @@ Highlight functions are handled specially.")
 ;; Page number is handy to have though.
 
 (defun vz/pdf-tools-mode-line--get-page-number ()
-  (format "%d/%d" (pdf-view-current-page) (pdf-cache-number-of-pages)))
+  (let ((string (format "%d/%d" (pdf-view-current-page) (pdf-cache-number-of-pages))))
+    (concat " "
+            (propertize string
+                        'display (vz/mode-line-roundise-text string nil nil t)
+                        'keymap (make-mode-line-mouse-map
+                                 'mouse-1
+                                 (lambda (_) (interactive "e")
+                                   (call-interactively #'pdf-view-goto-page)))))))
 
 (add-hook 'pdf-tools-enabled-hook
           (defun vz/pdf-tools-mode-line ()
@@ -180,8 +188,7 @@ Highlight functions are handled specially.")
    '(("d" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
      ("p" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
      ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
-     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)))
-  )
+     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t))))
 
 ;; ** TODO: Custom latex macros
 ;; Look into using this https://www.reddit.com/r/orgmode/comments/7u2n0h/tip_for_defining_latex_macros_for_use_in_both/
