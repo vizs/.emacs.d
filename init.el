@@ -37,3 +37,4 @@
     (with-eval-after-load (expand-file-name "lisp/hive/modeline.el" user-emacs-directory)
       (setq-local vz/mode-line-file-include-file-status? nil
                   vz/mode-line-file-include-file-short-path? nil)))))
+(put 'list-timers 'disabled nil)

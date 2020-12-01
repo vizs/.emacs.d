@@ -246,8 +246,7 @@ as (name-without-ns . local)."
   :functions vz/ivy-minibuffer-insert-at-point
   :bind (:map ivy-minibuffer-map
               ("<C-up>" . ivy-minibuffer-grow)
-              ("<C-down>" . ivy-minibuffer-shrink)
-              ("M-." . vz/ivy-minibuffer-insert-at-point))
+              ("<C-down>" . ivy-minibuffer-shrink))
   :config
   (setq-ns ivy
     count-format " [%d/%d] "
@@ -268,14 +267,6 @@ as (name-without-ns . local)."
       (setq-local max-mini-window-height
                   (setq ivy-height (1- ivy-height)))
       (window-resize nil -1)))
-
-  (defun vz/ivy-minibuffer-insert-at-point ()
-    "Insert symbol at point from the previously focused window."
-    (interactive)
-    (with-current-buffer (window-buffer (previous-window))
-      (ivy--insert-minibuffer (thing-at-point 'symbol t)))
-    (end-of-line))
-
   (defun vz/get-file-or-buffer ()
     "Select a list of opened buffers, files in current directory and entries in
 recentf and return the corresponding buffer. Create one if it doesn't exist"

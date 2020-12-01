@@ -130,7 +130,7 @@ behaviour is similar to that of in `bind-keys'."
 ;; * Modeline
 (with-eval-after-load user-init-file
   (load-file (expand-file-name "lisp/hive/modeline.el"
-			                         user-emacs-directory)))
+                               user-emacs-directory)))
 
 ;; * Shell
 (use-package comint
@@ -140,7 +140,7 @@ behaviour is similar to that of in `bind-keys'."
   :bind
   (:map comint-mode-map
         ("<S-return>" . comint-accumulate)
-	      ("<return>"   . vz/comint-send-input)
+        ("<return>"   . vz/comint-send-input)
         ("RET" . vz/comint-send-input))
   :config
   (defun vz/comint-send-input ()
@@ -250,10 +250,10 @@ behaviour is similar to that of in `bind-keys'."
 ;; * Programming Languages
 (use-package company
   :demand t
-	:functions (company-complete-common-or-cycle
-			        vz/company-previous-candidate
-			        vz/company-next-candidate)
-	:bind
+  :functions (company-complete-common-or-cycle
+              vz/company-previous-candidate
+              vz/company-next-candidate)
+  :bind
   (:map company-active-map
         ("C-n" . vz/company-next-candidate)
         ("C-p" . vz/company-previous-candidate))
