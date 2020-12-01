@@ -82,16 +82,29 @@ on the position of the cursor."
  "M-W" #'clipboard-kill-ring-save
  "M-K" (fn! (clipboard-kill-ring-save (point) (line-end-position)))
 
- ;; Use isearch regexp
- "C-s" #'isearch-forward-regexp
- "C-r" #'isearch-backward-regexp
 
  ;; Translations
  :map key-translation-map
- "M-r" (kbd "C-x r")
+ "M-r" (kbd "C-x r"))
 
- :map isearch-mode-map
- "C-'" #'avy-isearch)
+(use-package isearch
+  :straight (:type built-in)
+  :config
+  (vz/bind
+   ;; Use isearch regexp
+   "C-s" #'isearch-forward-regexp
+   "C-r" #'isearch-backward-regexp
+
+   :map isearch-mode-map
+   "C-'" #'avy-isearch)
+  ;; This is from oantolin's config
+  (add-hook 'isearch-mode-hook
+            (defun vz/isearch-insert-region-if-active ()
+              "Insert region as isearch query if it is active."
+              (when (use-region-p)
+                (isearch-yank-string (buffer-substring-no-properties
+                                      (region-beginning) (region-end)))
+                (deactivate-mark)))))
 
 (use-package expand-region
   :defer t
@@ -118,9 +131,10 @@ on the position of the cursor."
   (setq avy-all-windows nil)
   (vz/bind
    :prefix "M-g"
-   "c" #'avy-goto-char-in-line
    "f" #'avy-goto-char-2
-   "g" #'avy-goto-line))
+   "g" #'avy-goto-line
+   :prefix ""
+   "C-M-z" #'avy-goto-char-in-line))
 
 ;; Stolen from modal editing experiment
 
