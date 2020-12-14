@@ -229,30 +229,32 @@ to it. If nothing is found, create a new buffer"
           (vz/popup-shell--add (shell (vz/uniqify "*shell")) cwd)))))))
 
 ;; * Jump to prompt
-(defun vz/shell--get-prompts (prompts point)
-  "Return all prompts as a propertized string"
-  (save-excursion
-    (goto-char point)
-    (if-let ((pt (re-search-forward (rx (zero-or-one "!")
-                                        (= 1 (or "$" "μ" "#" "%"))
-                                        (0+ any)
-                                        eol)
-                                    nil t 1)))
-        (vz/shell--get-prompts (cons (propertize
-                                    (s-replace-regexp "\n$" "" (thing-at-point 'line t))
-                                    'pos pt) prompts)
-                             pt)
-      (cdr prompts))))
+
+(defvar-local vz/shell--prompt-alist nil
+  "An alist of prompt string and its position in buffer.")
+
+(defun vz/shell-clear-buffer ()
+  "Just like `comint-clear-buffer' except it also sets
+`vz/shell--prompt-alist' to nil."
+  (interactive)
+  (comint-clear-buffer)
+  (setq-local vz/shell--prompt-alist nil))
+
+(add-hook 'comint-input-filter-functions
+          (defun vz/shell--prompt-add-hook (prompt)
+            (when (and (derived-mode-p 'shell-mode)
+                       (vz/inside-shell?))
+              (setq-local vz/shell--prompt-alist
+                          (cons `(,(s-trim-right prompt) . ,(1- (point))) vz/shell--prompt-alist)))
+            t))
 
 (defun vz/shell-jump-to-prompt ()
-  "Jump to prompt by selecting it in ivy. The most recent is towards the top."
+  "Jump to prompt by selecting it in ivy."
   (interactive)
-  (->>
-   (ivy-read "> " (vz/shell--get-prompts '() (point-min))
-             :sort nil)
-   (get-text-property 0 'pos)
-   (goto-char))
-  (vz/beacon-highlight))
+  (ivy-read "> " vz/shell--prompt-alist
+            :sort nil
+            :action (fn (goto-char (cdr <>))
+                        (vz/beacon-highlight))))
 
 ;; * Emacs frame as terminal
 ;; ** Variables
@@ -329,7 +331,8 @@ term buffer associated with it"
  "?" #'vz/shell-insert-from-shell-hist
  "/" #'vz/shell-insert-from-hist
  "J" #'vz/shell-jump-to-prompt
- "k" #'vz/shell-send-keysequence-to-process)
+ "k" #'vz/shell-send-keysequence-to-process
+ [remap comint-clear-buffer] #'vz/shell-clear-buffer)
 
 ;; Local Variables:
 ;; eval: (outline-minor-mode)
