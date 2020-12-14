@@ -115,8 +115,15 @@ behaviour is similar to that of in `bind-keys'."
 ;; ** Occur menu styling
 ;; I don't like the underline face at the top...
 (add-hook 'occur-mode-hook
-          (defun vz/occur-style-menu ()
+          (defun vz/style-occur-menu ()
             (face-remap-add-relative 'underline :underline nil)))
+
+;; ** grep menu styling
+;; I don't like the underline face lol
+(add-hook 'grep-mode-hook
+          (defun vz/style-grep-menu ()
+            (-each '(compilation-info compilation-line-number underline)
+              (fn (face-remap-add-relative <> :underline nil)))))
 
 ;; * Dired
 (use-package dired
@@ -365,7 +372,8 @@ behaviour is similar to that of in `bind-keys'."
     (racket--cmd/async
      (racket--repl-session-id)
      `(eval ,(buffer-substring-no-properties (racket--repl-last-sexp-start) (point)))
-     (fn (eros--make-result-overlay <>
+     (fn (message "%s" <>)
+         (eros--make-result-overlay <>
            :where (point)
            :duration eros-eval-result-duration))))
   (vz/bind
