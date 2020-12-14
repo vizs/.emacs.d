@@ -19,11 +19,11 @@
                    (buffer-file-name)))
            (dir (let* ((dir (f-split (f-short (f-dirname path))))
                        (dir* (cdr dir)))
-                  (if (s-equals? (car dir*) "~") dir* dir)))
-           (shortened-dir (apply #'f-join
-                                  (append (-map (fn (substring <> 0 1)) (-drop-last 1 dir))
-                                          (list (-last-item dir))))))
-      (concat (f-short shortened-dir) "|")
+                  (if (s-equals? (car dir*) "~") dir* dir))))
+      (concat (f-short (apply #'f-join
+                              (append (-map (fn (substring <> 0 1)) (-drop-last 1 dir))
+                                      (list (-last-item dir)))))
+              "|")
     ""))
 
 (defun vz/mode-line-git-branch ()
@@ -143,8 +143,7 @@
                                 (buffer-name)
                                 (when vz/mode-line-file-include-file-status? (vz/mode-line-file-state)))))
                        (:eval (when vz/mode-line-file-extra-info
-                               (concat " "
-                                (eval `(vz/mode-line-roundise-text ,vz/mode-line-file-extra-info)))))
+                               (eval vz/mode-line-file-extra-info)))
                        " "
                        (:eval (vz/mode-line-roundise-text (vz/mode-line-git-branch)))
                        (:eval (vz/mode-line-fill 'mode-line 18))
