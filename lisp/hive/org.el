@@ -58,6 +58,8 @@
   ;; Adjust font size to be closer to that of the variable font
   (-each faces (fn (set-face-attribute <> nil :height 102))))
 
+;; (set-face-attribute 'org-latex-and-related nil :slant 'italic)
+
 ;; Let latex stuff be monospace too!
 (setq org-highlight-latex-and-related '(latex entities))
 
@@ -105,7 +107,7 @@
  org-preview-latex-image-directory (~ ".cache/org-ltximg/")
 
  ;; Timestamp format
- org-time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %k:%M>")
+ org-time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %H:%M>")
 
  org-preview-latex-default-process 'dvisvgm
 
