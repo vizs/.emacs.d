@@ -25,10 +25,10 @@
  (fn
   (with-eval-after-load 'recentf
     (add-to-list 'recentf-exclude
-                 (eval `(rx
-                         ,(expand-file-name "~/lib/org-scratch/")
-                         (one-or-more num)
-                         ".org"))))
+                 (rx
+                  (eval (expand-file-name "~/lib/org-scratch/"))
+                  (one-or-more num)
+                  ".org")))
   (with-current-buffer
       (find-file-noselect (expand-file-name
                            (concat (format-time-string "%Y%m%d%H%M") ".org")
