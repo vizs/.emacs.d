@@ -45,20 +45,22 @@
           (defun vz/org-mode-setup-buffer-face ()
             (setq-local
              buffer-face-mode-face `(:family ,vz/variable-font :height 120)
-             line-spacing 0.01)
+             line-spacing 0.1)
             (buffer-face-mode)))
 
 ;; Some faces has to be monospace!
 ;; NOTE: Not including `org-table' because valign-table takes care of
 ;; the separating lines so tables look nice even without a monospace font!
 (let ((faces '(org-link org-code org-block org-drawer
-               org-date org-special-keyword org-verbatim org-tag
-               org-latex-and-related)))
+               org-date org-special-keyword org-verbatim org-tag)))
   (vz/set-monospace-faces faces)
   ;; Adjust font size to be closer to that of the variable font
   (-each faces (fn (set-face-attribute <> nil :height 102))))
 
-;; (set-face-attribute 'org-latex-and-related nil :slant 'italic)
+(set-face-attribute 'org-latex-and-related nil
+                    :family "IBM Plex Mono"
+                    :slant 'italic
+                    :height 102)
 
 ;; Let latex stuff be monospace too!
 (setq org-highlight-latex-and-related '(latex entities))
@@ -115,12 +117,18 @@
  org-startup-folded t
 
  ;; Avoid editing invisible part
- org-catch-invisible-edits t)
+ org-catch-invisible-edits 'show-and-error)
 
 (setq-default org-display-custom-times t)
 
 ;; Capture templates
 (vz/use-package doct "captures")
+
+(add-hook 'org-capture-after-finalize-hook
+          (defun vz/kill-frame-after-org-capture-script ()
+            (when (s-equals? (frame-parameter (selected-frame) 'name)
+                             "vz/org-capture-frame")
+              (delete-frame (selected-frame)))))
 
 ;; Setup `counsel-org-goto'
 (defun vz/counsel-org-goto ()
@@ -258,3 +266,7 @@ markers for sub/super scripts but fontify them."
   (vz/bind
    :map org-cdlatex-mode-map
    "$" #'math-delimiters-insert))
+
+;; Agenda
+(with-eval-after-load 'org-agenda
+  (load-file (expand-file-name "lisp/hive/agenda.el" user-emacs-directory)))

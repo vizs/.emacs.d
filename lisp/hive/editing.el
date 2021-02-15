@@ -60,14 +60,15 @@ on the position of the cursor."
  "C-w" #'vz/backward-delete-or-kill-region
  "M-w" #'vz/backward-kill-word-or-kill-ring-save
  "C-S-k" #'kill-whole-line
- "M-k" (fn! (kill-ring-save (point) (line-end-position)))
+ "M-k" #'(lambda (n)
+           (interactive "p")
+           (kill-ring-save (point)
+            (save-excursion
+              (next-line (1- n))
+              (line-end-position))))
 
  ;; `hippie-expand' also takes care of `dabbrev-expand' suggestions
  "M-/" #'hippie-expand
-
- ;; C-x z and C-x M-ESC are hard to press
- "C-." #'repeat
- "C->" #'repeat-complex-command
 
  ;; I never use Emacs in a terminal
  "C-z" #'zap-up-to-char
@@ -119,6 +120,7 @@ on the position of the cursor."
   :defer t
   :bind (:map paredit-mode-map
               ("M-r" . nil)
+              ("M-s" . nil)
               ("M-S-r" . paredit-raise-sexp))
   :hook ((emacs-lisp-mode
           lisp-interaction-mode

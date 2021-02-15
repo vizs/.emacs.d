@@ -19,6 +19,7 @@
 (add-hook 'emacs-startup-hook
           #'(lambda ()
               (garbage-collect)
-              (setq gc-cons-threshold 16777216 ;; 16M
-               file-name-handler-alist default-file-name-handler-alist
+              (setq
+               gc-cons-threshold 16777216 ;; 16M
+               file-name-handler-alist (append file-name-hander-alist default-file-name-handler-alist)
                frame-inhibit-implied-resize '(tab-bar-lines))))

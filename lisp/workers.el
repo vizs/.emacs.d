@@ -56,6 +56,14 @@ behaviour is similar to that of in `bind-keys'."
                     fun)))))
           (-partition 2 args)))))
 
+(defun vz/kill-current-buffer-or-prompt (arg)
+  (interactive "P")
+  (if arg
+      (call-interactively #'kill-buffer)
+    (kill-current-buffer)))
+
+(vz/bind "C-x k" #'vz/kill-current-buffer-or-prompt)
+
 ;; Functions used to communicate with emacsclient.
 ;; It's in a separate file because it depends on dynamic scoping
 (load-file (expand-file-name "lisp/hive/scripting.el" user-emacs-directory))
@@ -124,6 +132,13 @@ behaviour is similar to that of in `bind-keys'."
           (defun vz/style-grep-menu ()
             (-each '(compilation-info compilation-line-number underline)
               (fn (face-remap-add-relative <> :underline nil)))))
+
+;; ** Help menu binds
+;; Why do I have to answer yes when I revert?
+
+(vz/bind
+ :map help-mode-map
+ [remap revert-buffer] (fn! (revert-buffer nil t)))
 
 ;; * Dired
 (use-package dired
@@ -340,6 +355,9 @@ behaviour is similar to that of in `bind-keys'."
   ;;                         '("\\.go\\'" vz/flymake-go)))
   ;;          nil t))
 
+;; ** Lua
+(use-package lua-mode)
+
 ;; ** Racket
 (use-package racket-mode
   :defer t
@@ -372,10 +390,11 @@ behaviour is similar to that of in `bind-keys'."
     (racket--cmd/async
      (racket--repl-session-id)
      `(eval ,(buffer-substring-no-properties (racket--repl-last-sexp-start) (point)))
-     (fn (message "%s" <>)
-         (eros--make-result-overlay <>
-           :where (point)
-           :duration eros-eval-result-duration))))
+     (let ((point (point)))
+       (fn (message "%s" <>)
+           (eros--make-result-overlay <>
+             :where point
+             :duration eros-eval-result-duration)))))
   (vz/bind
    :map racket-mode-map
    [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp))

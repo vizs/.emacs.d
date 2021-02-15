@@ -15,6 +15,9 @@
 
  use-dialog-box nil
 
+ ;; Initialise `Info-directory-list' with Emacs info files
+ Info-directory-list Info-default-directory-list
+
  backup-by-copying t
  backup-directory-alist '((".*" . "~/.cache/emacs-bkups/"))
  delete-old-versions t
@@ -57,7 +60,10 @@
  indent-tabs-mode t
  tab-width 4
 
- frame-resize-pixelwise t)
+ frame-resize-pixelwise t
+
+ ;; Move to bottom/top of buffer
+ scroll-error-top-bottom t)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -131,6 +137,8 @@ as (name-without-ns . local)."
 ;; ** Fonts
 (add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
                                              vz/monospace-font)))
+
+(set-face-attribute 'variable-pitch nil :family vz/variable-font)
 
 ;; ** Display … instead of $ at the visual end of truncated line
 (set-display-table-slot standard-display-table 'truncation ?…)

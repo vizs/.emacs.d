@@ -126,6 +126,14 @@
    `(org-date                         ((,class :background ,bg :foreground ,lf)))
    `(org-meta-line                    ((,class :background ,bg :foreground ,fg :weight bold)))
 
+   `(org-agenda-done                  ((,class :background ,bg :foreground ,lf)))
+   `(org-agenda-date                  ((,class :background ,bg :foreground ,fg)))
+   `(org-agenda-date-today            ((,class :background ,bg :foreground ,fg :weight bold)))
+   `(org-agenda-date-weekend          ((,class :background ,bg :foreground ,lf)))
+   `(org-agenda-structure             ((,class :background ,bg :foreground ,fg)))
+   `(org-scheduled-today              ((,class :background ,bg :foreground ,fg)))
+   `(org-time-grid                    ((,class :background ,bg :foreground ,lf)))
+
    `(makefile-space                   ((,class :background ,yw :foreground ,bg)))
 
    `(header-line                      ((,class :background ,bu :foreground ,lf)))

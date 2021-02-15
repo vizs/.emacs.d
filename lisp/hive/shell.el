@@ -167,7 +167,7 @@
                   (ivy-exit-with-action
                    (fn (setq directory (read-directory-name "> " <>))))
                 (setq directory <>))))
-    (vz/shell-history--ivy-action (concat "cd " directory))
+    (vz/shell-history--ivy-action (concat "cd " (shell-quote-argument directory)))
     (comint-send-string (get-buffer-process (current-buffer))
                         input)))
 
@@ -190,7 +190,7 @@ If CWD is non-nil, then cd to CWD."
   (when cwd
     (with-current-buffer buffer
       (comint-send-string (get-buffer-process buffer)
-                          (format "cd %s\n" cwd)))))
+                          (format "cd %s\n" (shell-quote-argument cwd))))))
 
 (defun vz/popup-shell--switch (buffer cwd &optional dont-cd?)
   "Switch to CWD in BUFFER"
@@ -199,7 +199,7 @@ If CWD is non-nil, then cd to CWD."
     (let ((input (comint-get-old-input-default))
           (process (get-buffer-process buffer)))
       (comint-delete-input)
-      (comint-send-string process (format "cd %s\n" cwd))
+      (comint-send-string process (format "cd %s\n" (shell-quote-argument cwd)))
       (unless (s-matches? input (rx (= 1 (or "$" "#" "%" "μ"))))
         (comint-send-string process input)))))
 
@@ -209,7 +209,7 @@ to it. If nothing is found, create a new buffer"
   (interactive)
   (let ((cwd (condition-case nil
                   (f-dirname (buffer-file-name))
-                (error default-directory))))
+               (error (f-full default-directory)))))
     (if (null vz/popup-shells)
         (vz/popup-shell--add (shell) cwd)
       (let* ((free-buffers (-filter
@@ -229,7 +229,6 @@ to it. If nothing is found, create a new buffer"
           (vz/popup-shell--add (shell (vz/uniqify "*shell")) cwd)))))))
 
 ;; * Jump to prompt
-
 (defvar-local vz/shell--prompt-alist nil
   "An alist of prompt string and its position in buffer.")
 
@@ -275,7 +274,8 @@ to it. If nothing is found, create a new buffer"
   (unless (process-live-p process)
     (let* ((b (process-buffer process))
            (f (asoc-get (buffer-local-variables b)
-                        'vz/term-minor-mode-frame)))
+                        'vz/term-minor-mode-frame))
+           (kill-buffer-query-functions nil))
       (kill-buffer b)
       (when (frame-live-p f)
         (delete-frame f)))))
@@ -310,7 +310,9 @@ to it. If nothing is found, create a new buffer"
 (defun vz/term-minor-mode-on-delete-frame (frame)
   "If FRAME is a member of `vz/term-minor-mode-frames', then kill the
 term buffer associated with it"
-  (when (member frame vz/term-minor-mode-frames)
+  (when (and (member frame vz/term-minor-mode-frames)
+             ;(vz/inside-shell? (frame-parameter frame 'term-buffer))
+             )
     (setq vz/term-minor-mode-frames (remove frame vz/term-minor-mode-frames))
     (let ((kill-buffer-query-functions nil))
       (kill-buffer (frame-parameter frame 'term-buffer)))))
@@ -331,7 +333,7 @@ term buffer associated with it"
  "?" #'vz/shell-insert-from-shell-hist
  "/" #'vz/shell-insert-from-hist
  "J" #'vz/shell-jump-to-prompt
- "k" #'vz/shell-send-keysequence-to-process
+ "C-k" #'vz/shell-send-keysequence-to-process
  [remap comint-clear-buffer] #'vz/shell-clear-buffer)
 
 ;; Local Variables:

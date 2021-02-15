@@ -1,4 +1,4 @@
-;; -*- lexical-binding: t; -*-
+;; -*- lexical-binding: t;
 
 ;; TODO: Add functions to search through notes and add
 ;; capture-templates to insert notes.
@@ -8,6 +8,8 @@
 ;;
 ;; TODO: Inside math environment, when I remove { and if the previous
 ;; character is ^ or _, I would like to remove {, } /and/ _ or ^
+;;
+;; TODO: pdf-annot delete last annotation like Okular's C-z
 
 ;; * Annotations
 
@@ -153,7 +155,9 @@ Highlight functions are handled specially.")
 
 ;; TODO: org-noter-pdftools doesn't really like to work. It starts
 ;; asking stuff when I enable org-noter.
+;; It somehow makes emacs segfault?
 (use-package org-pdftools
+  :after pdf-tools
   :hook (org-mode . org-pdftools-setup-link))
 
 ;; * TODO: org-transclusion (buggy rn)
@@ -182,13 +186,17 @@ Highlight functions are handled specially.")
 ;; ** Custom cdlatex-commands
 
 (use-package cdlatex
-  :init
+  :config
   (setq
    cdlatex-command-alist
-   '(("d" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
-     ("p" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
+   '(("dv" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
+     ("pv" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
+     ("t" "Insert \\intertext{}" "\\intertext{?}" cdlatex-position-cursor nil nil t)
+     ("lim" "Insert limit" "\\lim_{?}" cdlatex-position-cursor nil nil t)
      ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
-     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t))))
+     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)
+     ("intl" "Insert integral with limits" "\\int_{?}^{}" cdlatex-position-cursor nil nil t)))
+  (cdlatex-compute-tables))
 
 ;; ** TODO: Custom latex macros
 ;; Look into using this https://www.reddit.com/r/orgmode/comments/7u2n0h/tip_for_defining_latex_macros_for_use_in_both/

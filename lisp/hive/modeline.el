@@ -40,6 +40,9 @@
                                            ,except)))
               'face face))
 
+;; TODO: For variable width fonts, the following should be better
+;; width:  (apply #'+ (--map (aref it 4) (font-get-glyphs (font-at 0 nil "l") 0 4 " ass")))
+;; height: (apply #'max (--map (+ (aref it 7) (aref it 8)) (font-get-glyphs (font-at 0 nil "l") 0 4 " ass")))
 (defun vz/mode-line-roundise-text (text &optional foreground background raw-image?)
   "Return an image object with TEXT surrounded by arcs on either side."
   (require 'svg)
@@ -62,7 +65,7 @@
                 :fill (or foreground
                           (if (moody-window-active-p) vz/mode-line-fg vz/mode-line-fgi))
                 :x (/ h 2)
-                :y (1+ (font-get f :size)))
+                :y (font-get f :size))
       (if-let ((img (svg-image svg :ascent 'center))
                raw-image?)
           img
@@ -81,18 +84,23 @@
   (add-variable-watcher 'vz/mode-line-battery fn)
   (add-variable-watcher 'vz/mode-line-time fn))
 
-;; TODO: Maybe send a notification when it's 100% and lock screen when it's <20%?
+;; TODO: Maybe send a notification when it's 100%
 (defun vz/mode-line-update-battery ()
   "Update battery status in mode-line."
   (interactive)
+  (require 'notifications)
   (setq vz/mode-line-battery
         (vz/mode-line-roundise-text
-         (let ((battery-status (funcall battery-status-function)))
-           (format "%s%%%s"
-                   (car (s-slice-at "\.[0-9]+$" (asoc-get battery-status ?p)))
-                   (if (s-equals? (asoc-get battery-status ?B) "Charging")
-                       "+"
-                     "")))
+         (let* ((battery-status (funcall battery-status-function))
+                (percentage (floor (string-to-number (asoc-get battery-status ?p))))
+                (charging? (s-equals? (asoc-get battery-status ?B) "Charging")))
+           (cond
+            ((and (not charging?) (<= percentage 20))
+             ;(start-process "Lock due to low battery" nil "slock")
+             )
+            ((s-equals? (asoc-get battery-status ?B) "Full")
+             (notifications-notify :title "Battery" :body "BATTERY IS FULL" :urgency 'critical)))
+           (format "%d%%%s" percentage (if charging? "+" "")))
          vz/mode-line-fg vz/mode-line-bg)))
 
 (defun vz/mode-line-update-time ()
@@ -102,8 +110,6 @@
         (vz/mode-line-roundise-text (format-time-string "%H:%M")
                                     vz/mode-line-fg vz/mode-line-bg)))
 
-(run-at-time t display-time-interval #'vz/mode-line-update-time)
-(run-at-time nil battery-update-interval #'vz/mode-line-update-battery)
 
 ;; When no graphical frames are on screen, the modeline images does not
 ;; get updated, so whenever a frame is created, recreate the image
@@ -114,8 +120,8 @@
             (vz/mode-line-update-time)))
 (make-thread (fn (while (eq (length (visible-frame-list)) 1)
                    (sleep-for 1))
-                 (vz/mode-line-update-time)
-                 (vz/mode-line-update-battery)))
+                 (run-at-time t display-time-interval #'vz/mode-line-update-time)
+                 (run-at-time nil battery-update-interval #'vz/mode-line-update-battery)))
 
 (defvar-local vz/mode-line-file-include-file-status? t
   "If non-nil, include the value of `vz/mode-line-file-state'
