@@ -13,7 +13,7 @@
 (add-to-list 'org-tempo-tags '("<eq" . tempo-template-org-latex-equation*))
 
 ;; Scale up the org-latex-preview images
-(plist-put org-format-latex-options :scale 1.35)
+(plist-put org-format-latex-options :scale 1.5)
 ;; Make it completely black
 (plist-put org-format-latex-options :foreground "Black")
 
@@ -103,6 +103,8 @@
  ;; For whitespace sensiitive languages
  org-src-preserve-indentation t
 
+ org-src-fontify-natively nil
+
  ;; Path to various stuff
  org-directory (~ "doc/org")
  org-default-notes-file (~ "doc/org/notes.org")
@@ -117,7 +119,9 @@
  org-startup-folded t
 
  ;; Avoid editing invisible part
- org-catch-invisible-edits 'show-and-error)
+ org-catch-invisible-edits 'show-and-error
+
+ org-babel-load-languages '((emacs-lisp . t) (C .t)))
 
 (setq-default org-display-custom-times t)
 
@@ -138,19 +142,17 @@
   (org-show-entry))
 
 (vz/bind
+ "C-x C-l" #'org-store-link
  :map org-mode-map
- "C-c j" #'vz/counsel-org-goto
- "C-c l" #'org-store-link)
+ "C-c j" #'vz/counsel-org-goto)
 
 ;; Advice around `org-set-tags-command' to use `counsel-org-tag'
 (advice-add 'org-set-tags-command
             :override (fn (counsel-org-tag)))
 
 ;; Instead of completing removing _, ^, { and } when setting fancy
-;; super-sub-script display, we will give it a new face and "prettify"
+;; super-sub-script display, give it a new face and "prettify"
 ;; it too.
-;; To do this, we will override `org-raise-scripts' and change a few
-;; lines.
 
 (setq org-pretty-entities-include-sub-superscripts t)
 
@@ -219,15 +221,11 @@ markers for sub/super scripts but fontify them."
   (vz/org-prettify--set-prettify-symbols-alist))
 
 (defun vz/org-prettify--predicate (_start end _match)
-  ;; There's no need to check the previous character since
-  ;; `org-pretty-entities' works outside of math environments and all
-  ;; entities start with a \ so there's no meaning in checking the
-  ;; character before the \ unlike the character after the entity.
-  ;;
-  ;; The character after the entity is checked because \asdf and
-  ;; \asdfb both could be in `org-entites' and \asdfb should not be
-  ;; falsely prettified as <asdf>b.
-  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? ?/)
+  ;; There's no need the check the character before the entity match
+  ;; since all of them start with \. The characters that are
+  ;; acceptable after the match are mathmetical operators and some
+  ;; special characters.
+  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? ?/ ?|)
               (char-after end)))
 
 (define-minor-mode vz/org-prettify-mode

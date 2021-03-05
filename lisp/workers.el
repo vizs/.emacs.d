@@ -62,7 +62,8 @@ behaviour is similar to that of in `bind-keys'."
       (call-interactively #'kill-buffer)
     (kill-current-buffer)))
 
-(vz/bind "C-x k" #'vz/kill-current-buffer-or-prompt)
+(vz/bind
+ [remap kill-buffer] #'vz/kill-current-buffer-or-prompt)
 
 ;; Functions used to communicate with emacsclient.
 ;; It's in a separate file because it depends on dynamic scoping
@@ -269,6 +270,15 @@ behaviour is similar to that of in `bind-keys'."
                         (start-process "ircdiscord" nil "ircdiscord")))
         (format "%s:%d" (pass "misc/discord") serv))))
 
+;; * scroll-other-window
+;; This lets you use a custom function to scroll instead of just window_scroll in C
+;; See: https://github.com/politza/pdf-tools/issues/55
+(with-eval-after-load 'org-noter
+  (when (load-file (expand-file-name "lisp/hive/scroll-other-window.el"
+                                     user-emacs-directory))
+    (add-hook 'org-noter-notes-mode-hook
+              #'sow-mode)))
+
 ;; * Programming Languages
 (use-package company
   :demand t
@@ -288,7 +298,7 @@ behaviour is similar to that of in `bind-keys'."
     (company-complete-common-or-cycle 1))
   (setq-ns company
     require-match nil
-    idle-delay 0.2
+    idle-delay nil
     tooltip-limit 10
     show-numbers 'left
     global-modes '(not shell-mode org-mode)
@@ -366,7 +376,8 @@ behaviour is similar to that of in `bind-keys'."
   ;; (racket-mode . aggressive-indent-mode)
   (racket-mode . racket-xp-mode)
   :config
-  (setq racket-show-functions '(racket-show-pos-tip))
+  (setq racket-show-functions '(racket-show-pos-tip)
+        font-lock-maximum-decoration '((racket-mode . 0) (t . t)))
   (add-hook 'racket-xp-mode-hook
             (defun vz/racket-xp-mode-init ()
               (remove-hook 'pre-display-functions

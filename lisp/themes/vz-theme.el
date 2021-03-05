@@ -12,7 +12,7 @@
       (bl "#000000")
       (lf "#434343")
       (yw "#99994c")
-      (bu "#eaffff")
+      (bu "#ed2553")
       (ac "#eaed8d")
       (BG "#ebebdf"))
   (custom-theme-set-faces

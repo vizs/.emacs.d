@@ -84,7 +84,6 @@
   (add-variable-watcher 'vz/mode-line-battery fn)
   (add-variable-watcher 'vz/mode-line-time fn))
 
-;; TODO: Maybe send a notification when it's 100%
 (defun vz/mode-line-update-battery ()
   "Update battery status in mode-line."
   (interactive)
@@ -114,14 +113,14 @@
 ;; When no graphical frames are on screen, the modeline images does not
 ;; get updated, so whenever a frame is created, recreate the image
 ;; to make sure the info is up-to-date.
-(add-hook 'server-after-make-frame-hook
-          (defun vz/mode-line-update-after-make-frame ()
-            (vz/mode-line-update-battery)
-            (vz/mode-line-update-time)))
-(make-thread (fn (while (eq (length (visible-frame-list)) 1)
-                   (sleep-for 1))
-                 (run-at-time t display-time-interval #'vz/mode-line-update-time)
-                 (run-at-time nil battery-update-interval #'vz/mode-line-update-battery)))
+;; (add-hook 'server-after-make-frame-hook
+;;           (defun vz/mode-line-update-after-make-frame ()
+;;             (vz/mode-line-update-battery)
+;;             (vz/mode-line-update-time)))
+;; (make-thread (fn (while (eq (length (visible-frame-list)) 1)
+;;                    (sleep-for 1))
+;;                  (run-at-time t display-time-interval #'vz/mode-line-update-time)
+;;                  (run-at-time nil battery-update-interval #'vz/mode-line-update-battery)))
 
 (defvar-local vz/mode-line-file-include-file-status? t
   "If non-nil, include the value of `vz/mode-line-file-state'
@@ -136,12 +135,13 @@
   file name image.")
 
 (setq-default
- vz/mode-line-extra-info '(:eval (and
-                                  (window-at-side-p nil 'right)
-                                  (window-at-side-p nil 'bottom)
-                                  (concat vz/mode-line-time
-                                   " "
-                                   vz/mode-line-battery)))
+ vz/mode-line-extra-info '()
+ ;; (quote (:eval (and
+ ;;                (window-at-side-p nil 'right)
+ ;;                (window-at-side-p nil 'bottom)
+ ;;                (concat vz/mode-line-time
+ ;;                 " "
+ ;;                 vz/mode-line-battery))))
  vz/mode-line-format `("  "
                        (:eval (vz/mode-line-roundise-text
                                (concat (when vz/mode-line-file-include-file-short-path?

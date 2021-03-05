@@ -83,6 +83,10 @@ on the position of the cursor."
  "M-W" #'clipboard-kill-ring-save
  "M-K" (fn! (clipboard-kill-ring-save (point) (line-end-position)))
 
+ ;; dwim
+ "M-l" #'downcase-dwim
+ "M-u" #'upcase-dwim
+ "M-c" #'capitalize-dwim
 
  ;; Translations
  :map key-translation-map

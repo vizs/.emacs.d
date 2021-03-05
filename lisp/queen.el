@@ -30,7 +30,7 @@
 
  ;; Cursor styling
  cursor-in-non-selected-windows nil
- cursor-type '(bar . 4)
+ cursor-type '(bar . 2)
 
  custom-file "/dev/null"
 
@@ -48,7 +48,7 @@
  ;; Follow links to version controlled files
  vc-follow-symlinks t
 
- ;; tab-always-indent 'complete
+ tab-always-indent 'complete
 
  enable-local-eval t
 
@@ -63,7 +63,12 @@
  frame-resize-pixelwise t
 
  ;; Move to bottom/top of buffer
- scroll-error-top-bottom t)
+ scroll-error-top-bottom t
+
+ ;; Avoid duplicate items in kill-ring
+ kill-do-not-save-duplicates t
+
+ disabled-command-function nil)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -139,6 +144,15 @@ as (name-without-ns . local)."
                                              vz/monospace-font)))
 
 (set-face-attribute 'variable-pitch nil :family vz/variable-font)
+
+;; Color Emoji Time
+
+(add-hook 'server-after-make-frame-hook
+          (defun vz/set-emoji-range ()
+            (set-fontset-font t 'symbol
+                              "Noto Color Emoji" nil 'prepend)
+            (remove-hook 'server-after-make-frame-hook
+                         #'vz/set-emoji-range)))
 
 ;; ** Display … instead of $ at the visual end of truncated line
 (set-display-table-slot standard-display-table 'truncation ?…)
@@ -321,7 +335,7 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 (add-to-list 'custom-theme-load-path
              (expand-file-name "lisp/themes" user-emacs-directory))
 
-(load-theme 'vz t)
+(load-theme 'vz-nh t)
 
 ;; Local Variables:
 ;; eval: (outline-minor-mode)
