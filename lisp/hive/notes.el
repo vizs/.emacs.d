@@ -334,33 +334,35 @@ followed."
 ;; `vz/latex-equation-pairs'. But I'd also like to handle \\ and
 ;; auto-delete & when you're deleting =, >, <.
 
-(defvar vz/latex-smart-delete-pairs-start (-map (-compose #'regexp-quote #'car)
-                                                (append vz/latex-paren-pairs vz/latex-equation-pairs)))
+(defvar vz/latex-smart-delete-pairs-start
+  (-map (fn (cons (regexp-quote (car <>)) (length (car <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs)))
 
-(defvar vz/latex-smart-delete-pairs-end (-map (-compose #'regexp-quote #'cdr)
-                                              (append vz/latex-paren-pairs vz/latex-equation-pairs)))
+(defvar vz/latex-smart-delete-pairs-end
+  (-map (fn (cons (regexp-quote (cdr <>)) (length (cdr <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs)))
 
 (defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
   "Symbols which when deleted also deletes & before the character
   if present.")
+
+"somethingelsem"
 
 (defun vz/latex-smart-delete-char ()
   (interactive)
   (letrec ((loop
             (lambda (pair-starts pair-ends)
               (unless (null pair-starts)
-                (let* ((start (car pair-starts))
-                       (end (car pair-ends))
-                       (len-start (length start))
-                       (len-end (length end)))
+                (-let (((start . len-start) (car pair-starts))
+                       ((end   . len-end)   (car pair-ends)))
                   (cond
-                   ((and (looking-at-p end)
-                         (looking-back start len-start))
-                    (backward-char len-start)
-                    (delete-char (+ len-start len-end) t)
+                   ((looking-at-p end)
+                    (when (looking-back start len-start)
+                      (progn (backward-char len-start)
+                             (delete-char (+ len-start len-end) t)))
                     t)
-                   ((looking-at-p (concat start end))
-                    (delete-char (+ len-start len-end))
+                   ((looking-at-p start)
+                    (when (save-excursion (forward-char len-start)
+                                          (looking-at-p end))
+                      (delete-char (+ len-start len-end)))
                     t)
                    (t
                     (funcall loop (cdr pair-starts) (cdr pair-ends)))))))))
@@ -382,11 +384,16 @@ followed."
             (forward-char (- (match-end 0) start 1))
             (delete-char 1)
             (goto-char start))))
-       ((funcall loop '("{") '("}"))    ; Remove ^,_ before empty {}
+       ((funcall loop '(("{" . 1)) '(("}" . 1))) ; Remove ^,_ before empty {}
         (when (-contains? '(?^ ?_) (char-before (point)))
           (backward-char 1)
           (delete-char 1)))
        (t (delete-char 1))))))
+
+(defun vz/latex-smart-backward-delete-char ()
+  (interactive)
+  (backward-char 1)
+  (vz/latex-smart-delete-char))
 
 ;; * -*-*-*-
 ;; Local Variables:
