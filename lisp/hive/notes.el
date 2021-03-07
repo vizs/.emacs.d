@@ -335,16 +335,14 @@ followed."
 ;; auto-delete & when you're deleting =, >, <.
 
 (defvar vz/latex-smart-delete-pairs-start
-  (-map (fn (cons (regexp-quote (car <>)) (length (car <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs)))
+  (-sort (-on #'> #'cdr) (-map (fn (cons (regexp-quote (car <>)) (length (car <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs))))
 
 (defvar vz/latex-smart-delete-pairs-end
-  (-map (fn (cons (regexp-quote (cdr <>)) (length (cdr <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs)))
+  (-sort (-on #'> #'cdr) (-map (fn (cons (regexp-quote (cdr <>)) (length (cdr <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs))))
 
 (defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
   "Symbols which when deleted also deletes & before the character
   if present.")
-
-"somethingelsem"
 
 (defun vz/latex-smart-delete-char ()
   (interactive)
@@ -394,6 +392,30 @@ followed."
   (interactive)
   (backward-char 1)
   (vz/latex-smart-delete-char))
+
+;; This command should correctly pick the closing paren. I can't just
+;; go to EOL and look for the closest paren from there since that
+;; could mess up situations like {text {more | text} HMMMMM}. I guess
+;; the only choice is to look back for the closest starting paren and
+;; delete everything within the pair?
+
+(defun vz/latex-smart-kill ()
+  (interactive)
+  (let* ((beg (line-beginning-position))
+         (index
+          (-first (fn (looking-back (concat (car <>) ".*?") beg nil))
+                  (append vz/latex-smart-delete-pairs-start '(("{" . -1))))))
+    (if (null index)
+        (kill-line)
+      (when (looking-at (concat ".*?"
+                                (if (= -1 (cdr index))
+                                    "}"
+                                  (car (nth (-elem-index index vz/latex-smart-delete-pairs-start)
+                                            vz/latex-smart-delete-pairs-end)))))
+        (delete-char (- (match-end 0) (point) 1 (abs (cdr index))))))))
+
+(text HMMM)
+"{text \left(\right) {HMMMM}}"
 
 ;; * -*-*-*-
 ;; Local Variables:
