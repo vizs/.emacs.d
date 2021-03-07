@@ -188,14 +188,17 @@ Highlight functions are handled specially.")
 (use-package cdlatex
   :config
   (setq
+   ;; Don't use dollar
+   cdlatex-use-dollar-to-ensure-math nil
    cdlatex-command-alist
    '(("dv" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
      ("pv" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
-     ("t" "Insert \\intertext{}" "\\intertext{?}" cdlatex-position-cursor nil nil t)
+     ("txt" "Insert \\intertext{}" "\\intertext{?}" cdlatex-position-cursor nil nil t)
      ("lim" "Insert limit" "\\lim_{?}" cdlatex-position-cursor nil nil t)
      ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
      ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)
-     ("intl" "Insert integral with limits" "\\int_{?}^{}" cdlatex-position-cursor nil nil t)))
+     ("intl" "Insert integral with limits" "\\int_{?}^{}" cdlatex-position-cursor nil nil t)
+     ("1/" "Insert the inverse of" "\\frac{1}{?}" cdlatex-position-cursor nil nil t)))
   (cdlatex-compute-tables))
 
 ;; ** TODO: Custom latex macros
@@ -261,6 +264,69 @@ followed."
                         nil t))))
 
 (add-to-list 'org-startup-options '("abbrev" vz/org-abbrev-mode t))
+
+;; * Change \(\) to \[\] and shift parenthesis
+
+(defvar vz/latex-equation-pairs
+  '(("\\(" . "\\)")
+    ("\\[" . "\\]")))
+
+(defvar vz/latex-paren-pairs
+  '(("(" . ")")
+    ("[" . "]")
+    ("\\{" . "\\}")
+    ("\\left(" . "\\right)")
+    ("\\left[" . "\\right]")
+    ("\\left\\{" . "\\right\\}")))
+
+(defun vz/string-begs-and-ends-with? (str s-beg s-end)
+  "Does STR begin and end with S-BEG and S-END respectively?"
+  (and (s-starts-with? s-beg str)
+       (s-ends-with? s-end str)))
+
+;; I only really write racket so...
+(defun vz/change-latex-pair (beg end matchers direction)
+  (letrec ((text (substring-no-properties (delete-and-extract-region beg end)))
+           (total-matches (length matchers))
+           (loop (lambda (n matches)
+                   (if (null matches)
+                       (progn (insert text) nil)
+                     (if (vz/string-begs-and-ends-with? text (caar matches) (cdar matches))
+                         (let ((sur (nth (% (+ n (if direction 1 -1)) total-matches) matchers))
+                               (point (point)))
+                           (insert (format "%s%s%s"
+                                           (car sur)
+                                           (substring text (length (caar matches)) (- (length (cdar matches))))
+                                           (cdr sur)))
+                           (setq deactivate-mark nil)
+                           (set-mark point)
+                           t)
+                       (funcall loop (1+ n) (cdr matches)))))))
+    (funcall loop 0 matchers)))
+
+(defun vz/change-latex-equation-pair (arg)
+  "Change \(\) to \[\] and vice-versa."
+  (interactive "P")
+  (vz/change-latex-pair (region-beginning) (region-end) vz/latex-equation-pairs (not arg)))
+
+(defun vz/change-latex-parens-pair (arg)
+  "Change latex parenthesis. See `vz/latex-paren-pairs' for valid parens."
+  (interactive "P")
+  (vz/change-latex-pair (region-beginning) (region-end) vz/latex-paren-pairs (not arg)))
+
+(add-hook 'org-metaright-hook
+          (defun vz/org-latex-change-pair-metaright ()
+            (when (region-active-p)
+              (if (vz/change-latex-equation-pair '())
+                  t
+                (vz/change-latex-parens-pair '())))))
+
+(add-hook 'org-metaleft-hook
+          (defun vz/org-latex-change-pair-metaleft ()
+            (when (region-active-p)
+              (if (vz/change-latex-equation-pair '(t))
+                  t
+                (vz/change-latex-parens-pair '(t))))))
 
 ;; * -*-
 ;; Local Variables:
