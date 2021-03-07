@@ -328,7 +328,65 @@ followed."
                   t
                 (vz/change-latex-parens-pair '(t))))))
 
-;; * -*-
+;; * Smart delete and kill line
+
+;; Pairs to look for is already defined in `vz/latex-paren-pairs' and
+;; `vz/latex-equation-pairs'. But I'd also like to handle \\ and
+;; auto-delete & when you're deleting =, >, <.
+
+(defvar vz/latex-smart-delete-pairs-start (-map (-compose #'regexp-quote #'car) vz/latex-paren-pairs))
+
+(defvar vz/latex-smart-delete-pairs-end (-map (-compose #'regexp-quote #'cdr) vz/latex-paren-pairs))
+
+(defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
+  "Symbols which when deleted also deletes & before the character
+  if present.")
+
+(defun vz/latex-smart-delete-char ()
+  (interactive)
+  (letrec ((loop
+            (lambda (pair-starts pair-ends)
+              (unless (null pair-starts)
+                (let* ((start (car pair-starts))
+                       (end (car pair-ends))
+                       (len-start (length start))
+                       (len-end (length end)))
+                  (cond
+                   ((and (looking-at-p end)
+                         (looking-back start len-start))
+                    (backward-char len-start)
+                    (delete-char (+ len-start len-end) t)
+                    t)
+                   ((looking-at-p (concat start end))
+                    (delete-char (+ len-start len-end))
+                    t)
+                   (t
+                    (funcall loop (cdr pair-starts) (cdr pair-ends)))))))))
+    (unless (funcall loop vz/latex-smart-delete-pairs-start vz/latex-smart-delete-pairs-end) ; Delete empty paren pairs
+      (cond
+       ((and (char-equal (char-before (point)) ?&)
+             (-contains? vz/latex-smart-delete-align-symbols (char-after (point))))
+        (backward-char 1)
+        (delete-char 2))
+       ((and (char-equal (char-after (point)) ?&)
+             (-contains? vz/latex-smart-delete-align-symbols (char-after (1+ (point)))))
+        (delete-char 2))
+       ((and (-contains? '(?^ ?_) (char-after (point)))
+             (save-excursion (forward-char)
+                             (char-equal (char-after (point)) ?{)))
+        (delete-char 2)
+        (when (looking-at ".*?}")       ; Non-greedy match i.e., shortest match
+          (let ((start (point)))
+            (forward-char (- (match-end 0) start))
+            (delete-char 1)
+            (goto-char start))))
+       ((funcall loop '("{") '("}"))
+        (when (-contains? '(?^ ?_) (char-before (point)))
+          (backward-char 1)
+          (delete-char 1)))
+       (t (delete-char 1))))))
+
+;; * -*-*-*-
 ;; Local Variables:
 ;; eval: (outline-minor-mode)
 ;; outline-regexp: ";; [*]+"
