@@ -334,9 +334,11 @@ followed."
 ;; `vz/latex-equation-pairs'. But I'd also like to handle \\ and
 ;; auto-delete & when you're deleting =, >, <.
 
-(defvar vz/latex-smart-delete-pairs-start (-map (-compose #'regexp-quote #'car) vz/latex-paren-pairs))
+(defvar vz/latex-smart-delete-pairs-start (-map (-compose #'regexp-quote #'car)
+                                                (append vz/latex-paren-pairs vz/latex-equation-pairs)))
 
-(defvar vz/latex-smart-delete-pairs-end (-map (-compose #'regexp-quote #'cdr) vz/latex-paren-pairs))
+(defvar vz/latex-smart-delete-pairs-end (-map (-compose #'regexp-quote #'cdr)
+                                              (append vz/latex-paren-pairs vz/latex-equation-pairs)))
 
 (defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
   "Symbols which when deleted also deletes & before the character
@@ -364,23 +366,23 @@ followed."
                     (funcall loop (cdr pair-starts) (cdr pair-ends)))))))))
     (unless (funcall loop vz/latex-smart-delete-pairs-start vz/latex-smart-delete-pairs-end) ; Delete empty paren pairs
       (cond
-       ((and (char-equal (char-before (point)) ?&)
+       ((and (char-equal (char-before (point)) ?&) ; If cursor is between & and =/>/<
              (-contains? vz/latex-smart-delete-align-symbols (char-after (point))))
         (backward-char 1)
         (delete-char 2))
-       ((and (char-equal (char-after (point)) ?&)
+       ((and (char-equal (char-after (point)) ?&) ; If cursor is after &{=,>,<}
              (-contains? vz/latex-smart-delete-align-symbols (char-after (1+ (point)))))
         (delete-char 2))
-       ((and (-contains? '(?^ ?_) (char-after (point)))
+       ((and (-contains? '(?^ ?_) (char-after (point))) ; Slurp out whatever's inside {}, if any
              (save-excursion (forward-char)
                              (char-equal (char-after (point)) ?{)))
         (delete-char 2)
-        (when (looking-at ".*?}")       ; Non-greedy match i.e., shortest match
-          (let ((start (point)))
-            (forward-char (- (match-end 0) start))
+        (when (looking-at ".*}") ; Has to be greedy so we get the last }
+          (let ((start (point))) ; (Might be a problem since this only goes as far as EOL)
+            (forward-char (- (match-end 0) start 1))
             (delete-char 1)
             (goto-char start))))
-       ((funcall loop '("{") '("}"))
+       ((funcall loop '("{") '("}"))    ; Remove ^,_ before empty {}
         (when (-contains? '(?^ ?_) (char-before (point)))
           (backward-char 1)
           (delete-char 1)))
