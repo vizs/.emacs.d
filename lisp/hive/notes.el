@@ -312,6 +312,7 @@ followed."
                        (funcall loop (1+ n) (cdr matches)))))))
     (funcall loop 0 matchers)))
 
+;; Because marking is too much effort!
 (defun vz/change-latex-pair-around-point (matchers direction)
   (letrec ((total-matches (length matchers))
            (loop
@@ -319,8 +320,8 @@ followed."
               (unless (null matches)
                 (let ((length-start (length (caar matches)))
                       (length-end   (length (cdar matches))))
-                  (if (and (looking-at-p (regexp-quote (cdar matches)))
-                           (looking-back (regexp-quote (caar matches)) length-start))
+                  (if (and (s-equals? (buffer-substring (point) (+ (point) length-end))   (cdar matches))
+                           (s-equals? (buffer-substring (point) (- (point) length-start)) (caar matches)))
                       (progn
                         (backward-delete-char length-start)
                         (delete-char length-end)
@@ -351,14 +352,14 @@ parens."
 
 (add-hook 'org-metaright-hook
           (defun vz/org-latex-change-pair-metaright ()
-            (when (region-active-p)
-              (if (vz/change-latex-equation-pair '())
-                  t
-                (vz/change-latex-parens-pair '())))))
+            (when (texmathp)
+             (if (vz/change-latex-equation-pair '())
+                 t
+               (vz/change-latex-parens-pair '())))))
 
 (add-hook 'org-metaleft-hook
           (defun vz/org-latex-change-pair-metaleft ()
-            (when (region-active-p)
+            (when (texmathp)
               (if (vz/change-latex-equation-pair '(t))
                   t
                 (vz/change-latex-parens-pair '(t))))))
