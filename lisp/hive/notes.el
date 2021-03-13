@@ -2,11 +2,16 @@
 
 ;; TODO: Add functions to search through notes and add
 ;; capture-templates to insert notes.
-;;
-;; TODO: Slurping like paredit inside math
-;; environments would be nice
-;;
+
+;; TODO: Slurping like paredit inside math environments would be nice
+
 ;; TODO: pdf-annot delete last annotation like Okular's C-z
+
+;; TODO: Adding math units to expand-region try list would be nice but
+;; I'm not sure how to write this, it's really confusing.
+
+;; TODO: Consider completely removing cdlatex and using
+;; https://github.com/ymarco/auto-activating-snippets instead
 
 ;; * Annotations
 
@@ -132,7 +137,7 @@ Highlight functions are handled specially.")
 
 ;; * org-noter
 ;; org-noter package is inspired by interleave which in turn mimicks
-;; some old books that had an empty after every page so that students
+;; some old books that had an empty page after every page so that students
 ;; and other reads could take notes side-by-side. When I read a
 ;; physical book, I tend to scribble my notes on the page itself and
 ;; underline text. So I think org-noter, which is a "reimplementation"
@@ -288,7 +293,7 @@ followed."
        (s-ends-with? s-end str)))
 
 ;; I only really write racket so...
-(defun vz/change-latex-pair (beg end matchers direction)
+(defun vz/change-latex-pair-region (beg end matchers direction)
   (letrec ((text (substring-no-properties (delete-and-extract-region beg end)))
            (total-matches (length matchers))
            (loop (lambda (n matches)
@@ -307,15 +312,42 @@ followed."
                        (funcall loop (1+ n) (cdr matches)))))))
     (funcall loop 0 matchers)))
 
+(defun vz/change-latex-pair-around-point (matchers direction)
+  (letrec ((total-matches (length matchers))
+           (loop
+            (lambda (n matches)
+              (unless (null matches)
+                (let ((length-start (length (caar matches)))
+                      (length-end   (length (cdar matches))))
+                  (if (and (looking-at-p (regexp-quote (cdar matches)))
+                           (looking-back (regexp-quote (caar matches)) length-start))
+                      (progn
+                        (backward-delete-char length-start)
+                        (delete-char length-end)
+                        (let ((sur (nth (% (+ n (if direction 1 -1)) total-matches) matchers))
+                              (point (point)))
+                          (insert (car sur))
+                          (insert (cdr sur))
+                          (goto-char (- (point) (length (cdr sur))))
+                          t))
+                    (funcall loop (1+ n) (cdr matches))))))))
+    (funcall loop 0 matchers)))
+
 (defun vz/change-latex-equation-pair (arg)
-  "Change \(\) to \[\] and vice-versa."
+  "Change \(\) to \[\] and vice-versa. See
+`vz/latex-equation-pairs' for valid parens."
   (interactive "P")
-  (vz/change-latex-pair (region-beginning) (region-end) vz/latex-equation-pairs (not arg)))
+  (if (use-region-p)
+      (vz/change-latex-pair-region (region-beginning) (region-end) vz/latex-equation-pairs (not arg))
+    (vz/change-latex-pair-around-point vz/latex-equation-pairs (not arg))))
 
 (defun vz/change-latex-parens-pair (arg)
-  "Change latex parenthesis. See `vz/latex-paren-pairs' for valid parens."
+  "Change latex parenthesis. See `vz/latex-paren-pairs' for valid
+parens."
   (interactive "P")
-  (vz/change-latex-pair (region-beginning) (region-end) vz/latex-paren-pairs (not arg)))
+  (if (use-region-p)
+      (vz/change-latex-pair-region (region-beginning) (region-end) vz/latex-paren-pairs (not arg))
+    (vz/change-latex-pair-around-point vz/latex-paren-pairs (not arg))))
 
 (add-hook 'org-metaright-hook
           (defun vz/org-latex-change-pair-metaright ()
