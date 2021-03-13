@@ -3,11 +3,8 @@
 ;; TODO: Add functions to search through notes and add
 ;; capture-templates to insert notes.
 ;;
-;; TODO: Slurping and kill-line like paredit inside math
+;; TODO: Slurping like paredit inside math
 ;; environments would be nice
-;;
-;; TODO: Inside math environment, when I remove { and if the previous
-;; character is ^ or _, I would like to remove {, } /and/ _ or ^
 ;;
 ;; TODO: pdf-annot delete last annotation like Okular's C-z
 
@@ -362,14 +359,14 @@ followed."
                 (-let (((start . len-start) (car pair-starts))
                        ((end   . len-end)   (car pair-ends)))
                   (cond
-                   ((looking-at-p (format "[[:space:][:blank:]]*%s" end))
-                    (when (looking-back (format "%s[[:space:][:blank:]]*" start))
+                   ((looking-at-p end)
+                    (when (looking-back start)
                       (progn (goto-char (match-beginning 0))
                              (delete-char (- (match-end 0) (match-beginning 0) (- len-end)) t)))
                     t)
                    ((looking-at-p start)
                     (when (save-excursion (forward-char len-start)
-                                          (looking-at (format "[[:space:][:blank:]]*%s" end)))
+                                          (looking-at end))
                       (delete-char (- (match-end 0) (point))))
                     t)
                    (t
@@ -380,7 +377,7 @@ followed."
              (-contains? vz/latex-smart-delete-align-symbols (char-after (point))))
         (backward-char 1)
         (delete-char 2))
-       ((and (char-equal (char-after (point)) ?&) ; If cursor is after &{=,>,<}
+       ((and (char-equal (char-after (point)) ?&) ; If cursor is before &{=,>,<}
              (-contains? vz/latex-smart-delete-align-symbols (char-after (1+ (point)))))
         (delete-char 2))
        ((and (-contains? '(?^ ?_) (char-after (point))) ; Slurp out whatever's inside {}, if any
@@ -392,16 +389,56 @@ followed."
             (forward-char (- (match-end 0) start 1))
             (delete-char 1)
             (goto-char start))))
+       ((and (char-equal (char-after (point)) ?{) ;; Cursor position: {^,}|{}
+             (char-equal (char-after (1+ (point))) ?})
+             (-contains? '(?_ ?^) (char-before (point))))
+        (backward-delete-char 1)
+        (delete-char 2))
+       ((funcall loop '(("{" . 1)) '(("}" . 1))) ; Remove ^,_ before empty {}
+        t)
+       (t (delete-char 1))))))
+
+(defun vz/latex-smart-backward-delete-char ()
+  (interactive)
+  (letrec ((loop
+            (lambda (pair-starts pair-ends)
+              (unless (null pair-starts)
+                (-let (((start . len-start) (car pair-starts))
+                       ((end   . len-end)   (car pair-ends)))
+                  (cond
+                   ((looking-back (concat start end))
+                    (backward-char (+ len-end len-start))
+                    (delete-char (+ len-end len-start))
+                    t)
+                   ((and (looking-back start) (looking-at-p end))
+                    (backward-char len-start)
+                    (delete-char (+ len-start len-end))
+                    t)
+                   (t
+                    (funcall loop (cdr pair-starts) (cdr pair-ends)))))))))
+    (unless (funcall loop vz/latex-smart-delete-pairs-start vz/latex-smart-delete-pairs-end) ; Delete empty paren pairs
+      (cond
+       ((and (char-equal (char-before (point)) ?&) ; If cursor is between & and =/>/<
+             (-contains? vz/latex-smart-delete-align-symbols (char-after (point))))
+        (backward-char 1)
+        (delete-char 2))
+       ((and (-contains? vz/latex-smart-delete-align-symbols (char-before (point))) ; If cursor is after &{=,>,<}
+             (char-equal (char-before (1- (point))) ?&))
+        (backward-delete-char 2))
+       ((and (-contains? '(?^ ?_) (char-before (point))) ; Slurp out whatever's inside {}, if any
+             (char-equal (char-after (point)) ?{))
+        (backward-char 1)
+        (delete-char 2)
+        (when (looking-at ".*}") ; Has to be greedy so we get the last }
+          (let ((start (point))) ; (Might be a problem since this only goes as far as EOL)
+            (forward-char (- (match-end 0) start 1))
+            (delete-char 1)
+            (goto-char start))))
        ((funcall loop '(("{" . 1)) '(("}" . 1))) ; Remove ^,_ before empty {}
         (when (-contains? '(?^ ?_) (char-before (point)))
           (backward-char 1)
           (delete-char 1)))
-       (t (delete-char 1))))))
-
-;; THIS WILL NOT WORK!!!
-(defun vz/latex-smart-backward-delete-char ()
-  (interactive)
-  (vz/latex-smart-delete-char))
+       (t (backward-char 1))))))
 
 ;; This command looks for the closest starting pair backwards, then tries
 ;; to find the corresponding closest ending pair and deletes everything
@@ -420,6 +457,28 @@ followed."
             (delete-char (- (match-end 0) (point) length))
           (kill-line)))
     (kill-line)))
+
+;; ** Bindings
+;; This is bound to break innit?
+
+(vz/bind
+ :map org-cdlatex-mode-map
+ ;; TODO: remap does not work
+ "C-d" (defun vz/org-cdlatex-smart-delete-char (N)
+         (interactive "p")
+         (if (texmathp)
+             (vz/latex-smart-delete-char)
+           (org-delete-char N)))
+ "C-k" (defun vz/org-cdlatex-smart-kill-line (&optional arg)
+         (interactive "p")
+         (if (texmathp)
+             (vz/latex-smart-kill)
+           (org-kill-line arg)))
+ "C-w" (defun vz/org-cdlatex-smart-backward-delete-char (&optional arg)
+         (interactive "p")
+         (if (texmathp)
+             (vz/latex-smart-backward-delete-char)
+           (call-interactively (key-binding (vector last-input-event))))))
 
 ;; * -*-*-*-
 ;; Local Variables:
