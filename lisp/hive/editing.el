@@ -88,6 +88,8 @@ on the position of the cursor."
  "M-u" #'upcase-dwim
  "M-c" #'capitalize-dwim
 
+ [remap just-one-space] #'cycle-spacing
+
  ;; Translations
  :map key-translation-map
  "M-r" (kbd "C-x r"))
@@ -118,7 +120,10 @@ on the position of the cursor."
   :config
   (setq-ns expand-region
     contract-fast-key "S-SPC"
-    smart-cursor t))
+    smart-cursor t)
+  (when (load-file (expand-file-name "lisp/hive/org-expand-region.el" user-emacs-directory))
+    (remove-hook 'org-mode-hook #'er/add-org-mode-expansions)
+    (er/enable-mode-expansions 'org-mode #'gb/er/config-org-mode-expansions)))
 
 (use-package paredit
   :defer t
@@ -130,6 +135,12 @@ on the position of the cursor."
           lisp-interaction-mode
           racket-mode
           scheme-mode) . paredit-mode))
+
+(use-package siege-mode
+  :straight ( :type git :host github
+                    :repo "tslilc/siege-mode")
+  :config
+  (vz/bind "M-s M-s" #'siege-explicit-call))
 
 (use-package avy
   :demand t

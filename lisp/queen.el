@@ -68,7 +68,12 @@
  ;; Avoid duplicate items in kill-ring
  kill-do-not-save-duplicates t
 
- disabled-command-function nil)
+ disabled-command-function nil
+
+ auto-save-no-message t
+
+ ;; I can't write anything anw
+ view-read-only t)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -220,9 +225,7 @@ as (name-without-ns . local)."
   `(use-package ,name
      ,@body
      :config
-     (load-file (format "%s/lisp/hive/%s.el"
-                 user-emacs-directory
-                 (or ,file ',name)))))
+     (load-file (format "%s/lisp/hive/%s.el" user-emacs-directory (or ,file ',name)))))
 
 ;; ** Random helper functions
 (defun ~ (file)

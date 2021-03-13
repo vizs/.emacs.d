@@ -151,7 +151,12 @@ Highlight functions are handled specially.")
    org-noter-notes-search-path (-map (fn (~ <>)) '("doc/org" "doc/uni/notes"))
    org-noter-doc-property-in-notes t)
   ;; I really don't need org-noter to add stuff to my modeline
-  (advice-add 'org-noter--mode-line-text :override (fn "")))
+  (advice-add 'org-noter--mode-line-text :override (fn ""))
+  (vz/bind
+   :map org-mode-map
+   "C-c n" #'org-noter
+   :map pdf-view-mode-map
+   "C-c n" #'org-noter))
 
 ;; TODO: org-noter-pdftools doesn't really like to work. It starts
 ;; asking stuff when I enable org-noter.
@@ -198,7 +203,8 @@ Highlight functions are handled specially.")
      ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
      ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)
      ("intl" "Insert integral with limits" "\\int_{?}^{}" cdlatex-position-cursor nil nil t)
-     ("1/" "Insert the inverse of" "\\frac{1}{?}" cdlatex-position-cursor nil nil t)))
+     ("1/" "Insert the inverse of" "\\frac{1}{?}" cdlatex-position-cursor nil nil t))
+   cdlatex-math-symbol-alist '((?0 ("\\ominus"))))
   (cdlatex-compute-tables))
 
 ;; ** TODO: Custom latex macros
@@ -335,10 +341,14 @@ followed."
 ;; auto-delete & when you're deleting =, >, <.
 
 (defvar vz/latex-smart-delete-pairs-start
-  (-sort (-on #'> #'cdr) (-map (fn (cons (regexp-quote (car <>)) (length (car <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs))))
+  (-sort (-on #'> #'cdr)
+         (-map (fn (cons (regexp-quote (car <>)) (length (car <>))))
+               (append vz/latex-paren-pairs vz/latex-equation-pairs))))
 
 (defvar vz/latex-smart-delete-pairs-end
-  (-sort (-on #'> #'cdr) (-map (fn (cons (regexp-quote (cdr <>)) (length (cdr <>)))) (append vz/latex-paren-pairs vz/latex-equation-pairs))))
+  (-sort (-on #'> #'cdr)
+         (-map (fn (cons (regexp-quote (cdr <>)) (length (cdr <>))))
+               (append vz/latex-paren-pairs vz/latex-equation-pairs))))
 
 (defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
   "Symbols which when deleted also deletes & before the character
@@ -352,15 +362,15 @@ followed."
                 (-let (((start . len-start) (car pair-starts))
                        ((end   . len-end)   (car pair-ends)))
                   (cond
-                   ((looking-at-p end)
-                    (when (looking-back start len-start)
-                      (progn (backward-char len-start)
-                             (delete-char (+ len-start len-end) t)))
+                   ((looking-at-p (format "[[:space:][:blank:]]*%s" end))
+                    (when (looking-back (format "%s[[:space:][:blank:]]*" start))
+                      (progn (goto-char (match-beginning 0))
+                             (delete-char (- (match-end 0) (match-beginning 0) (- len-end)) t)))
                     t)
                    ((looking-at-p start)
                     (when (save-excursion (forward-char len-start)
-                                          (looking-at-p end))
-                      (delete-char (+ len-start len-end)))
+                                          (looking-at (format "[[:space:][:blank:]]*%s" end)))
+                      (delete-char (- (match-end 0) (point))))
                     t)
                    (t
                     (funcall loop (cdr pair-starts) (cdr pair-ends)))))))))
@@ -395,27 +405,18 @@ followed."
 
 ;; This command should correctly pick the closing paren. I can't just
 ;; go to EOL and look for the closest paren from there since that
-;; could mess up situations like {text {more | text} HMMMMM}. I guess
+;; could mess up situations like \{text \{more | text\} HMMMMM\}. I guess
 ;; the only choice is to look back for the closest starting paren and
 ;; delete everything within the pair?
 
+vz/latex-smart-delete-pairs-end
 (defun vz/latex-smart-kill ()
   (interactive)
-  (let* ((beg (line-beginning-position))
-         (index
-          (-first (fn (looking-back (concat (car <>) ".*?") beg nil))
-                  (append vz/latex-smart-delete-pairs-start '(("{" . -1))))))
-    (if (null index)
-        (kill-line)
-      (when (looking-at (concat ".*?"
-                                (if (= -1 (cdr index))
-                                    "}"
-                                  (car (nth (-elem-index index vz/latex-smart-delete-pairs-start)
-                                            vz/latex-smart-delete-pairs-end)))))
-        (delete-char (- (match-end 0) (point) 1 (abs (cdr index))))))))
-
-(text HMMM)
-"{text \left(\right) {HMMMM}}"
+  (message "%s"
+           ;;(-min-by (-on #'> #'car))
+           (-keep (fn (when (looking-at-p )
+                        (cons (match-end 0) (car <>))))
+                  vz/latex-smart-delete-pairs-end)))
 
 ;; * -*-*-*-
 ;; Local Variables:

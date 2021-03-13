@@ -204,29 +204,33 @@ If CWD is non-nil, then cd to CWD."
         (comint-send-string process input)))))
 
 (defun vz/popup-shell ()
-  "Try to find ``free'' buffers that have the CWD as `default-directory' and switch
-to it. If nothing is found, create a new buffer"
+  "If the frame is a terminal frame, then open the associated
+shell buffer otherwise try to find ``free'' buffers that have the
+CWD as `default-directory' and switch to it. If nothing is found,
+create a new buffer."
   (interactive)
-  (let ((cwd (condition-case nil
-                  (f-dirname (buffer-file-name))
-               (error (f-full default-directory)))))
-    (if (null vz/popup-shells)
-        (vz/popup-shell--add (shell) cwd)
-      (let* ((free-buffers (-filter
-                            (fn (and (vz/inside-shell? <>)
-                                     (null (get-buffer-window <> t))))
-                            vz/popup-shells))
-             (cwd-buffers (-filter
-                           (fn (with-current-buffer <>
-                                 (f-equal? default-directory cwd)))
-                           free-buffers)))
-        (cond
-         (cwd-buffers
-          (vz/popup-shell--switch (car cwd-buffers) cwd t))
-         ((and (null cwd-buffers) free-buffers)
-          (vz/popup-shell--switch (car free-buffers) cwd))
-         (t
-          (vz/popup-shell--add (shell (vz/uniqify "*shell")) cwd)))))))
+  (if (seq-contains-p vz/term-minor-mode-frames (selected-frame))
+      (switch-to-buffer-other-window (frame-parameter (selected-frame) 'term-buffer))
+    (let ((cwd (condition-case nil
+                   (f-dirname (buffer-file-name))
+                 (error (f-full default-directory)))))
+      (if (null vz/popup-shells)
+          (vz/popup-shell--add (shell) cwd)
+        (let* ((free-buffers (-filter
+                              (fn (and (vz/inside-shell? <>)
+                                       (null (get-buffer-window <> t))))
+                              vz/popup-shells))
+               (cwd-buffers (-filter
+                             (fn (with-current-buffer <>
+                                   (f-equal? default-directory cwd)))
+                             free-buffers)))
+          (cond
+           (cwd-buffers
+            (vz/popup-shell--switch (car cwd-buffers) cwd t))
+           ((and (null cwd-buffers) free-buffers)
+            (vz/popup-shell--switch (car free-buffers) cwd))
+           (t
+            (vz/popup-shell--add (shell (vz/uniqify "*shell")) cwd))))))))
 
 ;; * Jump to prompt
 (defvar-local vz/shell--prompt-alist nil
@@ -325,6 +329,15 @@ term buffer associated with it"
   (interactive "sPress keysequence:")
   (comint-send-string (get-buffer-process (current-buffer)) key))
 
+(defun vz/shell-quote-region-or-till-eol ()
+  "Shell quote the region or from point to EOL."
+  (interactive)
+  (insert
+   (shell-quote-argument
+    (if (region-active-p)
+        (delete-and-extract-region (region-beginning) (region-end))
+      (delete-and-extract-region (point) (line-end-position))))))
+
 (vz/bind
  :prefix "C-c"
  "p" #'vz/popup-shell
@@ -333,7 +346,8 @@ term buffer associated with it"
  "?" #'vz/shell-insert-from-shell-hist
  "/" #'vz/shell-insert-from-hist
  "J" #'vz/shell-jump-to-prompt
- "C-k" #'vz/shell-send-keysequence-to-process
+ "k" #'vz/shell-send-keysequence-to-process
+ "C-k" #'vz/shell-quote-region-or-till-eol
  [remap comint-clear-buffer] #'vz/shell-clear-buffer)
 
 ;; Local Variables:

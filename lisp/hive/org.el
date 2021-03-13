@@ -17,6 +17,11 @@
 ;; Make it completely black
 (plist-put org-format-latex-options :foreground "Black")
 
+(setq org-entities-user (append '(("ominus" "\\ominus" t "o" "o" "o" "⊖")
+                                  ("vdots" "\\vdots" t "&x2999" "..." "..." "⋮")
+                                  ("ddots" "\\ddots" t "&x22F1" "..." "..." "⋱"))
+                              org-entities-user))
+
 (use-package cdlatex
   :demand t
   :config

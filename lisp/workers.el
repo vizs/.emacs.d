@@ -137,9 +137,11 @@ behaviour is similar to that of in `bind-keys'."
 ;; ** Help menu binds
 ;; Why do I have to answer yes when I revert?
 
-(vz/bind
- :map help-mode-map
- [remap revert-buffer] (fn! (revert-buffer nil t)))
+;; God I love Emacs 28
+(when (< emacs-major-version 28)
+  (vz/bind
+   :map help-mode-map
+   [remap revert-buffer] (fn! (revert-buffer nil t))))
 
 ;; * Dired
 (use-package dired

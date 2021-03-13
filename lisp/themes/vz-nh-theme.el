@@ -29,7 +29,7 @@
    `(fill-column-indicator            ((,class :background ,dark-bg :foreground ,dark-bg)))
 
    `(error                            ((,class :background ,bg :foreground ,red)))
-   `(link                             ((,class :background ,bg :foreground ,blue :underline t)))
+   `(link                             ((,class :foreground ,blue :underline t)))
 
    `(cursor                           ((,class :background ,cursor :foreground ,fg)))
    `(fringe                           ((,class :background ,bg :foreground ,light-fg)))
@@ -162,7 +162,9 @@
 
    `(edit-indirect-edited-region      ((,class :background ,dark-bg :foreground ,fg)))
 
-   `(eros-result-overlay-face         ((,class :box ,darker-bg :background ,dark-bg :foreground ,fg))))
+   `(eros-result-overlay-face         ((,class :box ,darker-bg :background ,dark-bg :foreground ,fg)))
+
+   `(siege-preview-face               ((,class :foreground ,light-fg))))
 
   (setq hl-todo-keyword-faces
         `(("TODO"   . ,red)
