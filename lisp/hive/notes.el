@@ -398,25 +398,28 @@ followed."
           (delete-char 1)))
        (t (delete-char 1))))))
 
+;; THIS WILL NOT WORK!!!
 (defun vz/latex-smart-backward-delete-char ()
   (interactive)
-  (backward-char 1)
   (vz/latex-smart-delete-char))
 
-;; This command should correctly pick the closing paren. I can't just
-;; go to EOL and look for the closest paren from there since that
-;; could mess up situations like \{text \{more | text\} HMMMMM\}. I guess
-;; the only choice is to look back for the closest starting paren and
-;; delete everything within the pair?
+;; This command looks for the closest starting pair backwards, then tries
+;; to find the corresponding closest ending pair and deletes everything
+;; from point till the start of the ending pair.
 
-vz/latex-smart-delete-pairs-end
 (defun vz/latex-smart-kill ()
   (interactive)
-  (message "%s"
-           ;;(-min-by (-on #'> #'car))
-           (-keep (fn (when (looking-at-p )
-                        (cons (match-end 0) (car <>))))
-                  vz/latex-smart-delete-pairs-end)))
+  (if-let ((points (-keep (fn (when (looking-back (format "%s.*?" (car <>)))
+                                (cons (match-beginning 0) (car <>))))
+                          vz/latex-smart-delete-pairs-start)))
+      (-let* (((_ . start-pair) (-min-by (-on #'> #'car) points))
+              ((end-pair . length) (nth (-find-index (fn (s-equals? (car <>) start-pair))
+                                                     vz/latex-smart-delete-pairs-start)
+                                        vz/latex-smart-delete-pairs-end)))
+        (if (looking-at (format ".*?%s" end-pair))
+            (delete-char (- (match-end 0) (point) length))
+          (kill-line)))
+    (kill-line)))
 
 ;; * -*-*-*-
 ;; Local Variables:
