@@ -3,10 +3,10 @@
 ;; * Set the variables
 ;; ** Matching for nick
 
-(setq-ns vz/circe
-  mynicks '("viz" "_viz_")
+(setq
+  vz/circe-mynicks '("viz" "_viz_")
   ;; TODO: clean this up
-  mynicks-re (-reduce-from
+  vz/circe-mynicks-re (-reduce-from
               (fn: format "%1$s[ @]%2$s[,: ]\\|[ @]%2$s$"
                    (if (s-blank? <1>) "" (s-concat <1> "\\|"))
                    <2>)
@@ -15,8 +15,8 @@
 
 ;; ** IRC Login details
 
-(setq-ns circe
-  network-options
+(setq
+  circe-network-options
   `(("Freenode"
      :nick "_viz_"
      :port (6667 . 6697)
@@ -42,19 +42,18 @@
      :channel ("#general" "#commands")
      :pass ,(pass-discord 702578317081182258)))
   ;; reduce-lurker-spam t
-  use-cycle-completion t
-  highlight-nick-type 'message
-  server-buffer-name "{network}:{host}")
+  circe-use-cycle-completion t
+  circe-highlight-nick-type 'message
+  circe-server-buffer-name "{network}:{host}")
 (make-variable-buffer-local 'vz/circe-mentions)
 
 ;; ** Lui
 
-(setq-ns lui
-  logging-directory (expand-file-name "~/.cache/irc-log")
-  flyspell-p t
-  fill-type nil
-  time-stamp-format "%H:%M"
-  time-stamp-position 'right-margin)
+(setq lui-logging-directory (expand-file-name "~/.cache/irc-log")
+      lui-flyspell-p t
+      lui-fill-type nil
+      lui-time-stamp-format "%H:%M"
+      lui-time-stamp-position 'right-margin)
 
 ;; * Message handlers
 ;; ** Generic function -- also works for prompt
@@ -137,20 +136,20 @@
 
 ;; *** Set the variable
 
-(setq-ns circe-format
-  say      (fn: vz/circe-handle-msg 'say   <rest>)
-  self-say (fn: vz/circe-handle-msg 'ssay  <rest>)
-  action   (fn: vz/circe-handle-msg 'acn   <rest>))
-(setq-ns circe-format-server
-  message      (fn: vz/circe-handle-msg 'smsg  <rest>)
-  notice       (fn: vz/circe-handle-msg 'smsg  <rest>)
-  quit         (fn: vz/circe-handle-msg 'part  <rest>)
-  quit-channel (fn: vz/circe-handle-msg 'part  <rest>)
-  join         (fn: vz/circe-handle-msg 'join  <rest>)
-  topic        (fn: vz/circe-handle-msg 'smsg  <rest>)
-  part         (fn: vz/circe-handle-msg 'part  <rest>)
-  nick-change  (fn: vz/circe-handle-msg 'nch   <rest>)
-  rejoin       (fn: vz/circe-handle-msg 'join  <rest>))
+(setq
+  circe-format-say      (fn: vz/circe-handle-msg 'say   <rest>)
+  circe-format-self-say (fn: vz/circe-handle-msg 'ssay  <rest>)
+  circe-format-action   (fn: vz/circe-handle-msg 'acn   <rest>))
+(setq
+  circe-format-server-message      (fn: vz/circe-handle-msg 'smsg  <rest>)
+  circe-format-server-notice       (fn: vz/circe-handle-msg 'smsg  <rest>)
+  circe-format-server-quit         (fn: vz/circe-handle-msg 'part  <rest>)
+  circe-format-server-quit-channel (fn: vz/circe-handle-msg 'part  <rest>)
+  circe-format-server-join         (fn: vz/circe-handle-msg 'join  <rest>)
+  circe-format-server-topic        (fn: vz/circe-handle-msg 'smsg  <rest>)
+  circe-format-server-part         (fn: vz/circe-handle-msg 'part  <rest>)
+  circe-format-server-nick-change  (fn: vz/circe-handle-msg 'nch   <rest>)
+  circe-format-server-rejoin       (fn: vz/circe-handle-msg 'join  <rest>))
 
 ;; * Jump commands
 ;; ** Helper

@@ -130,6 +130,9 @@
 
 (setq-default org-display-custom-times t)
 
+(org-babel-do-load-languages 'org-babel-load-languages
+                             org-babel-load-languages)
+
 ;; Capture templates
 (vz/use-package doct "captures")
 

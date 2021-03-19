@@ -85,9 +85,8 @@ behaviour is similar to that of in `bind-keys'."
   :hook (prog-mode . show-paren-mode)
   :straight (:type built-in)
   :config
-  (setq-ns show-paren
-    delay 0
-    when-point-inside-paren t))
+  (setq show-paren-delay 0
+        show-paren-when-point-inside-paren t))
 
 ;; ** Spell check
 ;; Enabled on major-mode basis
@@ -96,12 +95,10 @@ behaviour is similar to that of in `bind-keys'."
   :hook (org-mode . flyspell-mode)
   :defer t
   :init
-  (setq-ns flyspell
-    persistent-highlight t
-    issue-message-flag nil)
-  ;;  mark-duplication-flag nil)
-  (setq-ns ispell
-    program-name "hunspell"))
+  (setq flyspell-persistent-highlight t
+        flyspell-issue-message-flag nil)
+  ;;  flyspell-mark-duplication-flag nil)
+  (setq ispell-program-name "hunspell"))
 
 ;; ** On the fly syntax checker
 (use-package flymake
@@ -116,10 +113,10 @@ behaviour is similar to that of in `bind-keys'."
      #b00110000
      #b01100000]
     nil nil 'center)
-  (setq-ns flymake
-    error-bitmap   '(vz/fringe-left-arrow error)
-    warning-bitmap '(vz/fringe-left-arrow warning)
-    note-bitmap    '(vz/fringe-left-arrow compilation-info)))
+  (setq
+    flymake-error-bitmap   '(vz/fringe-left-arrow error)
+    flymake-warning-bitmap '(vz/fringe-left-arrow warning)
+    flymake-note-bitmap    '(vz/fringe-left-arrow compilation-info)))
 
 ;; ** Occur menu styling
 ;; I don't like the underline face at the top...
@@ -214,9 +211,8 @@ behaviour is similar to that of in `bind-keys'."
   :defer t
   :bind ("C-c C" . olivetti-mode)
   :config
-  (setq-ns olivetti
-    body-width 80
-    enable-visual-line-mode nil))
+  (setq olivetti-body-width 80
+        olivetti-enable-visual-line-mode nil))
 
 ;; ** Folding text
 (use-package bicycle
@@ -298,17 +294,16 @@ behaviour is similar to that of in `bind-keys'."
   (defun vz/company-next-candidate ()
     (interactive)
     (company-complete-common-or-cycle 1))
-  (setq-ns company
-    require-match nil
-    idle-delay nil
-    tooltip-limit 10
-    show-numbers 'left
-    global-modes '(not shell-mode org-mode)
-    minimum-prefix-length 2)
-  (setq completion-in-region-function
-        (fn (if company-mode
-                (company-complete-common)
-              (ivy-completion-in-region <1> <2> <3> <4>))))
+  (setq
+    company-require-match nil
+    company-idle-delay nil
+    company-tooltip-limit 10
+    company-show-numbers 'left
+    company-global-modes '(not shell-mode org-mode)
+    company-minimum-prefix-length 2
+    completion-in-region-function (fn (if company-mode
+                                          (company-complete-common)
+                                        (ivy-completion-in-region <1> <2> <3> <4>))))
   (add-to-list 'company-backends #'company-capf)
   (global-company-mode))
 
@@ -330,9 +325,8 @@ behaviour is similar to that of in `bind-keys'."
   :bind
   ("C-c df" . python-describe-at-point)
   :config
-  (setq-ns python-shell
-    interpreter "python3"
-    interpreter-args "-i"))
+  (setq python-shell-interpreter "python3"
+        python-shell-interpreter-args "-i"))
 
 ;; ** Scheme
 ;; Depends on chicken
@@ -429,17 +423,15 @@ behaviour is similar to that of in `bind-keys'."
 ;; Save and sort entries in ivy and company
 (use-package prescient
   :config
-  (setq-ns prescient
-    history-length 150
-    ;;  filter-method '(literal regexp initialism fuzzy)
-    save-file (~ ".cache/emacs-prescient.el"))
+  (setq prescient-history-length 150
+        ;;  prescient-filter-method '(literal regexp initialism fuzzy)
+        prescient-save-file (~ ".cache/emacs-prescient.el"))
   (prescient-persist-mode))
 
 (use-package ivy-prescient
   :after prescient
   :config
-  (setq-ns ivy-prescient-enable
-    sorting t)
+  (setq ivy-prescient-enable-sorting t)
   (ivy-prescient-mode t))
 
 (use-package company-prescient
@@ -459,9 +451,8 @@ behaviour is similar to that of in `bind-keys'."
   :demand t
   :bind ("C-c T" . transmission)
   :config
-  (setq-ns transmission
-    time-format "%A, %d %B, %Y %k:%M"
-    units 'iec))
+  (setq transmission-time-format "%A, %d %B, %Y %k:%M"
+        transmission-units 'iec))
 
 ;; Local Variables:
 ;; eval: (outline-minor-mode)

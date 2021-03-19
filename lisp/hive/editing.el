@@ -118,9 +118,8 @@ on the position of the cursor."
   :functions (er/expand-region)
   :bind ("C-M-SPC" . er/expand-region)
   :config
-  (setq-ns expand-region
-    contract-fast-key "S-SPC"
-    smart-cursor t)
+  (setq expand-region-contract-fast-key "S-SPC"
+        expand-region-smart-cursor t)
   (when (load-file (expand-file-name "lisp/hive/org-expand-region.el" user-emacs-directory))
     (remove-hook 'org-mode-hook #'er/add-org-mode-expansions)
     (er/enable-mode-expansions 'org-mode #'gb/er/config-org-mode-expansions)))

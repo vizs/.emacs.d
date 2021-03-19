@@ -277,7 +277,8 @@ followed."
 
 (defvar vz/latex-equation-pairs
   '(("\\(" . "\\)")
-    ("\\[" . "\\]")))
+    ("\\[" . "\\]")
+    ("\\begin{align*}\n" . "\\end{align*}")))
 
 (defvar vz/latex-paren-pairs
   '(("(" . ")")
@@ -353,9 +354,9 @@ parens."
 (add-hook 'org-metaright-hook
           (defun vz/org-latex-change-pair-metaright ()
             (when (texmathp)
-             (if (vz/change-latex-equation-pair '())
-                 t
-               (vz/change-latex-parens-pair '())))))
+              (if (vz/change-latex-equation-pair '())
+                  t
+                (vz/change-latex-parens-pair '())))))
 
 (add-hook 'org-metaleft-hook
           (defun vz/org-latex-change-pair-metaleft ()

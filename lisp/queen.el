@@ -73,7 +73,10 @@
  auto-save-no-message t
 
  ;; I can't write anything anw
- view-read-only t)
+ view-read-only t
+
+ ;; This is much easier on the eyes
+ uniquify-buffer-name-style 'forward)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
@@ -97,50 +100,49 @@
 
 ;; *** setq but with namespace
 ;; inspo: https://github.com/neeasade/emacs.d
-(defmacro setq-ns (ns &rest args)
-  "`setq' but with the namespace as NS.
-If variable is a cons cell, then cdr is attached to setq.
-For example, to set a buffer local variable, you pass the variable name
-as (name-without-ns . local)."
-  (declare (indent 1))
-  `(progn
-     ,@(mapcar (lambda (x)
-                 (let ((set 'setq)
-                       (var (car x)))
-                   (when (and (listp var) (not (listp (cdr var))))
-                     (setq set (intern (format "setq-%s" (cdr var)))
-                           var (car var)))
-                   (list set (intern (format "%s-%s" ns var)) (cadr x))))
-        (seq-partition args 2))))
+;; (defmacro setq-ns (ns &rest args)
+;;   "`setq' but with the namespace as NS.
+;; If variable is a cons cell, then cdr is attached to setq.
+;; For example, to set a buffer local variable, you pass the variable name
+;; as (name-without-ns . local)."
+;;   (declare (indent 1))
+;;   `(progn
+;;      ,@(mapcar (lambda (x)
+;;                  (let ((set 'setq)
+;;                        (var (car x)))
+;;                   (when (and (listp var) (not (listp (cdr var))))
+;;                    (setq set (intern (format "setq-%s" (cdr var)))
+;;                     var (car var)))
+;;                   (list set (intern (format "%s-%s" ns var)) (cadr x))))
+;;         (seq-partition args 2))))
 
 ;; *** setq but for a hook
 ;; inspo: doom-emacs
 
-(defmacro setq-hook--create-fun (mode &rest body)
-  "Helper macro to create function for `setq-hook'."
-  `(defun ,(intern (format "vz/setq-for-%s" mode)) ()
-    (setq-local ,@body)))
+;; (defmacro setq-hook--create-fun (mode &rest body)
+;;   "Helper macro to create function for `setq-hook'."
+;;   `(defun ,(intern (format "vz/setq-for-%s" mode)) ()
+;;     (setq-local ,@body)))
 
-(defmacro setq-hook (mode &rest body)
-  "Set buffer local variable for a major mode."
-  (declare (indent 1))
-  (let ((f `(setq-hook--create-fun ,mode ,@body)))
-    `(add-hook ',mode ,f nil t)))
+;; (defmacro setq-hook (mode &rest body)
+;;   "Set buffer local variable for a major mode."
+;;   (declare (indent 1))
+;;   (let ((f `(setq-hook--create-fun ,mode ,@body)))
+;;     `(add-hook ',mode ,f nil t)))
 
 ;; *** Formating s-expressions?
 ;; from u/b3n
-(defmacro vz/format-sexp (sexp &rest format-args)
-  "Format SEXP and eval it."
-  `(eval (read (format ,(format "%S" sexp) ,@format-args))))
+;; (defmacro vz/format-sexp (sexp &rest format-args)
+;;   "Format SEXP and eval it."
+;;   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
 
 ;; ** Automatically chmod +x file if it has a shebang
 (add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
 
 ;; ** Auto-revert buffer if file is modified
 ;; From u/redblobgames
-(setq-ns auto-revert
-  use-notify t
-  avoid-polling t)
+(setq auto-revert-use-notify t
+      auto-revert-avoid-polling t)
 
 (global-auto-revert-mode)
 
@@ -183,10 +185,9 @@ as (name-without-ns . local)."
 
 ;; ** Setup straight variables
 (straight-use-package 'use-package)
-(setq-ns straight
-  use-package-by-default t
-  cache-autoloads t
-  vc-git-default-clone-depth 1)
+(setq straight-use-package-by-default t
+      straight-cache-autoloads t
+      straight-vc-git-default-clone-depth 1)
 
 ;; * Major helper functions
 ;; ** Emacs Lisp enhancers
@@ -261,10 +262,9 @@ as (name-without-ns . local)."
       (ace-delete-window)))
   ;; More noticable this way
   (set-face-attribute 'aw-leading-char-face nil :height 150)
-  (setq-ns aw
-    keys '(?a ?s ?d ?f ?h ?j ?k ?l)
-    ;; Only consider the windows in the active frame
-    scope 'frame))
+  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)
+        ;; Only consider the windows in the active frame
+        aw-scope 'frame))
 
 ;; *** Selection engine
 (use-package ivy
@@ -273,12 +273,11 @@ as (name-without-ns . local)."
               ("<C-up>" . ivy-minibuffer-grow)
               ("<C-down>" . ivy-minibuffer-shrink))
   :config
-  (setq-ns ivy
-    count-format " [%d/%d] "
-    use-virtual-buffers t
-    do-completion-in-region nil
-    wrap t
-    height 15)
+  (setq ivy-count-format " [%d/%d] "
+        ivy-use-virtual-buffers t
+        ivy-do-completion-in-region nil
+        ivy-wrap t
+        ivy-height 15)
   ;; This was moved to ivy-hydra.el
   (defun ivy-minibuffer-grow ()
     "Grow the minibuffer window by 1 line."
@@ -310,10 +309,9 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
   :demand t
   :bind ("C-c j" . counsel-imenu)
   :config
-  (setq-ns counsel
-    find-file-at-point t
-    org-headline-display-todo t
-    org-headline-display-tags t)
+  (setq counsel-find-file-at-point t
+        counsel-org-headline-display-todo t
+        counsel-org-headline-display-tags t)
   (defun vz/counsel-M-x-prompt ()
     "pls ")
   (advice-add 'counsel--M-x-prompt :override #'vz/counsel-M-x-prompt)
@@ -325,10 +323,9 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
 (use-package beacon
   :config
   (beacon-mode 1)
-  (setq-ns beacon-blink-when
-    window-scrolls t
-    point-moves-horizontally nil
-    point-moves-vertically nil)
+  (setq beacon-blink-when-window-scrolls t
+        beacon-blink-when-point-moves-horizontally nil
+        beacon-blink-when-point-moves-vertically nil)
   (defun vz/beacon-highlight ()
     "`beacon-blink' for one second to capture attention"
     (let ((beacon-blink-duration 1))

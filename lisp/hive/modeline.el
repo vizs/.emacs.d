@@ -14,9 +14,7 @@
     ""))
 
 (defun vz/mode-line-file-short-dir ()
-  (if-let ((path (if (derived-mode-p 'comint-mode)
-                     (concat default-directory "/a")
-                   (buffer-file-name)))
+  (if-let ((path (cond ((derived-mode-p 'comint-mode) (concat default-directory "/a"))))
            (dir (let* ((dir (f-split (f-short (f-dirname path))))
                        (dir* (cdr dir)))
                   (if (s-equals? (car dir*) "~") dir* dir))))

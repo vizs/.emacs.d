@@ -3,9 +3,8 @@
 (use-package eros
   :after elisp-mode
   :config
-  (setq-ns eros
-    eval-result-duration nil
-    overlays-use-font-lock nil))
+  (setq eros-eval-result-duration nil
+        eros-overlays-use-font-lock nil))
 
 (defun vz/elisp-init ()
   (flymake-mode)

@@ -43,6 +43,8 @@
    `(highlight                        ((,class :background ,dark-bg :foreground ,fg)))
    `(trailing-whitespace              ((,class :background ,darker-bg :foreground ,fg)))
 
+   `(Info-quoted                      ((,class :foreground ,light-fg :inherit fixed-pitch)))
+
    `(flyspell-incorrect               ((,class :underline (:color ,red :style wave))))
    `(flymake-error                    ((,class :underline (:color ,red :style wave))))
    `(flymake-warning                  ((,class :underline (:color ,green :style wave))))
@@ -135,6 +137,7 @@
    `(org-agenda-date-weekend          ((,class :background ,bg :foreground ,light-fg)))
    `(org-agenda-structure             ((,class :background ,bg :foreground ,fg)))
    `(org-scheduled-today              ((,class :background ,bg :foreground ,fg)))
+   ;; `(org-scheduled                    ((,class :background ,bg :foreground ,green)))
    `(org-time-grid                    ((,class :background ,bg :foreground ,light-fg)))
 
    `(makefile-space                   ((,class :background ,darker-bg :foreground ,bg)))

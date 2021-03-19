@@ -176,9 +176,8 @@ found ahead"
 
 (use-package ctrlf
   :init
-  (setq-ns ctrlf
-    mode-bindings '()
-    minibuffer-bindings '())
+  (setq ctrlf-mode-bindings '()
+        ctrlf-minibuffer-bindings '())
   :ryo
   ("C-f"   ctrlf-forward-fuzzy)
   ("C-S-f" ctrlf-backward-fuzzy)
