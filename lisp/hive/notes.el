@@ -63,16 +63,15 @@ Highlight functions are handled specially.")
 (defun vz/pdf-annot-header-line--update-images ()
   (setq-local
    header-line-format
-   (-map (fn (when-let ((func (get-text-property 0 'func <>))
-                        (_ (-contains? vz/pdf-annot-highlight-functions func)))
-               (put-text-property
-                0 (length <>)
-                `display
-                (vz/mode-line-roundise-text (symbol-name func)
-                                             (unless (eq func vz/pdf-annot-highlight-function-on-mouse-release)
-                                               vz/mode-line-fgi)
-                                             nil t) <>))
-             <>)
+   (seq-map #'(lambda (x)
+                (when-let ((func (get-text-property 0 'func x))
+                           (_ (-contains? vz/pdf-annot-highlight-functions func)))
+                 (put-text-property 0 (length x) 'display
+                  (vz/mode-line-roundise-text (symbol-name func)
+                   (unless (eq func vz/pdf-annot-highlight-function-on-mouse-release)
+                    vz/mode-line-fgi)
+                   nil t) x))
+                x)
          header-line-format))
   (force-mode-line-update))
 
@@ -87,27 +86,28 @@ Highlight functions are handled specially.")
     (eval `(call-interactively ,(asoc-get vz/pdf-annot-header-line-functions fn)))))
 
 (defun vz/pdf-annot-header-line--generate-images ()
-  (-map (fn (propertize
-             (format " %s " (car <>))
-             'display (vz/mode-line-roundise-text (symbol-name (car <>)) vz/mode-line-fgi nil t)
-             'func (car <>)
-             'local-map
-             (let ((map (make-sparse-keymap)))
-               (define-key map [header-line mouse-1]
-                 `(lambda (_)
-                    (interactive "e")
-                    ,(if (member (car <>) vz/pdf-annot-highlight-functions)
-                         `(vz/pdf-annot-update-highlight-function ',(car <>))
-                       `(call-interactively ,(cdr <>)))))
-               map)))
+  (seq-map #'(lambda (x)
+               (propertize
+                (format " %s " (car x))
+                'display (vz/mode-line-roundise-text (symbol-name (car x)) vz/mode-line-fgi nil t)
+                'func (car x)
+                'local-map
+                (let ((map (make-sparse-keymap)))
+                 (define-key map [header-line mouse-1]
+                   `(lambda (_)
+                      (interactive "e")
+                      ,(if (member (car x) vz/pdf-annot-highlight-functions)
+                           `(vz/pdf-annot-update-highlight-function ',(car x))
+                         `(call-interactively ,(cdr x)))))
+                 map)))
         vz/pdf-annot-header-line-functions))
 
 (add-hook 'pdf-annot-minor-mode-hook
           (defun vz/pdf-annot--set-header-line-format ()
             (face-remap-add-relative 'header-line '(:inherit mode-line))
             (let* ((images (vz/pdf-annot-header-line--generate-images))
-                   (length (-reduce-from (fn (+ (length <2>) <1>))
-                                         0 images)))
+                   (length (seq-reduce #'(lambda (x res) (+ (length res) x))
+                                       images 0)))
               (setq-local header-line-format
                           (cons (propertize " " 'display `((space :align-to (- center (0.5 . ,length))))
                                             'face 'header-line)
@@ -150,10 +150,10 @@ Highlight functions are handled specially.")
    org-noter-doc-split-fraction '(0.6 . 0.4)
    org-noter-auto-save-last-location t
    org-noter-default-notes-file-names '("annotations.org")
-   org-noter-notes-search-path (-map (fn (~ <>)) '("doc/org" "doc/uni/notes"))
+   org-noter-notes-search-path (seq-map #'(lambda (x) (~ x)) '("doc/org" "doc/uni/notes"))
    org-noter-doc-property-in-notes t)
   ;; I really don't need org-noter to add stuff to my modeline
-  (advice-add 'org-noter--mode-line-text :override (fn ""))
+  (advice-add 'org-noter--mode-line-text :override #'(lambda () ""))
   (vz/bind
    :map org-mode-map
    "C-c n" #'org-noter
@@ -194,12 +194,23 @@ Highlight functions are handled specially.")
 
 (use-package cdlatex
   :config
+  (vz/bind
+   :map org-cdlatex-mode-map
+   "`" nil
+   ";" #'(lambda ()
+           (interactive)
+           (if (texmathp)
+               (cdlatex-math-symbol)
+             (let (org-cdlatex-mode)
+              (call-interactively (key-binding (vector last-input-event)))))))
   (setq
    ;; Don't use dollar
    cdlatex-use-dollar-to-ensure-math nil
+   cdlatex-math-symbol-prefix ?;
    cdlatex-command-alist
    '(("dv" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
      ("pv" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
+     ("pv(" "Insert partial derivative" "\\left(\\frac{\\partial ?}{\\partial }\\right)" cdlatex-position-cursor nil nil t)
      ("txt" "Insert \\intertext{}" "\\intertext{?}" cdlatex-position-cursor nil nil t)
      ("lim" "Insert limit" "\\lim_{?}" cdlatex-position-cursor nil nil t)
      ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
@@ -243,8 +254,7 @@ Highlight functions are handled specially.")
 
 ;; Le not safe but this shouldn't be a problem
 (put 'vz/org-abbrev-file 'safe-local-variable
-     (fn (or (null <>)
-             (stringp <>))))
+     #'(lambda (x) (or (null x) (stringp x))))
 
 (defun vz/org-abbrev--expand-function ()
   "When `vz/org-abbrev-mode' is active, then allow abbreviation expansion
@@ -278,7 +288,7 @@ followed."
 (defvar vz/latex-equation-pairs
   '(("\\(" . "\\)")
     ("\\[" . "\\]")
-    ("\\begin{align*}\n" . "\\end{align*}")))
+    ("\\begin{align*}" . "\n\\end{align*}")))
 
 (defvar vz/latex-paren-pairs
   '(("(" . ")")
@@ -336,16 +346,14 @@ followed."
     (funcall loop 0 matchers)))
 
 (defun vz/change-latex-equation-pair (arg)
-  "Change \(\) to \[\] and vice-versa. See
-`vz/latex-equation-pairs' for valid parens."
+  "Switch through available pairs in `vz/latex-equation-pairs'."
   (interactive "P")
   (if (use-region-p)
       (vz/change-latex-pair-region (region-beginning) (region-end) vz/latex-equation-pairs (not arg))
     (vz/change-latex-pair-around-point vz/latex-equation-pairs (not arg))))
 
 (defun vz/change-latex-parens-pair (arg)
-  "Change latex parenthesis. See `vz/latex-paren-pairs' for valid
-parens."
+  "Switch through available pairs in `vz/latex-paren-pairs'."
   (interactive "P")
   (if (use-region-p)
       (vz/change-latex-pair-region (region-beginning) (region-end) vz/latex-paren-pairs (not arg))
@@ -372,14 +380,14 @@ parens."
 ;; auto-delete & when you're deleting =, >, <.
 
 (defvar vz/latex-smart-delete-pairs-start
-  (-sort (-on #'> #'cdr)
-         (-map (fn (cons (regexp-quote (car <>)) (length (car <>))))
-               (append vz/latex-paren-pairs vz/latex-equation-pairs))))
+  (seq-sort-by #'cdr #'>
+               (seq-map #'(lambda (p) (cons (regexp-quote (car p)) (length (car p))))
+                        (append vz/latex-paren-pairs vz/latex-equation-pairs))))
 
 (defvar vz/latex-smart-delete-pairs-end
-  (-sort (-on #'> #'cdr)
-         (-map (fn (cons (regexp-quote (cdr <>)) (length (cdr <>))))
-               (append vz/latex-paren-pairs vz/latex-equation-pairs))))
+  (seq-sort-by #'cdr #'>
+               (seq-map #'(lambda (p) (cons (regexp-quote (cdr p)) (length (cdr p))))
+                        (append vz/latex-paren-pairs vz/latex-equation-pairs))))
 
 (defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
   "Symbols which when deleted also deletes & before the character
@@ -390,8 +398,9 @@ parens."
   (letrec ((loop
             (lambda (pair-starts pair-ends)
               (unless (null pair-starts)
-                (-let (((start . len-start) (car pair-starts))
-                       ((end   . len-end)   (car pair-ends)))
+                (pcase-let ((`(,start . ,len-start) (car pair-starts))
+                            (`(,end   . ,len-end)   (car pair-ends)))
+                  (message "end: %s, start: %s" end start)
                   (cond
                    ((looking-at-p end)
                     (when (looking-back start)
@@ -408,13 +417,13 @@ parens."
     (unless (funcall loop vz/latex-smart-delete-pairs-start vz/latex-smart-delete-pairs-end) ; Delete empty paren pairs
       (cond
        ((and (char-equal (char-before (point)) ?&) ; If cursor is between & and =/>/<
-             (-contains? vz/latex-smart-delete-align-symbols (char-after (point))))
+             (seq-contains-p vz/latex-smart-delete-align-symbols (char-after (point))))
         (backward-char 1)
         (delete-char 2))
        ((and (char-equal (char-after (point)) ?&) ; If cursor is before &{=,>,<}
-             (-contains? vz/latex-smart-delete-align-symbols (char-after (1+ (point)))))
+             (seq-contains-p vz/latex-smart-delete-align-symbols (char-after (1+ (point)))))
         (delete-char 2))
-       ((and (-contains? '(?^ ?_) (char-after (point))) ; Slurp out whatever's inside {}, if any
+       ((and (seq-contains-p '(?^ ?_) (char-after (point))) ; Slurp out whatever's inside {}, if any
              (save-excursion (forward-char)
                              (char-equal (char-after (point)) ?{)))
         (delete-char 2)
@@ -425,7 +434,7 @@ parens."
             (goto-char start))))
        ((and (char-equal (char-after (point)) ?{) ;; Cursor position: {^,}|{}
              (char-equal (char-after (1+ (point))) ?})
-             (-contains? '(?_ ?^) (char-before (point))))
+             (seq-contains-p '(?_ ?^) (char-before (point))))
         (backward-delete-char 1)
         (delete-char 2))
        ((funcall loop '(("{" . 1)) '(("}" . 1))) ; Remove ^,_ before empty {}
@@ -437,8 +446,8 @@ parens."
   (letrec ((loop
             (lambda (pair-starts pair-ends)
               (unless (null pair-starts)
-                (-let (((start . len-start) (car pair-starts))
-                       ((end   . len-end)   (car pair-ends)))
+                (pcase-let ((`(,start . ,len-start) (car pair-starts))
+                            (`(,end   . ,len-end)   (car pair-ends)))
                   (cond
                    ((looking-back (concat start end))
                     (backward-char (+ len-end len-start))
@@ -453,13 +462,13 @@ parens."
     (unless (funcall loop vz/latex-smart-delete-pairs-start vz/latex-smart-delete-pairs-end) ; Delete empty paren pairs
       (cond
        ((and (char-equal (char-before (point)) ?&) ; If cursor is between & and =/>/<
-             (-contains? vz/latex-smart-delete-align-symbols (char-after (point))))
+             (seq-contains-p vz/latex-smart-delete-align-symbols (char-after (point))))
         (backward-char 1)
         (delete-char 2))
-       ((and (-contains? vz/latex-smart-delete-align-symbols (char-before (point))) ; If cursor is after &{=,>,<}
+       ((and (seq-contains-p vz/latex-smart-delete-align-symbols (char-before (point))) ; If cursor is after &{=,>,<}
              (char-equal (char-before (1- (point))) ?&))
         (backward-delete-char 2))
-       ((and (-contains? '(?^ ?_) (char-before (point))) ; Slurp out whatever's inside {}, if any
+       ((and (seq-contains-p '(?^ ?_) (char-before (point))) ; Slurp out whatever's inside {}, if any
              (char-equal (char-after (point)) ?{))
         (backward-char 1)
         (delete-char 2)
@@ -469,7 +478,7 @@ parens."
             (delete-char 1)
             (goto-char start))))
        ((funcall loop '(("{" . 1)) '(("}" . 1))) ; Remove ^,_ before empty {}
-        (when (-contains? '(?^ ?_) (char-before (point)))
+        (when (seq-contains-p '(?^ ?_) (char-before (point)))
           (backward-char 1)
           (delete-char 1)))
        (t (backward-char 1))))))
@@ -480,13 +489,14 @@ parens."
 
 (defun vz/latex-smart-kill ()
   (interactive)
-  (if-let ((points (-keep (fn (when (looking-back (format "%s.*?" (car <>)))
-                                (cons (match-beginning 0) (car <>))))
-                          vz/latex-smart-delete-pairs-start)))
-      (-let* (((_ . start-pair) (-min-by (-on #'> #'car) points))
-              ((end-pair . length) (nth (-find-index (fn (s-equals? (car <>) start-pair))
-                                                     vz/latex-smart-delete-pairs-start)
-                                        vz/latex-smart-delete-pairs-end)))
+  (if-let ((points (vz/filter-map
+                    #'(lambda (x) (when (looking-back (format "%s.*?" (car x)))
+                                   (cons (match-beginning 0) (car x))))
+                    vz/latex-smart-delete-pairs-start)))
+      (pcase-let* ((`(_ . ,start-pair) (car (seq-sort-by #'car #'< points)))
+                   (`(,end-pair . ,length) (nth (vz/find-index #'(lambda (x) (s-equals? (car x) start-pair))
+                                                               vz/latex-smart-delete-pairs-start)
+                                                vz/latex-smart-delete-pairs-end)))
         (if (looking-at (format ".*?%s" end-pair))
             (delete-char (- (match-end 0) (point) length))
           (kill-line)))

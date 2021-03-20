@@ -20,21 +20,21 @@
 ;; to `recentf-exclude' so as to remove previous scratch buffers from
 ;; `ivy--buffer-list'.
 (make-thread ; Don't care how long it takes (can still block Emacs though)
- (fn
-  (with-eval-after-load 'recentf
-    (add-to-list 'recentf-exclude
-                 (rx
-                  (eval (expand-file-name "~/lib/org-scratch/"))
-                  (one-or-more num)
-                  ".org")))
-  (with-current-buffer
-      (find-file-noselect (expand-file-name
-                           (concat (format-time-string "%Y%m%d%H%M") ".org")
-                           "~/lib/org-scratch"))
-    (rename-buffer "*org-scratch*")
-    (with-eval-after-load (expand-file-name "lisp/hive/modeline.el" user-emacs-directory)
-      (setq-local vz/mode-line-file-include-file-status? nil
-                  vz/mode-line-file-include-file-short-path? nil)))))
+ #'(lambda ()
+     (with-eval-after-load 'recentf
+      (add-to-list 'recentf-exclude
+       (rx
+        (eval (expand-file-name "~/lib/org-scratch/"))
+        (one-or-more num)
+        ".org")))
+     (with-current-buffer
+         (find-file-noselect (expand-file-name
+                              (concat (format-time-string "%Y%m%d%H%M") ".org")
+                              "~/lib/org-scratch"))
+       (rename-buffer "*org-scratch*")
+       (with-eval-after-load (expand-file-name "lisp/hive/modeline.el" user-emacs-directory)
+        (setq-local vz/mode-line-file-include-file-status? nil
+         vz/mode-line-file-include-file-short-path? nil)))))
 (put 'list-timers 'disabled nil)
 (put 'narrow-to-page 'disabled nil)
 (put 'narrow-to-region 'disabled nil)

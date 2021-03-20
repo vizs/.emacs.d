@@ -55,8 +55,8 @@
    (list
     (wand:create-rule :match "[A-Za-z0-9]+([0-9a-z]+)"
                       :capture :whole
-                      :action (fn:
-                               switch-to-buffer-other-window (man <>)))
+                      :action #'(lambda (x) (interactive)
+                                  (switch-to-buffer-other-window (man x))))
     (wand:create-rule :match "https?://youtube.com"
                       :capture :whole
                       :action #'vz/plumb-yt)
@@ -71,12 +71,8 @@
                       :action #'vz/plumb-file)
     (wand:create-rule :match ".*:[0-9]+$"
                       :capture :whole
-                      :action (fn:
-                               -->
-                               (s-split ":" <>)
-                               (vz/plumb-file
-                                (car it)
-                                (string-to-number (cadr it)))))
+                      :action #'(lambda (x) (let ((f (s-split ":" x)))
+                                             (vz/plumb-file (car x) (string-to-number (cadr x))))))
     (wand:create-rule :match "\\..+$"
                       :capture :whole
                       :action #'vz/plumb-file)
@@ -85,8 +81,7 @@
                       :action #'shell-commmand)
     (wand:create-rule :match ".*"
                       :capture :whole
-                      :action #'vz/plumb-eval)
-    ))
+                      :action #'vz/plumb-eval)))
 
 (defun vz/plumb ()
   "Plumb the region or thing at point"

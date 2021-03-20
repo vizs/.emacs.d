@@ -60,7 +60,7 @@
                org-date org-special-keyword org-verbatim org-tag)))
   (vz/set-monospace-faces faces)
   ;; Adjust font size to be closer to that of the variable font
-  (-each faces (fn (set-face-attribute <> nil :height 102))))
+  (seq-each #'(lambda (x) (set-face-attribute x nil :height 102)) faces))
 
 (set-face-attribute 'org-latex-and-related nil
                     :family "IBM Plex Mono"
@@ -71,7 +71,7 @@
 (setq org-highlight-latex-and-related '(latex entities))
 
 ;; Make headline larger and bold and decrease the height of `org-num-face'
-(-each org-level-faces (fn (set-face-attribute <> nil :weight 'bold :slant 'normal)))
+(seq-each #'(lambda (x) (set-face-attribute x nil :weight 'bold :slant 'normal)) org-level-faces)
 (let* ((height0 (+ 120 40))
        (height1 (+ 120 30))
        (height2 (+ 120 25))
@@ -156,7 +156,7 @@
 
 ;; Advice around `org-set-tags-command' to use `counsel-org-tag'
 (advice-add 'org-set-tags-command
-            :override (fn (counsel-org-tag)))
+            :override #'(lambda (&optional arg) (counsel-org-tag)))
 
 ;; Instead of completing removing _, ^, { and } when setting fancy
 ;; super-sub-script display, give it a new face and "prettify"
@@ -220,7 +220,7 @@ markers for sub/super scripts but fontify them."
   (dolist (entity (append org-entities-user org-entities))
     (when (listp entity)              ; `org-entities' has strings too
       (when-let* ((match-for (car entity))
-                  (replace-with (-last-item entity))
+                  (replace-with (car (last entity)))
                   (_ (= 1 (length replace-with))))
         (add-to-list 'vz/org-prettify-symbols
                      (cons (concat "\\" match-for) replace-with))))))
@@ -233,8 +233,8 @@ markers for sub/super scripts but fontify them."
   ;; since all of them start with \. The characters that are
   ;; acceptable after the match are mathmetical operators and some
   ;; special characters.
-  (-contains? '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? ?/ ?|)
-              (char-after end)))
+  (seq-contains-p '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? ?/ ?|)
+                  (char-after end)))
 
 (define-minor-mode vz/org-prettify-mode
   "When non-nil, use `prettify-symbols-mode' to prettify

@@ -34,8 +34,8 @@ on the position of the cursor."
   "Increase the number at point by ARG."
   (interactive "p")
   (when-let ((num (thing-at-point 'number)))
-    (-let* (((beg . end) (bounds-of-thing-at-point 'word))
-            (n (- end beg)))
+    (pcase-let* ((`(,beg . ,end) (bounds-of-thing-at-point 'word))
+                 (n (- end beg)))
       (delete-region beg end)
       (insert (format (format "%%0%dd" n) (+ arg num))))))
 
@@ -81,7 +81,9 @@ on the position of the cursor."
  "C-S-y" #'clipboard-yank
  "C-S-w" #'clipboard-kill-region
  "M-W" #'clipboard-kill-ring-save
- "M-K" (fn! (clipboard-kill-ring-save (point) (line-end-position)))
+ "M-K" #'(lambda ()
+           (interactive)
+           (clipboard-kill-ring-save (point) (line-end-position)))
 
  ;; dwim
  "M-l" #'downcase-dwim
@@ -146,6 +148,8 @@ on the position of the cursor."
   :config
   (setq avy-all-windows nil)
   (vz/bind
+   "C-S-n" #'avy-goto-line-above
+   "C-S-p" #'avy-goto-line-below
    :prefix "M-g"
    "f" #'avy-goto-char-2
    "g" #'avy-goto-line
@@ -180,16 +184,18 @@ loop around and look for occurence for CHAR from the start of line."
   "Keymap for `vz/jump-to-char' backwards.")
 
 (vz/bind
- "M-g F" (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
+ "M-g F" #'(lambda ()
+             (interactive)
+             (setq overriding-local-map vz/jump-to-char-forward-map))
 
  :map vz/jump-to-char-forward-map
- [remap self-insert-command]  (fn! (vz/jump-to-char 'forward (this-command-keys)))
- "C-,"                        (fn! (setq overriding-local-map vz/jump-to-char-backward-map))
- "C-g"                        (fn! (setq overriding-local-map nil))
- "<escape>"                   (fn! (setq overriding-local-map nil))
+ [remap self-insert-command]  #'(lambda () (intearctive) (vz/jump-to-char 'forward (this-command-keys)))
+ "C-,"                        #'(lambda () (intearctive) (setq overriding-local-map vz/jump-to-char-backward-map))
+ "C-g"                        #'(lambda () (intearctive) (setq overriding-local-map nil))
+ "<escape>"                   #'(lambda () (intearctive) (setq overriding-local-map nil))
 
  :map vz/jump-to-char-backward-map
- [remap self-insert-command]  (fn! (vz/jump-to-char 'backward (this-command-keys)))
- "C-,"                        (fn! (setq overriding-local-map vz/jump-to-char-forward-map))
- "<escape>"                   (fn! (setq overriding-local-map nil))
- "C-g"                        (fn! (setq overriding-local-map nil)))
+ [remap self-insert-command]  #'(lambda () (interactive) (vz/jump-to-char 'backward (this-command-keys)))
+ "C-,"                        #'(lambda () (interactive) (setq overriding-local-map vz/jump-to-char-forward-map))
+ "<escape>"                   #'(lambda () (interactive) (setq overriding-local-map nil))
+ "C-g"                        #'(lambda () (interactive) (setq overriding-local-map nil)))

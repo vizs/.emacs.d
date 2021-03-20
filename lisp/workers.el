@@ -15,9 +15,8 @@
 
 (defun vz/disable-bold-italic ()
   "Disable bold and italic for everything except bold and italic face."
-  (-each (face-list)
-    (fn:
-     set-face-attribute <> nil :weight 'normal))
+  (seq-each #'(lambda (x) (set-face-attribute x nil :weight 'normal))
+            (face-list))
   ;; :slant 'normal
   ;; :underline nil))
   (set-face-attribute 'bold   nil :weight 'bold)
@@ -25,12 +24,11 @@
 
 (defun vz/windows-in-direction (direction &optional windows)
   "Get all WINDOWS in DIRECTION relative to selected window."
-  (-->
-   (or (car windows) (selected-window))
-   (window-in-direction direction it)
-   (if it
-       (vz/windows-in-direction direction (cons it windows))
-     windows)))
+  (let ((win (window-in-direction direction
+                                  (or (car windows) (selected-window)))))
+    (if win
+        (vz/windows-in-direction direction (cons win windows))
+      windows)))
 
 (defun vz/uniqify (string)
   "Uniqify STRING by adding random characters at the end.
@@ -45,16 +43,17 @@ behaviour is similar to that of in `bind-keys'."
   (let ((map 'global-map)
         (prefix ""))
     `(progn
-       ,@(-map
-          (fn (-let (((key fun) <>))
-               (pcase key
-                (:map    (setq map fun)    '())
-                (:prefix (setq prefix fun) '())
-                (_ (list 'define-key
-                    map
-                    (if (stringp key) `(kbd ,(concat prefix " " key)) key)
-                    fun)))))
-          (-partition 2 args)))))
+       ,@(seq-map
+          #'(lambda (x)
+            (seq-let (key fun) x
+             (pcase key
+              (:map    (setq map fun)    '())
+              (:prefix (setq prefix fun) '())
+              (_ (list 'define-key
+                  map
+                  (if (stringp key) `(kbd ,(concat prefix " " key)) key)
+                  fun)))))
+          (seq-partition args 2)))))
 
 (defun vz/kill-current-buffer-or-prompt (arg)
   (interactive "P")
@@ -128,8 +127,8 @@ behaviour is similar to that of in `bind-keys'."
 ;; I don't like the underline face lol
 (add-hook 'grep-mode-hook
           (defun vz/style-grep-menu ()
-            (-each '(compilation-info compilation-line-number underline)
-              (fn (face-remap-add-relative <> :underline nil)))))
+            (seq-each #'(lambda (x) (face-remap-add-relative x :underline nil))
+                      '(compilation-info compilation-line-number underline))))
 
 ;; ** Help menu binds
 ;; Why do I have to answer yes when I revert?
@@ -138,7 +137,9 @@ behaviour is similar to that of in `bind-keys'."
 (when (< emacs-major-version 28)
   (vz/bind
    :map help-mode-map
-   [remap revert-buffer] (fn! (revert-buffer nil t))))
+   [remap revert-buffer] #'(lambda (_)
+                             (interactive)
+                             (revert-buffer nil t))))
 
 ;; * Dired
 (use-package dired
@@ -227,18 +228,18 @@ behaviour is similar to that of in `bind-keys'."
   :functions (vz/edit-indirect-paragraph)
   :config
   (setq edit-indirect-guess-mode-function
-        (fn: funcall (with-current-buffer <> major-mode)))
+        #'(lambda (x) (funcall (with-current-buffer x major-mode))))
   (defun vz/edit-indirect-paragraph ()
     (interactive)
     (mark-paragraph)
     (command-execute #'edit-indirect-region)))
 
-;; ** Execute actions based on text
+;; ** TODO: Execute actions based on text
 ;; Desperately needs a rewrite
-(vz/use-package wand "plumb"
-  :straight (:type git :host github
-                   :repo "cmpitg/wand"
-                   :fork (:repo "vizs/wand")))
+;; (vz/use-package wand "plumb"
+;;   :straight (:type git :host github
+;;                    :repo "cmpitg/wand"
+;;                    :fork (:repo "vizs/wand")))
 
 ;; * Org-mode
 ;; You don't need any explanation
@@ -255,18 +256,18 @@ behaviour is similar to that of in `bind-keys'."
 
 ;; * Communication
 ;; IRC and Discord using ircdiscord
-(vz/use-package circe "irc"
-  :defer t
-  :functions (vz/circe-jump-irc vz/circe-jump-discord)
-  :init
-  (defun pass-irc (serv)
-    (fn: pass (format "irc/%s" serv)))
-  (defun pass-discord (serv)
-    (fn (unless (or vz/ircdiscord-process
-                    (process-live-p vz/ircdiscord-process))
-          (setq-default vz/ircdiscord-process
-                        (start-process "ircdiscord" nil "ircdiscord")))
-        (format "%s:%d" (pass "misc/discord") serv))))
+;; (vz/use-package circe "irc"
+;;   :defer t
+;;   :functions (vz/circe-jump-irc vz/circe-jump-discord)
+;;   :init
+;;   (defun pass-irc (serv)
+;;     #'(lambda (pass (format "irc/%s" serv))))
+;;   (defun pass-discord (serv)
+;;     #'(lambda (unless (or vz/ircdiscord-process
+;;                     (process-live-p vz/ircdiscord-process))
+;;           (setq-default vz/ircdiscord-process
+;;                         (start-process "ircdiscord" nil "ircdiscord")))
+;;         (format "%s:%d" (pass "misc/discord") serv))))
 
 ;; * scroll-other-window
 ;; This lets you use a custom function to scroll instead of just window_scroll in C
@@ -301,9 +302,11 @@ behaviour is similar to that of in `bind-keys'."
     company-show-numbers 'left
     company-global-modes '(not shell-mode org-mode)
     company-minimum-prefix-length 2
-    completion-in-region-function (fn (if company-mode
-                                          (company-complete-common)
-                                        (ivy-completion-in-region <1> <2> <3> <4>))))
+    completion-in-region-function
+    #'(lambda (start end collection predicate)
+        (if company-mode
+            (company-complete-common)
+          (ivy-completion-in-region start end collection predicate))))
   (add-to-list 'company-backends #'company-capf)
   (global-company-mode))
 
@@ -398,10 +401,10 @@ behaviour is similar to that of in `bind-keys'."
      (racket--repl-session-id)
      `(eval ,(buffer-substring-no-properties (racket--repl-last-sexp-start) (point)))
      (let ((point (point)))
-       (fn (message "%s" <>)
-           (eros--make-result-overlay <>
-             :where point
-             :duration eros-eval-result-duration)))))
+       #'(lambda (result) (message "%s" result)
+           (eros--make-result-overlay result
+            :where point
+            :duration eros-eval-result-duration)))))
   (vz/bind
    :map racket-mode-map
    [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp))

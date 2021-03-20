@@ -14,13 +14,13 @@
     ""))
 
 (defun vz/mode-line-file-short-dir ()
-  (if-let ((path (cond ((derived-mode-p 'comint-mode) (concat default-directory "/a"))))
+  (if-let ((path (when (derived-mode-p 'comint-mode) (concat default-directory "/a")))
            (dir (let* ((dir (f-split (f-short (f-dirname path))))
                        (dir* (cdr dir)))
                   (if (s-equals? (car dir*) "~") dir* dir))))
       (concat (f-short (apply #'f-join
-                              (append (-map (fn (substring <> 0 1)) (-drop-last 1 dir))
-                                      (list (-last-item dir)))))
+                              (append (seq-map #'(lambda (f) (substring f 0 1)) (butlast dir))
+                                      (last dir))))
               "|")
     ""))
 
@@ -77,8 +77,9 @@
 (defvar vz/mode-line-time ""
   "Variable that stores the svg image of current time.")
 
-(let ((fn (fn (when (eq <3> 'set)
-                 (force-mode-line-update t)))))
+(let ((fn #'(lambda (_ _ x)
+              (when (eq x 'set)
+               (force-mode-line-update t)))))
   (add-variable-watcher 'vz/mode-line-battery fn)
   (add-variable-watcher 'vz/mode-line-time fn))
 
@@ -115,7 +116,7 @@
 ;;           (defun vz/mode-line-update-after-make-frame ()
 ;;             (vz/mode-line-update-battery)
 ;;             (vz/mode-line-update-time)))
-;; (make-thread (fn (while (eq (length (visible-frame-list)) 1)
+;; (make-thread #'(lambda () (while (eq (length (visible-frame-list)) 1)
 ;;                    (sleep-for 1))
 ;;                  (run-at-time t display-time-interval #'vz/mode-line-update-time)
 ;;                  (run-at-time nil battery-update-interval #'vz/mode-line-update-battery)))

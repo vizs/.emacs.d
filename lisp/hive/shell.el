@@ -140,9 +140,8 @@
 
 ;; * Jump to directory alias
 (defun vz/shell-get-dir-alias ()
-  (-map (fn (cadr (s-split "=" <>)))
-        (-drop-last
-         1
+  (seq-map #'(lambda (x) (cadr (s-split "=" x)))
+        (butlast
          (s-split "\n"
                   (f-read
                    (if (s-equals? (f-filename explicit-shell-file-name) "mksh")
@@ -162,11 +161,11 @@
     (ivy-read
      "> " (vz/shell-get-dir-alias)
      :caller 'vz/shell-jump-to-dir
-     :action (fn
-              (if (eq this-command #'ivy-call)
-                  (ivy-exit-with-action
-                   (fn (setq directory (read-directory-name "> " <>))))
-                (setq directory <>))))
+     :action #'(lambda (x)
+                 (if (eq this-command #'ivy-call)
+                     (ivy-exit-with-action
+                      #'(lambda (_) (setq directory (read-directory-name "> " x))))
+                   (setq directory x))))
     (vz/shell-history--ivy-action (concat "cd " (shell-quote-argument directory)))
     (comint-send-string (get-buffer-process (current-buffer))
                         input)))
@@ -183,10 +182,11 @@ If CWD is non-nil, then cd to CWD."
   (add-to-list 'vz/popup-shells buffer)
   (set-process-sentinel
    (get-buffer-process buffer)
-   (fn (unless (process-live-p <>)
-         (let ((buf (process-buffer <>)))
-           (setq vz/popup-shells (remove buf vz/popup-shells))
-           (kill-buffer buf)))))
+   #'(lambda (p)
+       (unless (process-live-p p)
+        (let ((buf (process-buffer p)))
+         (setq vz/popup-shells (remove buf vz/popup-shells))
+         (kill-buffer buf)))))
   (when cwd
     (with-current-buffer buffer
       (comint-send-string (get-buffer-process buffer)
@@ -216,13 +216,11 @@ create a new buffer."
                  (error (f-full default-directory)))))
       (if (null vz/popup-shells)
           (vz/popup-shell--add (shell) cwd)
-        (let* ((free-buffers (-filter
-                              (fn (and (vz/inside-shell? <>)
-                                       (null (get-buffer-window <> t))))
+        (let* ((free-buffers (seq-filter #'(lambda (buf) (and (vz/inside-shell? buf)
+                                                          (null (get-buffer-window buf t))))
                               vz/popup-shells))
-               (cwd-buffers (-filter
-                             (fn (with-current-buffer <>
-                                   (f-equal? default-directory cwd)))
+               (cwd-buffers (seq-filter #'(lambda (buf) (with-current-buffer buf
+                                                         (f-equal? default-directory cwd)))
                              free-buffers)))
           (cond
            (cwd-buffers
@@ -256,7 +254,8 @@ create a new buffer."
   (interactive)
   (ivy-read "> " vz/shell--prompt-alist
             :sort nil
-            :action (fn (goto-char (cdr <>))
+            :action #'(lambda (p)
+                        (goto-char (cdr p))
                         (vz/beacon-highlight))))
 
 ;; * Emacs frame as terminal
@@ -288,23 +287,20 @@ create a new buffer."
   "Remove all dead *term* buffers"
   (interactive)
   (let ((kill-buffer-query-functions nil))
-    (-each
-        (-filter
-         (fn:
-          with-current-buffer <>
-          (and (s-prefix? "*term-" (buffer-name <>))
-               (or (not (frame-live-p vz/term-minor-mode-frame))
-                   (not (get-buffer-process <>)))))
+    (seq-each
+        (seq-filter
+         #'(lambda (x) (with-current-buffer x
+                        (and (s-prefix? "*term-" (buffer-name x))
+                         (or (not (frame-live-p vz/term-minor-mode-frame))
+                          (not (get-buffer-process x))))))
          (buffer-list))
       #'kill-buffer)))
 
 (defun vz/term-minor-mode-set-title (string)
   "Set frame title when `vz/term-minor-mode' is active"
   (when (bound-and-true-p vz/term-minor-mode)
-    (->>
-     (s-trim-right string)
-     (format "term: %s")
-     (set-frame-parameter vz/term-minor-mode-frame 'title))))
+    (set-frame-parameter vz/term-minor-mode 'title
+                         (format "term: %s" (s-trim-right string)))))
 
 ;; (add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
 

@@ -6,12 +6,12 @@
 (setq
   vz/circe-mynicks '("viz" "_viz_")
   ;; TODO: clean this up
-  vz/circe-mynicks-re (-reduce-from
-              (fn: format "%1$s[ @]%2$s[,: ]\\|[ @]%2$s$"
-                   (if (s-blank? <1>) "" (s-concat <1> "\\|"))
-                   <2>)
-              ""
-              (cdr vz/circe-mynicks)))
+  vz/circe-mynicks-re (seq-reduce
+                       (lambda (x res) (format "%1$s[ @]%2$s[,: ]\\|[ @]%2$s$"
+                                           (if (s-blank? x) "" (s-concat x "\\|"))
+                                           res))
+                       (cdr vz/circe-mynicks)
+                       ""))
 
 ;; ** IRC Login details
 
@@ -137,51 +137,49 @@
 ;; *** Set the variable
 
 (setq
-  circe-format-say      (fn: vz/circe-handle-msg 'say   <rest>)
-  circe-format-self-say (fn: vz/circe-handle-msg 'ssay  <rest>)
-  circe-format-action   (fn: vz/circe-handle-msg 'acn   <rest>))
+  circe-format-say      #'((lambda (&rest r) (vz/circe-handle-msg 'say  r))
+  circe-format-self-say #'((lambda (&rest r) (vz/circe-handle-msg 'ssay r))
+  circe-format-action   #'((lambda (&rest r) (vz/circe-handle-msg 'acn  r)))
 (setq
-  circe-format-server-message      (fn: vz/circe-handle-msg 'smsg  <rest>)
-  circe-format-server-notice       (fn: vz/circe-handle-msg 'smsg  <rest>)
-  circe-format-server-quit         (fn: vz/circe-handle-msg 'part  <rest>)
-  circe-format-server-quit-channel (fn: vz/circe-handle-msg 'part  <rest>)
-  circe-format-server-join         (fn: vz/circe-handle-msg 'join  <rest>)
-  circe-format-server-topic        (fn: vz/circe-handle-msg 'smsg  <rest>)
-  circe-format-server-part         (fn: vz/circe-handle-msg 'part  <rest>)
-  circe-format-server-nick-change  (fn: vz/circe-handle-msg 'nch   <rest>)
-  circe-format-server-rejoin       (fn: vz/circe-handle-msg 'join  <rest>))
+  circe-format-server-message      #'(lambda (&rest r (vz/circe-handle-msg 'smsg r))
+  circe-format-server-notice       #'(lambda (&rest r (vz/circe-handle-msg 'smsg r))
+  circe-format-server-quit         #'(lambda (&rest r (vz/circe-handle-msg 'part r))
+  circe-format-server-quit-channel #'(lambda (&rest r (vz/circe-handle-msg 'part r))
+  circe-format-server-join         #'(lambda (&rest r (vz/circe-handle-msg 'join r))
+  circe-format-server-topic        #'(lambda (&rest r (vz/circe-handle-msg 'smsg r))
+  circe-format-server-part         #'(lambda (&rest r (vz/circe-handle-msg 'part r))
+  circe-format-server-nick-change  #'(lambda (&rest r (vz/circe-handle-msg 'nch  r))
+  circe-format-server-rejoin       #'(lambda (&rest r (vz/circe-handle-msg 'join r)))
 
 ;; * Jump commands
 ;; ** Helper
 
 (defun vz/circe-get-channels-cond (cond)
   "Get channels from all server buffer that match the condition cond"
-  (->>
-   (-filter cond (circe-server-buffers))
-   (-map (fn: with-current-buffer <> (circe-server-channel-buffers)))
-   (-flatten)))
+  (flatten-tree
+   (seq-map #'(lambda (x) (with-current-buffer x
+                           (circe-server-channel-buffers)))
+            (seq-filter cond (circe-server-buffers)))))
 
 ;; ** Jump to channel
 
 (defun vz/circe-jump-irc ()
   "Jump to irc channel"
   (interactive)
-  (->>
-   (fn: not (s-prefix? "Discord " (buffer-name <>)))
-   (vz/circe-get-channels-cond)
-   (-map #'buffer-name)
-   (ivy-read "> ")
-   (switch-to-buffer-other-window)))
+  (switch-to-buffer-other-window
+   (ivy-read "> "
+             (seq-map #'buffer-name
+                      (vz/circe-get-channels-cond
+                       #'(lambda (x) (not (s-prefix? "Discord " (buffer-name x)))))))))
 
 (defun vz/circe-jump-discord ()
   "Jump to discord channel"
   (interactive)
-  (->>
-   (fn: s-prefix? "Discord " (buffer-name <>))
-   (vz/circe-get-channels-cond)
-   (-map #'buffer-name)
-   (ivy-read "> ")
-   (switch-to-buffer-other-window)))
+  (switch-to-buffer-other-window
+   (ivy-read "> "
+             (seq-map #'buffer-name
+                      (vz/circe-get-channels-cond
+                       #'(lambda (x) (s-prefix? "Discord " (buffer-name x))))))))
 
 ;; *** Jump to mention
 
@@ -191,31 +189,24 @@
 (defun vz/circe-jump-to-mention ()
   "Jump to mention in current circe buffer"
   (interactive)
-  (->>
-   (ivy-read "> " vz/circe-mentions)
-   (asoc-get vz/circe-mentions)
-   (goto-line)))
+  (goto-line (asoc-get vz/circe-mentions
+                       (ivy-read "> " vz/circe-mentions))))
 
 (defun vz/circe-jump-to-mentions ()
   "Jump to mentions in all circe buffers"
   (interactive)
-  (let ((mentions
-         (->>
-          (vz/circe-get-channels-cond (fn t))
-          (-map #'(lambda (b)
-                    (with-current-buffer b
-                     (-map
-                      (fn: cons
-                       (format "%s:%s" (buffer-name b) (car <>))
-                       (cdr <>))
-                      vz/circe-mentions))))
-          (-flatten))))
-    (-->
-     (ivy-read "> " mentions)
-     (let ((ch  (car (s-split ":" it)))
-           (pos (asoc-get mentions it )))
-       (switch-to-buffer-other-window ch)
-       (goto-line pos)))))
+  (let* ((mentions
+          (flatten-tree
+           (seq-map #'(lambda (b)
+                        (with-current-buffer b
+                         (seq-map #'(lambda (x) (cons (format "%s:%s" (buffer-name b) (car x))))
+                          vz/circe-mentions)))
+                    (vz/circe-get-channels-cond #'(lambda (_) t)))))
+         (mention (ivy-read "> " mentions))
+         (ch (car (s-split ":" mention)))
+         (pos (asoc-get mentions mention)))
+    (switch-to-buffer-other-window ch)
+    (goto-line pos)))
 
 ;; ** Bind
 
@@ -247,7 +238,7 @@
   (let ((faces '(circe-prompt-face circe-originator-face
                  lui-time-stamp-face circe-my-message-face)))
     (vz/set-monospace-faces faces)
-    (-each faces (fn: set-face-attribute <> nil :height 102))))
+    (seq-each #'(lambda (x) (set-face-attribute x nil :height 102)) faces)))
 
 (defun vz/circe-draw-prompt ()
   (lui-set-prompt (vz/circe-draw-msg-generic (buffer-name) "")))

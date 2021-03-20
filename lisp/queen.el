@@ -1,174 +1,13 @@
 ;; -*- lexical-binding: t; -*-
 
-;; * Set variables and sane defaults
-;; ** Sanity
-(setq-default
- vz/monospace-font (replace-regexp-in-string
-                    "\n$" ""
-                    (shell-command-to-string "fc-match -f %{family} monospace"))
- vz/variable-font (replace-regexp-in-string
-                   "\n$" ""
-                   (shell-command-to-string "fc-match -f %{family} serif"))
+;; * Package manager
 
- vz/ircdiscord-process nil
- vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
+;; Quelpa scares me so I'm using straight, use `use-package' to manage
+;; configuration of packages.
 
- use-dialog-box nil
-
- ;; Initialise `Info-directory-list' with Emacs info files
- Info-directory-list Info-default-directory-list
-
- backup-by-copying t
- backup-directory-alist '((".*" . "~/.cache/emacs-bkups/"))
- delete-old-versions t
- keep-new-versions 5
- keep-old-versions 2
- version-control t
- auto-save-file-name-transforms '((".*" "~/.cache/emacs-autosave/" t))
- auto-save-list-file-prefix "~/.cache/emacs-autosave/"
- create-lockfiles nil
-
- ;; Cursor styling
- cursor-in-non-selected-windows nil
- cursor-type '(bar . 2)
-
- custom-file "/dev/null"
-
- ;; Startup stuff
- initial-scratch-message nil
- inhibit-startup-screen t
- initial-buffer-choice t
-
- ;; Insert newline at EOF
- require-final-newline t
-
- ;; I prefer to separate default kill register and clipboard
- x-select-enable-clipboard nil
-
- ;; Follow links to version controlled files
- vc-follow-symlinks t
-
- tab-always-indent 'complete
-
- enable-local-eval t
-
- ;; Horizontal scrolling
- mouse-wheel-tilt-scroll t
- mouse-wheel-flip-direction t
-
- ;; Indentation
- indent-tabs-mode t
- tab-width 4
-
- frame-resize-pixelwise t
-
- ;; Move to bottom/top of buffer
- scroll-error-top-bottom t
-
- ;; Avoid duplicate items in kill-ring
- kill-do-not-save-duplicates t
-
- disabled-command-function nil
-
- auto-save-no-message t
-
- ;; I can't write anything anw
- view-read-only t
-
- ;; This is much easier on the eyes
- uniquify-buffer-name-style 'forward)
-
-(defalias 'yes-or-no-p 'y-or-n-p)
-
-;; *** Delete region when inserting text
-;; (delete-selection-mode t)
-
-;; ** Indentation
-(defvar c-basic-offset 4)
-(defvar cperl-basic-offset 4)
-(defvar python-indent 4)
-
-(add-hook 'prog-mode-hook
-          (defun vz/prog-functional-indent-style ()
-            (when (apply #'derived-mode-p vz/functional-major-modes)
-              (setq-local indent-tabs-mode nil
-                          tab-width 2))))
-
-;; * Niceties
-;; ** Helper macros
-(require 'seq)
-
-;; *** setq but with namespace
-;; inspo: https://github.com/neeasade/emacs.d
-;; (defmacro setq-ns (ns &rest args)
-;;   "`setq' but with the namespace as NS.
-;; If variable is a cons cell, then cdr is attached to setq.
-;; For example, to set a buffer local variable, you pass the variable name
-;; as (name-without-ns . local)."
-;;   (declare (indent 1))
-;;   `(progn
-;;      ,@(mapcar (lambda (x)
-;;                  (let ((set 'setq)
-;;                        (var (car x)))
-;;                   (when (and (listp var) (not (listp (cdr var))))
-;;                    (setq set (intern (format "setq-%s" (cdr var)))
-;;                     var (car var)))
-;;                   (list set (intern (format "%s-%s" ns var)) (cadr x))))
-;;         (seq-partition args 2))))
-
-;; *** setq but for a hook
-;; inspo: doom-emacs
-
-;; (defmacro setq-hook--create-fun (mode &rest body)
-;;   "Helper macro to create function for `setq-hook'."
-;;   `(defun ,(intern (format "vz/setq-for-%s" mode)) ()
-;;     (setq-local ,@body)))
-
-;; (defmacro setq-hook (mode &rest body)
-;;   "Set buffer local variable for a major mode."
-;;   (declare (indent 1))
-;;   (let ((f `(setq-hook--create-fun ,mode ,@body)))
-;;     `(add-hook ',mode ,f nil t)))
-
-;; *** Formating s-expressions?
-;; from u/b3n
-;; (defmacro vz/format-sexp (sexp &rest format-args)
-;;   "Format SEXP and eval it."
-;;   `(eval (read (format ,(format "%S" sexp) ,@format-args))))
-
-;; ** Automatically chmod +x file if it has a shebang
-(add-hook 'after-save-hook #'executable-make-buffer-file-executable-if-script-p)
-
-;; ** Auto-revert buffer if file is modified
-;; From u/redblobgames
-(setq auto-revert-use-notify t
-      auto-revert-avoid-polling t)
-
-(global-auto-revert-mode)
-
-;; ** Fonts
-(add-to-list 'default-frame-alist `(font . ,(format "%s:pixelsize=12"
-                                             vz/monospace-font)))
-
-(set-face-attribute 'variable-pitch nil :family vz/variable-font)
-
-;; Color Emoji Time
-
-(add-hook 'server-after-make-frame-hook
-          (defun vz/set-emoji-range ()
-            (set-fontset-font t 'symbol
-                              "Noto Color Emoji" nil 'prepend)
-            (remove-hook 'server-after-make-frame-hook
-                         #'vz/set-emoji-range)))
-
-;; ** Display … instead of $ at the visual end of truncated line
-(set-display-table-slot standard-display-table 'truncation ?…)
-
-;; ** Inner border
-(add-to-list 'default-frame-alist '(internal-border-width . 4))
-
-;; * Straight
 ;; ** Bootstrap straight
+
+;; Straight from the readme
 (defvar bootstrap-version)
 (let ((bootstrap-file (expand-file-name
                        "straight/repos/straight.el/bootstrap.el"
@@ -183,43 +22,17 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; ** Setup straight variables
+(setq straight-vc-git-default-clone-depth 1 ; Be ASAP
+      straight-cache-autoloads t)
+
+;; ** Install use-package
+
 (straight-use-package 'use-package)
-(setq straight-use-package-by-default t
-      straight-cache-autoloads t
-      straight-vc-git-default-clone-depth 1)
 
-;; * Major helper functions
-;; ** Emacs Lisp enhancers
-;; dash | list
-;; s    | string
-;; f    | file
-;; fn   | lambda
-;; asoc | alist
-(use-package dash)
-(use-package s)
-(use-package f)
-(use-package fn
-  :straight (:type git :host github
-             :repo "troyp/fn.el"
-             :fork (:host github :repo "vizs/fn.el"))
-  :config
-  ;; TODO: Check if first element is string,
-  ;;       if so add it to interactive
-  (defmacro fn! (&rest body)
-    "Like `fn' but interactive"
-    `(lambda ()
-       (interactive)
-       ,@body))
-  (defmacro fn:! (&rest body)
-    "Like `fn:' but interactive"
-    `(lambda ()
-       (interactive)
-       (,@body))))
-(use-package asoc
-  :straight (:type git :host github :repo "troyp/asoc.el"))
+(setq straight-use-package-by-default t)
 
-;; ** use-packge but also load a file
+;; ** Macro to load in a file when using `use-package'
+
 (defmacro vz/use-package (name file &rest body)
   "Like `use-package' but also load file located lisp/hive/FILE.el."
   (declare (indent 2))
@@ -228,50 +41,283 @@
      :config
      (load-file (format "%s/lisp/hive/%s.el" user-emacs-directory (or ,file ',name)))))
 
-;; ** Random helper functions
+;; * Helper functions
+
+
+(require 'seq)
+(require 'pcase)
+
+;; I only really write racket so HAHA
+
+;; ** filter-map
+
+(defun vz/filter-map (pred list)
+  "Like (seq-filter #'(lambda (x) x) (seq-map #'pred list)."
+  (letrec ((helper #'(lambda (list res)
+                       (if (null list)
+                           res
+                         (funcall helper (butlast list)
+                          (if-let ((elt (funcall pred (car (last list)))))
+                              (cons elt res)
+                            res))))))
+    (funcall helper list '())))
+
+;; ** find-index
+
+(defun vz/find-index (pred list)
+  "Find first index for which PRED returned non-nil in
+LIST. Return nil if otherwise."
+  (letrec ((helper #'(lambda (n list)
+                       (cond
+                        ((null list) nil)
+                        ((funcall pred (car list)) n)
+                        (t (funcall helper (1+ n) (cdr list)))))))
+    (funcall helper 0 list)))
+
+;; ** Full path to files in $HOME
+
 (defun ~ (file)
-  "Path to FILE respective to $HOME"
+  "Path to FILE respective to $HOME."
   (expand-file-name file (getenv "HOME")))
 
-;; ** Font related functions
+;; ** Set face's font-family
+
 (defun vz/set-monospace-faces (faces)
-  (-each faces
-    (fn: set-face-attribute <> nil :family vz/monospace-font)))
+  (seq-each #'(lambda (x) (set-face-attribute x nil :family vz/monospace-font))
+            faces))
 
 (defun vz/set-variable-faces (faces)
-  (-each faces
-    (fn: set-face-attribute <> nil :family vz/variable-font)))
+  (seq-each #'(lambda (x) (set-face-attribute x nil :family vz/variable-font))
+            faces))
 
-;; ** Quality of life packages
-;; *** Saner switch window and goto-char motion
-(use-package avy
-  :bind
-  (("C-S-n" . avy-goto-line-below)
-   ("C-S-p" . avy-goto-line-above)))
-(use-package ace-window
-  :after avy
-  :functions vz/ace-delete-window
-  :bind (("C-x o" . ace-window)
-	       ("C-x 0" . vz/ace-delete-window))
+;; ** External Elisp Enhancers
+
+(use-package s)                         ; String
+(use-package f)                         ; File
+(use-package asoc                       ; Alist
+  :straight ( :type git :host github :repo "troyp/asoc.el"))
+
+;; * Customise core built-in packages
+;; ** Disable custom files
+
+(use-package cus-edit
+  :straight ( :type built-in)
   :config
-  (defun vz/ace-delete-window ()
-    "If window count is 2, run `delete-window`; `ace-delete-window` otherwise."
-    (interactive)
-    (if (eq 2 (length (window-list)))
-        (delete-window)
-      (ace-delete-window)))
-  ;; More noticable this way
-  (set-face-attribute 'aw-leading-char-face nil :height 150)
-  (setq aw-keys '(?a ?s ?d ?f ?h ?j ?k ?l)
-        ;; Only consider the windows in the active frame
-        aw-scope 'frame))
+  (setq custom-file "/dev/null"))
 
-;; *** Selection engine
+;; ** Auto saves and backups
+
+;; It is really annoying when Emacs scatters auto saves and backups in
+;; random directories. But you can save them under a single directory.
+
+(use-package files
+  :straight ( :type built-in)
+  :config
+  (setq
+   ;; Save auto save files under a single directory
+   auto-save-file-name-transforms `((".*" ,(~ ".cache/emacs-autosave/") t))
+   auto-save-list-file-prefix (~ ".cache/emacs-autosave/")
+
+   ;; Pointless to send a message IMO, only clutters the *Messages*
+   ;; buffer.
+   auto-save-no-message t
+
+   ;; Don't ask to delete old backup-files
+   delete-old-versions t
+
+   ;; I /don't/ really care about the ownership of backup files
+   backup-by-copying t
+
+   ;; Save backup files under a single directory
+   backup-directory-alist `((".*" . ,(~ ".cache/emacs-bkups/")))))
+
+;; ** Auto-revert mode
+
+(use-package autorevert
+  :straight ( :type built-in)
+  :config
+  (global-auto-revert-mode t)
+  (setq
+   ;; Kind of pointless to have this when I can just turn on `auto-revert-mode'
+   create-lockfiles nil
+
+   ;; Should hopefully be more efficient this way
+   auto-revert-use-notify t
+   auto-revert-avoid-polling t))
+
+;; ** Auto ``chmod +x'' files
+
+(use-package executable
+  :straight ( :type built-in)
+  :config
+  (add-hook 'after-save-hook
+            #'executable-make-buffer-file-executable-if-script-p))
+
+;; ** Cursor
+
+(setq-default
+ cursor-in-non-selected-windows nil
+ cursor-type '(bar . 2))
+
+;; ** End files w/ newline
+
+(use-package files
+  :straight ( :type built-in)
+  :config
+  (setq require-final-newline t))
+
+;; ** X clipboard things
+
+(use-package select
+  :straight ( :type built-in)
+  :config
+  (setq
+   ;; Separate kill-ring and X clipboard
+   x-select-enable-clipboard nil))
+
+;; ** Indentation
+
+(setq
+ vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
+
+ tab-always-indent 'complete
+ indent-tabs-mode t
+ tab-width 4)
+
+(defvar c-basic-offset 4)
+(defvar cperl-basic-offset 4)
+(defvar python-indent 4)
+
+(add-hook 'prog-mode-hook
+          (defun vz/prog-functional-indent-style ()
+            (when (apply #'derived-mode-p vz/functional-major-modes)
+              (setq-local indent-tabs-mode nil
+                          tab-width 2))))
+
+;; ** Horizontal scrolling
+
+(use-package mwheel
+  :straight ( :type built-in)
+  :config
+  (setq mouse-wheel-tilt-scroll t
+        mouse-wheel-flip-direction t))
+
+;; ** Use `view-mode' for read only files
+
+(use-package files
+  :straight ( :type built-in)
+  :config
+  (setq view-read-only t))
+
+;; ** Uniquify buffer names
+
+(use-package uniquify
+  :straight ( :type built-in)
+  :config
+  (setq uniquify-buffer-name-style 'forward))
+
+;; ** I don't want to shoot myself
+
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(setq
+ use-dialog-box nil
+ ;; Not resizing pixelwise irks me to no end.
+ frame-resize-pixelwise t)
+
+
+(setq
+ ;; C L E A N
+ initial-scratch-message nil
+
+ inhibit-startup-screen t
+ initial-buffer-choice t)
+
+(use-package vc-hooks
+  :straight ( :type built-in)
+  :config
+  (setq vc-follow-symlinks t))
+
+(use-package files
+  :straight ( :type built-in)
+  :config
+  ;; Unsafe IK /shrug
+  (setq enable-local-eval t))
+
+(use-package novice
+  :straight ( :type built-in)
+  :config
+  (setq disabled-command-function nil))
+
+;; ** Fonts
+
+(setq
+ vz/monospace-font (replace-regexp-in-string
+                    "\n$" ""
+                    (shell-command-to-string "fc-match -f %{family} monospace"))
+ vz/variable-font (replace-regexp-in-string
+                   "\n$" ""
+                   (shell-command-to-string "fc-match -f %{family} serif")))
+
+(add-to-list 'default-frame-alist
+             `(font . ,(format "%s:pixelsize=12" vz/monospace-font)))
+
+(set-face-attribute 'variable-pitch nil :family vz/variable-font)
+
+(add-hook 'server-after-make-frame-hook
+          (defun vz/set-emoji-range ()
+            (set-fontset-font t 'symbol
+                              "Noto Color Emoji" nil 'prepend)
+            (remove-hook 'server-after-make-frame-hook
+                         #'vz/set-emoji-range)))
+
+;; ** Theme and minor styling
+
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "lisp/themes" user-emacs-directory))
+
+(load-theme 'vz-nh t)
+
+;; Display … instead of $ at the visual end of truncated line
+(set-display-table-slot standard-display-table 'truncation ?…)
+
+;; Inner border
+(add-to-list 'default-frame-alist '(internal-border-width . 4))
+
+;; ** Highlight on long cursor movements
+
+(require 'pulse)
+
+(use-package pulse
+  :straight ( :type built-in)
+  :config
+  (setq pulse-flag t))
+
+;; Too lazy to change the function call elsewhere :P
+(defun vz/beacon-highlight (&rest _)
+  "Pulse the current line momentarily."
+  (interactive)
+  (let ((pulse-iterations 50)
+        (pulse-delay 0.1))
+    (pulse-momentary-highlight-one-line (point))))
+
+(advice-add 'delete-window :after #'vz/beacon-highlight)
+
+;; TODO: Find out why this doesn't work
+;; (advice-add 'other-window  :after #'vz/beacon-highlight)
+
+(advice-add 'scroll-up-command   :after #'vz/beacon-highlight)
+(advice-add 'scroll-down-command :after #'vz/beacon-highlight)
+
+(advice-add 'recenter-top-bottom :after #'vz/beacon-highlight)
+
+;; * Selection engine
+
 (use-package ivy
   :functions vz/ivy-minibuffer-insert-at-point
-  :bind (:map ivy-minibuffer-map
-              ("<C-up>" . ivy-minibuffer-grow)
-              ("<C-down>" . ivy-minibuffer-shrink))
+  :bind ( :map ivy-minibuffer-map
+               ("<C-up>" . ivy-minibuffer-grow)
+               ("<C-down>" . ivy-minibuffer-shrink))
   :config
   (setq ivy-count-format " [%d/%d] "
         ivy-use-virtual-buffers t
@@ -291,14 +337,7 @@
       (setq-local max-mini-window-height
                   (setq ivy-height (1- ivy-height)))
       (window-resize nil -1)))
-  (defun vz/get-file-or-buffer ()
-    "Select a list of opened buffers, files in current directory and entries in
-recentf and return the corresponding buffer. Create one if it doesn't exist"
-    (--> (append (ivy--virtual-buffers)
-                 (-filter #'f-file? (directory-files default-directory))
-                 (-map #'buffer-name (buffer-list)))
-         (ivy-read "> " it)
-         (or (get-buffer it) (find-file-noselect it))))
+  (advice-add 'ivy-switch-buffer :after #'vz/beacon-highlight)
   (ivy-mode 1))
 
 (use-package ivy-avy
@@ -315,28 +354,11 @@ recentf and return the corresponding buffer. Create one if it doesn't exist"
   (defun vz/counsel-M-x-prompt ()
     "pls ")
   (advice-add 'counsel--M-x-prompt :override #'vz/counsel-M-x-prompt)
-  (-each '(yank-pop describe-bindings)
-    (fn (define-key counsel-mode-map (vector 'remap <>) nil)))
+  (seq-each #'(lambda (x) (define-key counsel-mode-map (vector 'remap x) nil))
+            '(yank-pop describe-bindings))
   (counsel-mode t))
 
-;; *** Blink cursor on certain actions
-(use-package beacon
-  :config
-  (beacon-mode 1)
-  (setq beacon-blink-when-window-scrolls t
-        beacon-blink-when-point-moves-horizontally nil
-        beacon-blink-when-point-moves-vertically nil)
-  (defun vz/beacon-highlight ()
-    "`beacon-blink' for one second to capture attention"
-    (let ((beacon-blink-duration 1))
-      (beacon-blink))))
-
-;; * Custom theme
-(add-to-list 'custom-theme-load-path
-             (expand-file-name "lisp/themes" user-emacs-directory))
-
-(load-theme 'vz-nh t)
-
+;; * -*-*-*-
 ;; Local Variables:
 ;; eval: (outline-minor-mode)
 ;; outline-regexp: ";; [*]+"
