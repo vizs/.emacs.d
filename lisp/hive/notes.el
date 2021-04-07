@@ -206,7 +206,7 @@ Highlight functions are handled specially.")
   (setq
    ;; Don't use dollar
    cdlatex-use-dollar-to-ensure-math nil
-   cdlatex-math-symbol-prefix ?;
+   cdlatex-math-symbol-prefix ?\;
    cdlatex-command-alist
    '(("dv" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
      ("pv" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
@@ -217,7 +217,7 @@ Highlight functions are handled specially.")
      ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)
      ("intl" "Insert integral with limits" "\\int_{?}^{}" cdlatex-position-cursor nil nil t)
      ("1/" "Insert the inverse of" "\\frac{1}{?}" cdlatex-position-cursor nil nil t))
-   cdlatex-math-symbol-alist '((?0 ("\\ominus"))))
+   cdlatex-math-symbol-alist '((?0 ("\\ominus" "\\circ"))))
   (cdlatex-compute-tables))
 
 ;; ** TODO: Custom latex macros
@@ -256,6 +256,8 @@ Highlight functions are handled specially.")
 (put 'vz/org-abbrev-file 'safe-local-variable
      #'(lambda (x) (or (null x) (stringp x))))
 
+;; TODO: Maybe I should change this to an around advice instead?
+;; Context: info page on abbrev-mode
 (defun vz/org-abbrev--expand-function ()
   "When `vz/org-abbrev-mode' is active, then allow abbreviation expansion
 only in text environments. Otherwise, the default behaviour is
@@ -267,6 +269,7 @@ followed."
         (abbrev--default-expand))
     (abbrev--default-expand)))
 
+;; TODO: Can this be a local variable?
 (setq abbrev-expand-function #'vz/org-abbrev--expand-function)
 
 (add-hook 'hack-local-variables-hook
@@ -361,14 +364,14 @@ followed."
 
 (add-hook 'org-metaright-hook
           (defun vz/org-latex-change-pair-metaright ()
-            (when (texmathp)
+            (when org-cdlatex-mode
               (if (vz/change-latex-equation-pair '())
                   t
                 (vz/change-latex-parens-pair '())))))
 
 (add-hook 'org-metaleft-hook
           (defun vz/org-latex-change-pair-metaleft ()
-            (when (texmathp)
+            (when org-cdlatex-mode
               (if (vz/change-latex-equation-pair '(t))
                   t
                 (vz/change-latex-parens-pair '(t))))))
@@ -382,16 +385,82 @@ followed."
 (defvar vz/latex-smart-delete-pairs-start
   (seq-sort-by #'cdr #'>
                (seq-map #'(lambda (p) (cons (regexp-quote (car p)) (length (car p))))
-                        (append vz/latex-paren-pairs vz/latex-equation-pairs))))
+                        (append vz/latex-paren-pairs vz/latex-equation-pairs
+                                '(("{" . "}")))))
+  "The definition is awfully complicated since I wanted to save
+time by doing some expensive processes beforehand.")
 
 (defvar vz/latex-smart-delete-pairs-end
   (seq-sort-by #'cdr #'>
                (seq-map #'(lambda (p) (cons (regexp-quote (cdr p)) (length (cdr p))))
-                        (append vz/latex-paren-pairs vz/latex-equation-pairs))))
+                        (append vz/latex-paren-pairs vz/latex-equation-pairs
+                                '(("{" . "}"))))))
 
 (defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
   "Symbols which when deleted also deletes & before the character
-  if present.")
+if present.")
+
+(defun vz/latex-smart-delete--find-pair-around-point (direction point pair-starts pair-ends)
+  "Find the pair around point. POINT is the point to search
+around, PAIR-STARTS and PAIR_ENDS are list of pair of starting
+and ending string of pairs and their length. See the definition
+of `vz/latex-smart-delete-pairs-start'. Returns (point-position
+pair-start pair-end) where point-position can be between, start
+or end; nil otherwise. If DIRECTION is positive, then it can be
+between or start. If DIRECTION is negative, then it can be
+between or end."
+  (unless (null pair-starts)
+    (pcase-let ((`(,start . ,len-start) (car pair-starts))
+                (`(,end   . ,len-end)   (car pair-ends)))
+      (cond
+       ;; If we are looking at END straight ahead, then see if the
+       ;; text behind the point is START
+       ((looking-at-p end)
+        (if (looking-back start len-start)
+            (list 'between (car pair-starts) (car pair-ends))
+          (vz/latex-smart-delete--find-pair-around-point direction point (cdr pair-starts) (cdr pair-ends))))
+       ;; See if we are looking at START and END straight ahead with
+       ;; no space in between
+       ((and (> direction 0) (looking-at-p (concat start end)))
+        (list 'start (car pair-starts) (car pair-ends)))
+       ;; See if we are after START and END pairs i.e., START_END|
+       ;; where | is the point and _ is just a visual indicator
+       ((and (< direction 0) (looking-back (concat start end) (+ len-start len-end)))
+        (list 'end (car pair-starts) (car pair-ends)))
+       (t
+        (vz/latex-smart-delete--find-pair-around-point direction point (cdr pair-starts) (cdr pair-ends)))))))
+
+(defun vz/latex-smart-delete-char (n)
+  "This function should, hopefully, find the approriate
+``proper'' pair around point and delete it. Pairs' start and
+end are defined in `vz/latex-smart-delete-pairs-start' and
+`vz/latex-smart-delete-pairs-end' respectively.
+
+In addition to that, it should also delete
+1. ^,_ before {}
+2. &=, &>, &<
+3. \\.
+
+A ``proper'' pair is defined as ``<pair_start><pair_end>''."
+  (interactive "p")
+  (when (> n 0)
+    (let ((pair
+           (vz/latex-smart-delete--find-pair-around-point (point) 1
+                                                          vz/latex-smart-delete-pairs-start
+                                                          vz/latex-smart-delete-pairs-end)))
+      (if (null pair)
+          (delete-char 1)
+        (pcase-let ((`(,ppos (,start . ,len-start) (,end . ,len-end)) pair))
+          (pcase ppos
+            (('between)
+             (backward-char len-start)
+             (delete-char (+ len-start len-end)))
+            (('start)
+             (delete-char (+ len-start len-end))))
+          ;; If ^,_ present before {, then delete it!
+          (when (seq-contains '(?_ ?^) (char-before) #'char-equal)
+            (delete-backward-char 1)))))
+    (vz/latex-smart-delete-char (1- n)))))
 
 (defun vz/latex-smart-delete-char ()
   (interactive)
@@ -400,7 +469,6 @@ followed."
               (unless (null pair-starts)
                 (pcase-let ((`(,start . ,len-start) (car pair-starts))
                             (`(,end   . ,len-end)   (car pair-ends)))
-                  (message "end: %s, start: %s" end start)
                   (cond
                    ((looking-at-p end)
                     (when (looking-back start)
@@ -520,9 +588,10 @@ followed."
            (org-kill-line arg)))
  "C-w" (defun vz/org-cdlatex-smart-backward-delete-char (&optional arg)
          (interactive "p")
-         (if (texmathp)
+         (if (and (not (use-region-p)) (texmathp))
              (vz/latex-smart-backward-delete-char)
-           (call-interactively (key-binding (vector last-input-event))))))
+           (let (org-cdlatex-mode)
+             (call-interactively (key-binding (vector last-input-event)))))))
 
 ;; * -*-*-*-
 ;; Local Variables:
