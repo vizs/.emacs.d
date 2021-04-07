@@ -396,10 +396,6 @@ time by doing some expensive processes beforehand.")
                         (append vz/latex-paren-pairs vz/latex-equation-pairs
                                 '(("{" . "}"))))))
 
-(defvar vz/latex-smart-delete-align-symbols '(?= ?> ?<)
-  "Symbols which when deleted also deletes & before the character
-if present.")
-
 (defun vz/latex-smart-delete--find-pair-around-point (direction point pair-starts pair-ends)
   "Find the pair around point. POINT is the point to search
 around, PAIR-STARTS and PAIR_ENDS are list of pair of starting
@@ -443,113 +439,55 @@ In addition to that, it should also delete
 
 A ``proper'' pair is defined as ``<pair_start><pair_end>''."
   (interactive "p")
-  (when (> n 0)
+  (when (> (abs n) 0)
     (let ((pair
            (vz/latex-smart-delete--find-pair-around-point (point) 1
                                                           vz/latex-smart-delete-pairs-start
                                                           vz/latex-smart-delete-pairs-end)))
       (if (null pair)
-          (delete-char 1)
+          (delete-char (if (looking-at-p (rx (or "&=" "&>" "&<" "\\")))
+                           2
+                         1))
         (pcase-let ((`(,ppos (,start . ,len-start) (,end . ,len-end)) pair))
           (pcase ppos
-            (('between)
+            ('between
              (backward-char len-start)
              (delete-char (+ len-start len-end)))
-            (('start)
+            ('start
              (delete-char (+ len-start len-end))))
-          ;; If ^,_ present before {, then delete it!
+          ;; If ^,_ present before {, then delete it
           (when (seq-contains '(?_ ?^) (char-before) #'char-equal)
             (delete-backward-char 1)))))
-    (vz/latex-smart-delete-char (1- n)))))
+    (vz/latex-smart-delete-char (1- n))))
 
-(defun vz/latex-smart-delete-char ()
-  (interactive)
-  (letrec ((loop
-            (lambda (pair-starts pair-ends)
-              (unless (null pair-starts)
-                (pcase-let ((`(,start . ,len-start) (car pair-starts))
-                            (`(,end   . ,len-end)   (car pair-ends)))
-                  (cond
-                   ((looking-at-p end)
-                    (when (looking-back start)
-                      (progn (goto-char (match-beginning 0))
-                             (delete-char (- (match-end 0) (match-beginning 0) (- len-end)) t)))
-                    t)
-                   ((looking-at-p start)
-                    (when (save-excursion (forward-char len-start)
-                                          (looking-at end))
-                      (delete-char (- (match-end 0) (point))))
-                    t)
-                   (t
-                    (funcall loop (cdr pair-starts) (cdr pair-ends)))))))))
-    (unless (funcall loop vz/latex-smart-delete-pairs-start vz/latex-smart-delete-pairs-end) ; Delete empty paren pairs
-      (cond
-       ((and (char-equal (char-before (point)) ?&) ; If cursor is between & and =/>/<
-             (seq-contains-p vz/latex-smart-delete-align-symbols (char-after (point))))
-        (backward-char 1)
-        (delete-char 2))
-       ((and (char-equal (char-after (point)) ?&) ; If cursor is before &{=,>,<}
-             (seq-contains-p vz/latex-smart-delete-align-symbols (char-after (1+ (point)))))
-        (delete-char 2))
-       ((and (seq-contains-p '(?^ ?_) (char-after (point))) ; Slurp out whatever's inside {}, if any
-             (save-excursion (forward-char)
-                             (char-equal (char-after (point)) ?{)))
-        (delete-char 2)
-        (when (looking-at ".*}") ; Has to be greedy so we get the last }
-          (let ((start (point))) ; (Might be a problem since this only goes as far as EOL)
-            (forward-char (- (match-end 0) start 1))
-            (delete-char 1)
-            (goto-char start))))
-       ((and (char-equal (char-after (point)) ?{) ;; Cursor position: {^,}|{}
-             (char-equal (char-after (1+ (point))) ?})
-             (seq-contains-p '(?_ ?^) (char-before (point))))
-        (backward-delete-char 1)
-        (delete-char 2))
-       ((funcall loop '(("{" . 1)) '(("}" . 1))) ; Remove ^,_ before empty {}
-        t)
-       (t (delete-char 1))))))
-
-(defun vz/latex-smart-backward-delete-char ()
-  (interactive)
-  (letrec ((loop
-            (lambda (pair-starts pair-ends)
-              (unless (null pair-starts)
-                (pcase-let ((`(,start . ,len-start) (car pair-starts))
-                            (`(,end   . ,len-end)   (car pair-ends)))
-                  (cond
-                   ((looking-back (concat start end))
-                    (backward-char (+ len-end len-start))
-                    (delete-char (+ len-end len-start))
-                    t)
-                   ((and (looking-back start) (looking-at-p end))
-                    (backward-char len-start)
-                    (delete-char (+ len-start len-end))
-                    t)
-                   (t
-                    (funcall loop (cdr pair-starts) (cdr pair-ends)))))))))
-    (unless (funcall loop vz/latex-smart-delete-pairs-start vz/latex-smart-delete-pairs-end) ; Delete empty paren pairs
-      (cond
-       ((and (char-equal (char-before (point)) ?&) ; If cursor is between & and =/>/<
-             (seq-contains-p vz/latex-smart-delete-align-symbols (char-after (point))))
-        (backward-char 1)
-        (delete-char 2))
-       ((and (seq-contains-p vz/latex-smart-delete-align-symbols (char-before (point))) ; If cursor is after &{=,>,<}
-             (char-equal (char-before (1- (point))) ?&))
-        (backward-delete-char 2))
-       ((and (seq-contains-p '(?^ ?_) (char-before (point))) ; Slurp out whatever's inside {}, if any
-             (char-equal (char-after (point)) ?{))
-        (backward-char 1)
-        (delete-char 2)
-        (when (looking-at ".*}") ; Has to be greedy so we get the last }
-          (let ((start (point))) ; (Might be a problem since this only goes as far as EOL)
-            (forward-char (- (match-end 0) start 1))
-            (delete-char 1)
-            (goto-char start))))
-       ((funcall loop '(("{" . 1)) '(("}" . 1))) ; Remove ^,_ before empty {}
-        (when (seq-contains-p '(?^ ?_) (char-before (point)))
-          (backward-char 1)
-          (delete-char 1)))
-       (t (backward-char 1))))))
+(defun vz/latex-smart-delete-backward-char (n)
+  "Like `vz/latex-smart-delete-char' but backwards."
+  (interactive "p")
+  (when (> (abs n) 0)
+    (let ((pair
+           (vz/latex-smart-delete--find-pair-around-point (point) -1
+                                                          vz/latex-smart-delete-pairs-start
+                                                          vz/latex-smart-delete-pairs-end)))
+      (if (null pair)
+          ;; This mess because `looking-back' is expensive.
+          (let ((char-before (char-before)))
+            (delete-backward-char 1)
+            (when (or (and (seq-contains '(?> ?< ?=) char-before #'char-equal)
+                           (char-equal (char-before) ?&))
+                      (and (char-equal (char-before) ?\\)
+                           (char-equal char-before ?\\)))
+              (delete-backward-char 1)))
+        (pcase-let ((`(,ppos (,start . ,len-start) (,end . ,len-end)) pair))
+          (pcase ppos
+            ('between
+             (backward-char len-start)
+             (delete-char (+ len-start len-end)))
+            ('end
+             (delete-backward-char (+ len-start len-end))))
+          ;; If ^,_ present before {, then delete it
+          (when (seq-contains '(?_ ?^) (char-before) #'char-equal)
+            (delete-backward-char 1)))))
+    (vz/latex-smart-delete-backward-char (1- n))))
 
 ;; This command looks for the closest starting pair backwards, then tries
 ;; to find the corresponding closest ending pair and deletes everything
@@ -579,17 +517,17 @@ A ``proper'' pair is defined as ``<pair_start><pair_end>''."
  "C-d" (defun vz/org-cdlatex-smart-delete-char (N)
          (interactive "p")
          (if (texmathp)
-             (vz/latex-smart-delete-char)
+             (vz/latex-smart-delete-char N)
            (org-delete-char N)))
  "C-k" (defun vz/org-cdlatex-smart-kill-line (&optional arg)
          (interactive "p")
          (if (texmathp)
              (vz/latex-smart-kill)
            (org-kill-line arg)))
- "C-w" (defun vz/org-cdlatex-smart-backward-delete-char (&optional arg)
+ "C-w" (defun vz/org-cdlatex-smart-delete-backward-char (&optional arg)
          (interactive "p")
          (if (and (not (use-region-p)) (texmathp))
-             (vz/latex-smart-backward-delete-char)
+             (vz/latex-smart-delete-backward-char arg)
            (let (org-cdlatex-mode)
              (call-interactively (key-binding (vector last-input-event)))))))
 
