@@ -1,6 +1,17 @@
 ;; -*- lexical-binding: t; -*-
 ;; Custom navigation commands and such
 
+;; I never got into the habit of ending sentences with double space
+(setq sentence-end-double-space nil)
+
+(add-hook 'server-after-make-frame-hook
+          (defun vz/add-to-input-decode-map ()
+            (vz/bind
+             :map input-decode-map
+             (kbd "C-M-m") [C-M-m]
+             (kbd "C-M-S-m") [C-M-S-m])
+            (remove-hook #'vz/add-to-input-decode-map 'server-after-make-frame-hook)))
+
 (defun vz/beginning-of-line ()
   "Run `back-to-indentation` or `beginning-of-line` depending
 on the position of the cursor."
@@ -49,6 +60,27 @@ on the position of the cursor."
   (interactive "P")
   (delete-indentation (not arg)))
 
+(defun vz/goto-beg-and-query-replace-regexp ()
+  "Go to beginning of buffer and run `query-replace-regexp'."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (call-interactively #'query-replace-regexp)))
+
+(defun vz/kill-ring-save-line (n)
+  (interactive "p")
+  (kill-ring-save (point)
+                  (save-excursion
+                    (forward-line (1- n))
+                    (line-end-position))))
+
+(defun vz/clipboard-kill-ring-save-line (n)
+  (interactive "p")
+  (clipboard-kill-ring-save (point)
+                            (save-excursion
+                             (forward-line (1- n))
+                             (line-end-position))))
+
 (vz/bind
  "C-c M-+" #'vz/increase-number-at-point
  "C-c M--" #'vz/decrease-number-at-point
@@ -60,12 +92,7 @@ on the position of the cursor."
  "C-w" #'vz/backward-delete-or-kill-region
  "M-w" #'vz/backward-kill-word-or-kill-ring-save
  "C-S-k" #'kill-whole-line
- "M-k" #'(lambda (n)
-           (interactive "p")
-           (kill-ring-save (point)
-            (save-excursion
-              (next-line (1- n))
-              (line-end-position))))
+ [C-M-m] #'vz/kill-ring-save-line
 
  ;; `hippie-expand' also takes care of `dabbrev-expand' suggestions
  "M-/" #'hippie-expand
@@ -73,17 +100,14 @@ on the position of the cursor."
  ;; I never use Emacs in a terminal
  "C-z" #'zap-up-to-char
 
- ;; Swap `query-replace' and `query-replace-regexp'
  "M-%" #'query-replace-regexp
- "C-M-%" #'query-replace
+ "C-M-%" #'vz/goto-beg-and-query-replace-regexp
 
  ;; X Clipboard
  "C-S-y" #'clipboard-yank
  "C-S-w" #'clipboard-kill-region
  "M-W" #'clipboard-kill-ring-save
- "M-K" #'(lambda ()
-           (interactive)
-           (clipboard-kill-ring-save (point) (line-end-position)))
+ [C-M-S-m] #'vz/clipboard-kill-ring-save-line
 
  ;; dwim
  "M-l" #'downcase-dwim
@@ -106,6 +130,7 @@ on the position of the cursor."
 
    :map isearch-mode-map
    "C-'" #'avy-isearch)
+  (setq isearch-allow-scroll t)
   ;; This is from oantolin's config
   (add-hook 'isearch-mode-hook
             (defun vz/isearch-insert-region-if-active ()
@@ -139,7 +164,7 @@ on the position of the cursor."
 
 (use-package siege-mode
   :straight ( :type git :host github
-                    :repo "tslilc/siege-mode")
+                    :repo "vizs/siege-mode")
   :config
   (vz/bind "M-s M-s" #'siege-explicit-call))
 
@@ -148,54 +173,39 @@ on the position of the cursor."
   :config
   (setq avy-all-windows nil)
   (vz/bind
-   "C-S-n" #'avy-goto-line-above
-   "C-S-p" #'avy-goto-line-below
+   "C-S-n" #'avy-goto-line-below
+   "C-S-p" #'avy-goto-line-above
+
+   "C-S-f" (defun vz/avy-goto-char-forward (char)
+             (interactive (list (read-char "Character: " t)))
+             (avy-with vz/avy-goto-char-forward
+               (avy-jump (regexp-quote (string char))
+                         :beg (point)
+                         :end (line-end-position))))
+
+   "C-S-b" (defun vz/avy-goto-char-backward (char)
+             (interactive (list (read-char "Character: " t)))
+             (avy-with vz/avy-goto-char-backward
+               (avy-jump (regexp-quote (string char))
+                         :beg (line-beginning-position)
+                         :end (point))))
+
+   "M-F" (defun vz/avy-goto-word-forward ()
+           (interactive)
+           (avy-with vz/avy-goto-word-forward
+             (avy-jump avy-goto-word-0-regexp
+                       :beg (point)
+                       :end (line-end-position))))
+
+   "M-B" (defun vz/avy-goto-word-backward ()
+           (interactive)
+           (avy-with vz/avy-goto-word-backward
+             (avy-jump avy-goto-word-0-regexp
+                       :beg (line-beginning-position)
+                       :end (point))))
+
+   "C-M-z" #'avy-goto-char-in-line
+
    :prefix "M-g"
    "f" #'avy-goto-char-2
-   "g" #'avy-goto-line
-   :prefix ""
-   "C-M-z" #'avy-goto-char-in-line))
-
-;; Stolen from modal editing experiment
-
-(defun vz/jump-to-char (direction char)
-  "Jump to CHAR in DIRECTION. If CHAR is not found after cursor till EOL, then
-loop around and look for occurence for CHAR from the start of line."
-  (interactive
-   (list (if current-prefix-arg 'backward 'forward)
-         (string (read-key "Search for: "))))
-  (message "Searching for %s" char)
-  (let* ((end    (if (eq direction 'forward) #'beginning-of-line #'end-of-line))
-         (search (if (eq direction 'forward) #'re-search-forward #'re-search-backward))
-         (limit  (if (eq direction 'forward) (line-end-position) (line-beginning-position)))
-         (point (save-excursion
-                  (condition-case nil
-                      (funcall search char limit)
-                    (error
-                     (funcall end)
-                     (funcall search char limit))))))
-    (when point
-      (goto-char point))))
-
-(defvar vz/jump-to-char-forward-map (make-keymap)
-  "Keymap for `vz/jump-to-char' forwards.")
-
-(defvar vz/jump-to-char-backward-map (make-keymap)
-  "Keymap for `vz/jump-to-char' backwards.")
-
-(vz/bind
- "M-g F" #'(lambda ()
-             (interactive)
-             (setq overriding-local-map vz/jump-to-char-forward-map))
-
- :map vz/jump-to-char-forward-map
- [remap self-insert-command]  #'(lambda () (intearctive) (vz/jump-to-char 'forward (this-command-keys)))
- "C-,"                        #'(lambda () (intearctive) (setq overriding-local-map vz/jump-to-char-backward-map))
- "C-g"                        #'(lambda () (intearctive) (setq overriding-local-map nil))
- "<escape>"                   #'(lambda () (intearctive) (setq overriding-local-map nil))
-
- :map vz/jump-to-char-backward-map
- [remap self-insert-command]  #'(lambda () (interactive) (vz/jump-to-char 'backward (this-command-keys)))
- "C-,"                        #'(lambda () (interactive) (setq overriding-local-map vz/jump-to-char-forward-map))
- "<escape>"                   #'(lambda () (interactive) (setq overriding-local-map nil))
- "C-g"                        #'(lambda () (interactive) (setq overriding-local-map nil)))
+   "g" #'avy-goto-line))

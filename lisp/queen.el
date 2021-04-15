@@ -177,22 +177,20 @@ LIST. Return nil if otherwise."
 
 ;; ** Indentation
 
-(setq
- vz/functional-major-modes '(nix-mode emacs-lisp-mode racket-mode scheme-mode)
-
+(setq-default
  tab-always-indent 'complete
  indent-tabs-mode t
- tab-width 4)
+ tab-width 4
 
-(defvar c-basic-offset 4)
-(defvar cperl-basic-offset 4)
-(defvar python-indent 4)
+ c-basic-offset 4
+ cperl-basic-offset 4
+ python-indent 4)
 
 (add-hook 'prog-mode-hook
-          (defun vz/prog-functional-indent-style ()
-            (when (apply #'derived-mode-p vz/functional-major-modes)
-              (setq-local indent-tabs-mode nil
-                          tab-width 2))))
+          (defun vz/indent-with-spaces-hook ()
+            (when (apply #'derived-mode-p
+                         '(nix-mode emacs-lisp-mode racket-mode scheme-mode))
+              (setq-local indent-tabs-mode nil))))
 
 ;; ** Horizontal scrolling
 
@@ -297,19 +295,15 @@ LIST. Return nil if otherwise."
 (defun vz/beacon-highlight (&rest _)
   "Pulse the current line momentarily."
   (interactive)
-  (let ((pulse-iterations 50)
-        (pulse-delay 0.1))
-    (pulse-momentary-highlight-one-line (point))))
+  (unless (minibufferp)
+    (let ((pulse-iterations 25)
+          (pulse-delay 0.1))
+      (pulse-momentary-highlight-one-line (point)))))
 
-(advice-add 'delete-window :after #'vz/beacon-highlight)
-
-;; TODO: Find out why this doesn't work
-;; (advice-add 'other-window  :after #'vz/beacon-highlight)
-
-(advice-add 'scroll-up-command   :after #'vz/beacon-highlight)
-(advice-add 'scroll-down-command :after #'vz/beacon-highlight)
-
-(advice-add 'recenter-top-bottom :after #'vz/beacon-highlight)
+;; (dolist (hook '(window-state-change-hook ; window selection
+;;                 window-configuration-change-hook ; window deletion
+;;                 window-scroll-functions))
+;;   (add-hook hook #'vz/beacon-highlight))
 
 ;; * Selection engine
 
@@ -337,7 +331,6 @@ LIST. Return nil if otherwise."
       (setq-local max-mini-window-height
                   (setq ivy-height (1- ivy-height)))
       (window-resize nil -1)))
-  (advice-add 'ivy-switch-buffer :after #'vz/beacon-highlight)
   (ivy-mode 1))
 
 (use-package ivy-avy

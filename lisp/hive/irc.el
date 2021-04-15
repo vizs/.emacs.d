@@ -27,8 +27,9 @@
     ("Discord Madhouse"
      :host "irc.astrak.co"
      :user "viz"
+     :port (6667 . 6697)
      :channels ("#general" "#linux" "#unixporn" "#memes" "#scripting")
-     :pass ,(pass-discord 446727370964205585))
+     :pass ,(pass-irc "MadHouse"))
     ("Discord Nixhub"
      :host "localhost"
      :user "viz"
@@ -137,19 +138,19 @@
 ;; *** Set the variable
 
 (setq
-  circe-format-say      #'((lambda (&rest r) (vz/circe-handle-msg 'say  r))
-  circe-format-self-say #'((lambda (&rest r) (vz/circe-handle-msg 'ssay r))
-  circe-format-action   #'((lambda (&rest r) (vz/circe-handle-msg 'acn  r)))
+  circe-format-say      #'(lambda (&rest r) (vz/circe-handle-msg 'say  r))
+  circe-format-self-say #'(lambda (&rest r) (vz/circe-handle-msg 'ssay r))
+  circe-format-action   #'(lambda (&rest r) (vz/circe-handle-msg 'acn  r)))
 (setq
-  circe-format-server-message      #'(lambda (&rest r (vz/circe-handle-msg 'smsg r))
-  circe-format-server-notice       #'(lambda (&rest r (vz/circe-handle-msg 'smsg r))
-  circe-format-server-quit         #'(lambda (&rest r (vz/circe-handle-msg 'part r))
-  circe-format-server-quit-channel #'(lambda (&rest r (vz/circe-handle-msg 'part r))
-  circe-format-server-join         #'(lambda (&rest r (vz/circe-handle-msg 'join r))
-  circe-format-server-topic        #'(lambda (&rest r (vz/circe-handle-msg 'smsg r))
-  circe-format-server-part         #'(lambda (&rest r (vz/circe-handle-msg 'part r))
-  circe-format-server-nick-change  #'(lambda (&rest r (vz/circe-handle-msg 'nch  r))
-  circe-format-server-rejoin       #'(lambda (&rest r (vz/circe-handle-msg 'join r)))
+  circe-format-server-message      #'(lambda (&rest r) (vz/circe-handle-msg 'smsg r))
+  circe-format-server-notice       #'(lambda (&rest r) (vz/circe-handle-msg 'smsg r))
+  circe-format-server-quit         #'(lambda (&rest r) (vz/circe-handle-msg 'part r))
+  circe-format-server-quit-channel #'(lambda (&rest r) (vz/circe-handle-msg 'part r))
+  circe-format-server-join         #'(lambda (&rest r) (vz/circe-handle-msg 'join r))
+  circe-format-server-topic        #'(lambda (&rest r) (vz/circe-handle-msg 'smsg r))
+  circe-format-server-part         #'(lambda (&rest r) (vz/circe-handle-msg 'part r))
+  circe-format-server-nick-change  #'(lambda (&rest r) (vz/circe-handle-msg 'nch  r))
+  circe-format-server-rejoin       #'(lambda (&rest r) (vz/circe-handle-msg 'join r)))
 
 ;; * Jump commands
 ;; ** Helper

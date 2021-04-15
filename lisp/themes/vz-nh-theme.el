@@ -3,13 +3,15 @@
 
 (deftheme vz-nh "A custom theme")
 
-(let ((class '((class color) (min-colors 89)))
+(let ((class '((type graphic) (class color) (min-colors 89)))
       (bg "#ffffff")
       (fg "#0d0d0d")
       (red "#ff9994")
       (blue "#79a2ed")
       (grey "#cccccc")
       (green "#c1e1c1")
+      (dark-red "#ff0000")
+      (dark-green "#32cd32")
       (cursor "#505152")
       (light-fg "#a9a9a9")
       (darker-bg "#a9a9a9")
@@ -42,6 +44,9 @@
    `(lazy-highlight                   ((,class :background ,dark-bg :foreground ,fg)))
    `(highlight                        ((,class :background ,dark-bg :foreground ,fg)))
    `(trailing-whitespace              ((,class :background ,darker-bg :foreground ,fg)))
+
+   `(holiday                          ((,class :background ,bg :foreground ,dark-red)))
+   `(calendar-today                   ((,class :background ,bg :foreground ,blue)))
 
    `(Info-quoted                      ((,class :foreground ,light-fg :inherit fixed-pitch)))
 
@@ -136,9 +141,14 @@
    `(org-agenda-date-today            ((,class :background ,bg :foreground ,fg :weight bold)))
    `(org-agenda-date-weekend          ((,class :background ,bg :foreground ,light-fg)))
    `(org-agenda-structure             ((,class :background ,bg :foreground ,fg)))
-   `(org-scheduled-today              ((,class :background ,bg :foreground ,fg)))
-   ;; `(org-scheduled                    ((,class :background ,bg :foreground ,green)))
+   `(org-scheduled                    ((,class :foreground ,fg)))
+   `(org-scheduled-today              ((,class :foreground ,fg)))
+   `(org-scheduled-previously         ((,class :background ,bg :foreground ,dark-red)))
    `(org-time-grid                    ((,class :background ,bg :foreground ,light-fg)))
+
+   ;; `(org-deadline-today               ((,class :foreground ,dark-red)))
+   `(org-upcoming-deadline            ((,class :foreground ,fg)))
+   `(org-upcoming-distant-deadline    ((,class :foreground ,fg)))
 
    `(makefile-space                   ((,class :background ,darker-bg :foreground ,bg)))
 

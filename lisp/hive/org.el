@@ -45,42 +45,49 @@
 ;; Instead of headline stars, `org-num-mode' is better
 (add-hook 'org-mode-hook #'org-num-mode)
 
-;; Use a variable pitch font for most things
-(add-hook 'org-mode-hook
-          (defun vz/org-mode-setup-buffer-face ()
-            (setq-local
-             buffer-face-mode-face `(:family ,vz/variable-font :height 120)
-             line-spacing 0.1)
-            (buffer-face-mode)))
+;; native uses auctex highlighting?
+(setq org-highlight-latex-and-related '(latex))
 
-;; Some faces has to be monospace!
-;; NOTE: Not including `org-table' because valign-table takes care of
-;; the separating lines so tables look nice even without a monospace font!
-(let ((faces '(org-link org-code org-block org-drawer
-               org-date org-special-keyword org-verbatim org-tag)))
-  (vz/set-monospace-faces faces)
-  ;; Adjust font size to be closer to that of the variable font
-  (seq-each #'(lambda (x) (set-face-attribute x nil :height 102)) faces))
+(defun vz/org-style ()
+  (interactive)
 
-(set-face-attribute 'org-latex-and-related nil
-                    :family "IBM Plex Mono"
-                    :slant 'italic
-                    :height 102)
+  (setq-local buffer-face-mode-face `(:family ,vz/variable-font :height 120)
+              line-spacing 0.1)
+  (buffer-face-mode)
 
-;; Let latex stuff be monospace too!
-(setq org-highlight-latex-and-related '(latex entities))
+  (seq-each (lambda (x) (face-remap-add-relative x :weight 'bold :slant 'normal))
+            org-level-faces)
 
-;; Make headline larger and bold and decrease the height of `org-num-face'
-(seq-each #'(lambda (x) (set-face-attribute x nil :weight 'bold :slant 'normal)) org-level-faces)
-(let* ((height0 (+ 120 40))
-       (height1 (+ 120 30))
-       (height2 (+ 120 25))
-       (height3 (+ 120 20)))
-  (set-face-attribute 'org-level-1 nil :height height0)
-  (set-face-attribute 'org-level-2 nil :height height1)
-  (set-face-attribute 'org-level-3 nil :height height2)
-  (set-face-attribute 'org-level-4 nil :height height3)
-  (setq org-num-face '(:height 110 :weight bold)))
+  (let ((faces '(org-link org-code org-block org-drawer
+                 org-date org-special-keyword org-verbatim org-tag)))
+    (seq-each (lambda (x)
+                (face-remap-add-relative x :height 102
+                                         :family vz/monospace-font))
+              faces))
+  (face-remap-add-relative 'org-latex-and-related
+                           :family "IBM Plex Mono"
+                           :slant 'italic
+                           :height 102)
+
+  (face-remap-add-relative 'org-quote :family vz/variable-font :slant 'italic)
+
+  (let ((height 100))
+    (face-remap-add-relative 'org-block-begin-line :height height :weight 'bold)
+    (face-remap-add-relative 'org-block-end-line   :height height :weight 'bold))
+
+  (let* ((height0 (+ 120 40))
+         (height1 (+ 120 30))
+         (height2 (+ 120 25))
+         (height3 (+ 120 20)))
+    (face-remap-add-relative 'org-level-1 :height height0)
+    (face-remap-add-relative 'org-level-2 :height height1)
+    (face-remap-add-relative 'org-level-3 :height height2)
+    (face-remap-add-relative 'org-level-4 :height height3)
+
+    (setq-local org-num-face `(:family ,vz/variable-font :height 110 :weight bold
+                               :slant normal))))
+
+(add-hook 'org-mode-hook #'vz/org-style)
 
 ;; Better tables
 (use-package valign
@@ -93,12 +100,6 @@
 ;; Hide emphasis markers
 (setq org-hide-emphasis-markers t
       org-fontify-quote-and-verse-blocks t)
-
-;; Customise random faces
-(set-face-attribute 'org-quote nil :family vz/variable-font :slant 'italic)
-(let ((height 100))
-  (set-face-attribute 'org-block-begin-line nil :height height :weight 'bold)
-  (set-face-attribute 'org-block-end-line nil :height height :weight 'bold))
 
 ;; Turn on `org-indent-mode'
 (setq org-startup-indented t)
@@ -233,7 +234,7 @@ markers for sub/super scripts but fontify them."
   ;; since all of them start with \. The characters that are
   ;; acceptable after the match are mathmetical operators and some
   ;; special characters.
-  (seq-contains-p '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? ?/ ?|)
+  (seq-contains-p '(?\C-j ?} ?{ ?\\ ?_ ?- ?+ ?^ ?\( ?\) ?$ ? ?/ ?| ?.)
                   (char-after end)))
 
 (define-minor-mode vz/org-prettify-mode

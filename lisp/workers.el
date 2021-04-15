@@ -137,7 +137,7 @@ behaviour is similar to that of in `bind-keys'."
 (when (< emacs-major-version 28)
   (vz/bind
    :map help-mode-map
-   [remap revert-buffer] #'(lambda (_)
+   [remap revert-buffer] #'(lambda ()
                              (interactive)
                              (revert-buffer nil t))))
 
@@ -224,15 +224,7 @@ behaviour is similar to that of in `bind-keys'."
 
 ;; ** Edit a part of a buffer in separate window
 (use-package edit-indirect
-  :defer t
-  :functions (vz/edit-indirect-paragraph)
-  :config
-  (setq edit-indirect-guess-mode-function
-        #'(lambda (x) (funcall (with-current-buffer x major-mode))))
-  (defun vz/edit-indirect-paragraph ()
-    (interactive)
-    (mark-paragraph)
-    (command-execute #'edit-indirect-region)))
+  :defer t)
 
 ;; ** TODO: Execute actions based on text
 ;; Desperately needs a rewrite
@@ -256,18 +248,18 @@ behaviour is similar to that of in `bind-keys'."
 
 ;; * Communication
 ;; IRC and Discord using ircdiscord
-;; (vz/use-package circe "irc"
-;;   :defer t
-;;   :functions (vz/circe-jump-irc vz/circe-jump-discord)
-;;   :init
-;;   (defun pass-irc (serv)
-;;     #'(lambda (pass (format "irc/%s" serv))))
-;;   (defun pass-discord (serv)
-;;     #'(lambda (unless (or vz/ircdiscord-process
-;;                     (process-live-p vz/ircdiscord-process))
-;;           (setq-default vz/ircdiscord-process
-;;                         (start-process "ircdiscord" nil "ircdiscord")))
-;;         (format "%s:%d" (pass "misc/discord") serv))))
+(vz/use-package circe "irc"
+  :defer t
+  :functions (vz/circe-jump-irc vz/circe-jump-discord)
+  :init
+  (defun pass-irc (serv)
+    #'(lambda (_) (pass (format "irc/%s" serv))))
+  (defun pass-discord (serv)
+    #'(lambda (_) (unless (or vz/ircdiscord-process
+                          (process-live-p vz/ircdiscord-process))
+                  (setq-default vz/ircdiscord-process
+                   (start-process "ircdiscord" nil "ircdiscord")))
+        (format "%s:%d" (pass "misc/discord") serv))))
 
 ;; * scroll-other-window
 ;; This lets you use a custom function to scroll instead of just window_scroll in C
@@ -325,8 +317,8 @@ behaviour is similar to that of in `bind-keys'."
 (use-package python
   :defer t
   :straight (:type built-in)
-  :bind
-  ("C-c df" . python-describe-at-point)
+  ;:bind
+  ;("C-c df" . python-describe-at-point)
   :config
   (setq python-shell-interpreter "python3"
         python-shell-interpreter-args "-i"))
@@ -434,7 +426,8 @@ behaviour is similar to that of in `bind-keys'."
 (use-package ivy-prescient
   :after prescient
   :config
-  (setq ivy-prescient-enable-sorting t)
+  (setq ivy-prescient-enable-sorting t
+        ivy-prescient-sort-commands (append ivy-prescient-sort-commands '(proced-filter-interactive)))
   (ivy-prescient-mode t))
 
 (use-package company-prescient
@@ -456,6 +449,48 @@ behaviour is similar to that of in `bind-keys'."
   :config
   (setq transmission-time-format "%A, %d %B, %Y %k:%M"
         transmission-units 'iec))
+
+;; ** proced
+(use-package proced
+  :straight ( :type built-in)
+  :config
+  (setq-default proced-filter 'all))
+
+;; ** Calendar
+;; The way I'm setting the holidays is probably not idiomatic IDRC. I
+;; don't live in murica anw
+
+(use-package calendar
+  :straight ( :type built-in)
+  :config
+  (setq calendar-mark-holidays-flag t
+        calendar-islamic-all-holidays-flag t
+        holiday-hindu-holidays ;; Only fixed ones. Majority vary every year.
+        '((holiday-fixed 1 15 "Makar Sankranti")
+          ;; Technically Tamil only but eh
+          (holiday-fixed 1 15 "Pongal")
+          (holiday-fixed 1 14 "Tamil New Year"))
+        holiday-christian-holidays
+        '((holiday-easter-etc -2 "Good Friday")
+          (holiday-fixed 12 25 "Christmas"))
+        holiday-islamic-holidays
+        '((holiday-islamic 10 1 "Eid-ul-Fitr")
+          (holiday-islamic 3 12 "Eid-e-Milad-un-Nabi"))
+        holiday-general-holidays
+        '((holiday-fixed 1 1 "New Year's")
+          (holiday-fixed 1 26 "Republic Day")
+          (holiday-fixed 1 14 "Dr. B.R. Ambedkar Jayanti")
+          (holiday-fixed 8 18 "Independence Day")
+          (holiday-fixed 10 2 "Gandhi Jayanthi"))
+        calendar-holidays (append holiday-hindu-holidays
+                                  holiday-general-holidays
+                                  holiday-christian-holidays
+                                  holiday-islamic-holidays)
+
+        calendar-date-style 'european
+        calendar-month-abbrev-array calendar-month-name-array
+        calendar-day-abbrev-array calendar-day-name-array)
+  (add-hook 'calendar-today-visible-hook #'calendar-mark-today))
 
 ;; Local Variables:
 ;; eval: (outline-minor-mode)

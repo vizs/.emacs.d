@@ -291,7 +291,7 @@ followed."
 (defvar vz/latex-equation-pairs
   '(("\\(" . "\\)")
     ("\\[" . "\\]")
-    ("\\begin{align*}" . "\n\\end{align*}")))
+    ("\\begin{align*}\n" . "\n\\end{align*}")))
 
 (defvar vz/latex-paren-pairs
   '(("(" . ")")
@@ -411,10 +411,8 @@ between or end."
       (cond
        ;; If we are looking at END straight ahead, then see if the
        ;; text behind the point is START
-       ((looking-at-p end)
-        (if (looking-back start len-start)
-            (list 'between (car pair-starts) (car pair-ends))
-          (vz/latex-smart-delete--find-pair-around-point direction point (cdr pair-starts) (cdr pair-ends))))
+       ((and (looking-at-p end) (looking-back start len-start))
+        (list 'between (car pair-starts) (car pair-ends)))
        ;; See if we are looking at START and END straight ahead with
        ;; no space in between
        ((and (> direction 0) (looking-at-p (concat start end)))
@@ -424,7 +422,10 @@ between or end."
        ((and (< direction 0) (looking-back (concat start end) (+ len-start len-end)))
         (list 'end (car pair-starts) (car pair-ends)))
        (t
-        (vz/latex-smart-delete--find-pair-around-point direction point (cdr pair-starts) (cdr pair-ends)))))))
+        (vz/latex-smart-delete--find-pair-around-point direction
+                                                       point
+                                                       (cdr pair-starts)
+                                                       (cdr pair-ends)))))))
 
 (defun vz/latex-smart-delete-char (n)
   "This function should, hopefully, find the approriate
@@ -469,14 +470,9 @@ A ``proper'' pair is defined as ``<pair_start><pair_end>''."
                                                           vz/latex-smart-delete-pairs-start
                                                           vz/latex-smart-delete-pairs-end)))
       (if (null pair)
-          ;; This mess because `looking-back' is expensive.
-          (let ((char-before (char-before)))
-            (delete-backward-char 1)
-            (when (or (and (seq-contains '(?> ?< ?=) char-before #'char-equal)
-                           (char-equal (char-before) ?&))
-                      (and (char-equal (char-before) ?\\)
-                           (char-equal char-before ?\\)))
-              (delete-backward-char 1)))
+          (delete-backward-char (if (looking-back (rx (or "&=" "&>" "&<" "\\")) 2)
+                                    2
+                                  1))
         (pcase-let ((`(,ppos (,start . ,len-start) (,end . ,len-end)) pair))
           (pcase ppos
             ('between

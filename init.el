@@ -6,9 +6,6 @@
 (load-file (expand-file-name "lisp/queen.el" user-emacs-directory))
 (load-file (expand-file-name "lisp/workers.el" user-emacs-directory))
 
-(unless (boundp 'vz/initial-loaded)
-  (vz/disable-bold-italic))
-
 (defvar vz/initial-loaded t)
 
 ;; TODO: Consider using a single file but make *org-scratch* to be a
@@ -31,6 +28,7 @@
          (find-file-noselect (expand-file-name
                               (concat (format-time-string "%Y%m%d%H%M") ".org")
                               "~/lib/org-scratch"))
+       (org-mode)
        (rename-buffer "*org-scratch*")
        (with-eval-after-load (expand-file-name "lisp/hive/modeline.el" user-emacs-directory)
         (setq-local vz/mode-line-file-include-file-status? nil

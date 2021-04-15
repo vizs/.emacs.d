@@ -1,5 +1,11 @@
 ;; -*- lexical-binding: t; -*-
 
+;; TODO: Fontify input to shell process that have been written by
+;; editing the output from the shell process.
+;;
+;; TODO: Completely remove the need for prompt and fontify input
+;; differently when in nix-shell
+
 ;; * Basic configuration
 ;; ** Set path to shell
 (setq explicit-shell-file-name (or (getenv "SHELL") "/bin/sh"))
@@ -40,7 +46,7 @@
    ;; comint-prompt-read-only t
    inhibit-field-text-motion t
    comint-process-echoes t)
-  (setq Man-notify-method 'quiet))
+  (setq-local Man-notify-method 'quiet))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
@@ -60,7 +66,8 @@
   (comint-send-string (get-buffer-process (current-buffer))
                       (concat command "\n"))
   (comint-add-to-input-history command)
-  (vz/shell-history--write command))
+  (vz/shell-history--write command)
+  (vz/term-minor-mode-set-title command))
 
 ;; * Shell history tracking
 ;; ** Variables
@@ -159,7 +166,7 @@
              (directory "")
              (_ (vz/inside-shell?)))
     (ivy-read
-     "> " (vz/shell-get-dir-alias)
+     "> " (cons "." (vz/shell-get-dir-alias))
      :caller 'vz/shell-jump-to-dir
      :action #'(lambda (x)
                  (if (eq this-command #'ivy-call)
@@ -299,10 +306,10 @@ create a new buffer."
 (defun vz/term-minor-mode-set-title (string)
   "Set frame title when `vz/term-minor-mode' is active"
   (when (bound-and-true-p vz/term-minor-mode)
-    (set-frame-parameter vz/term-minor-mode 'title
-                         (format "term: %s" (s-trim-right string)))))
+    (set-frame-parameter vz/term-minor-mode-frame 'title
+                         (format "term@%s: %s" default-directory (s-trim-right string)))))
 
-;; (add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
+(add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
 
 ;; `term-buffer' is set to the name of the shell buffer when the frame is created.
 ;; `term-buffer' is a frame parameter.

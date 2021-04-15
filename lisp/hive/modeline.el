@@ -44,8 +44,10 @@
 (defun vz/mode-line-roundise-text (text &optional foreground background raw-image?)
   "Return an image object with TEXT surrounded by arcs on either side."
   (require 'svg)
-  (if (s-blank? text)
-      ""
+  (cond
+   ((s-blank? text) "")
+   ((not (display-graphic-p)) text)
+   (t
     (let* ((f (font-at 0 nil "l"))
            (fw (window-font-width nil 'mode-line))
            (h (window-font-height nil 'mode-line))
@@ -67,7 +69,7 @@
       (if-let ((img (svg-image svg :ascent 'center))
                raw-image?)
           img
-        (propertize " " 'display img)))))
+        (propertize " " 'display img))))))
 
 ;; Update battery and time at intervals
 (setq-default battery-update-interval 240)
