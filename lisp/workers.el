@@ -3,8 +3,15 @@
 ;; * Functions
 (defun pass (passwd)
   "Get password using `pass'"
-  (s-replace-regexp "\n$" "" (shell-command-to-string
-                              (format "pass get %s" passwd))))
+  (interactive (list
+                (completing-read
+                 "Account: " (s-split "\n" (shell-command-to-string "pass ls")))))
+  (let ((pass (s-replace-regexp "\n$" "" (shell-command-to-string
+                                          (format "pass get %s" passwd))))
+        (select-enable-clipboard t))
+    (when (called-interactively-p 'interactive)
+      (kill-new pass))
+    pass))
 
 (defun vz/reload-config ()
   "Reload init.el."
@@ -362,18 +369,16 @@ behaviour is similar to that of in `bind-keys'."
 ;; ** Racket
 (use-package racket-mode
   :defer t
-  :hook
-  (racket-mode . racket-unicode-input-method-enable)
-  ;; (racket-mode . aggressive-indent-mode)
-  (racket-mode . racket-xp-mode)
+  :hook (racket-mode . racket-xp-mode)
   :config
-  (setq racket-show-functions '(racket-show-pos-tip)
-        font-lock-maximum-decoration '((racket-mode . 0) (t . t)))
+  (setq font-lock-maximum-decoration '((racket-mode . 0) (t . t)))
+
   (add-hook 'racket-xp-mode-hook
             (defun vz/racket-xp-mode-init ()
-              (remove-hook 'pre-display-functions
-                           #'racket-xp-pre-redisplay t)
+              ;; (remove-hook 'pre-display-functions
+              ;;              #'racket-xp-pre-redisplay t)
               (setq-local eldoc-documentation-function #'racket-xp-eldoc-function)))
+
   ;; For that sweet ivy-prescient sorting
   (defun vz/racket--symbol-at-point-or-prompt (force-prompt-p prompt &optional completions)
     (let* ((s (ivy-read prompt completions
@@ -384,6 +389,7 @@ behaviour is similar to that of in `bind-keys'."
         s)))
   (advice-add 'racket--symbol-at-point-or-prompt
               :override #'vz/racket--symbol-at-point-or-prompt)
+
   (defun vz/racket-eros-eval-last-sexp ()
     "Eval the previous sexp asynchronously and create an eros overlay"
     (interactive)
@@ -399,7 +405,110 @@ behaviour is similar to that of in `bind-keys'."
             :duration eros-eval-result-duration)))))
   (vz/bind
    :map racket-mode-map
-   [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp))
+   [remap racket-send-last-sexp] #'vz/racket-eros-eval-last-sexp)
+
+  (defvar vz/racket-mode-syntax-table-during-abbrev
+    (make-syntax-table racket-mode-syntax-table))
+  (modify-syntax-entry ?\\ "w" vz/racket-mode-syntax-table-during-abbrev)
+
+  (define-abbrev-table 'racket-mode-unicode-abbrev-table
+    '(("lambda" "λ" nil 0 :system t)
+      ("\\alpha" "α" nil 0 :system t)
+      ("\\Alpha" "Α" nil 0 :system t)
+      ("\\beta" "β" nil 0 :system t)
+      ("\\Beta" "Β" nil 0 :system t)
+      ("\\gamma" "γ" nil 0 :system t)
+      ("\\Gamma" "Γ" nil 0 :system t)
+      ("\\delta" "δ" nil 0 :system t)
+      ("\\Delta" "Δ" nil 0 :system t)
+      ("\\epsilon" "ε" nil 0 :system t)
+      ("\\Epsilon" "Ε" nil 0 :system t)
+      ("\\zeta" "ζ" nil 0 :system t)
+      ("\\Zeta" "Ζ" nil 0 :system t)
+      ("\\eta" "η" nil 0 :system t)
+      ("\\Eta" "Η" nil 0 :system t)
+      ("\\theta" "θ" nil 0 :system t)
+      ("\\Theta" "Θ" nil 0 :system t)
+      ("\\iota" "ι" nil 0 :system t)
+      ("\\Iota" "Ι" nil 0 :system t)
+      ("\\kappa" "κ" nil 0 :system t)
+      ("\\Kappa" "Κ" nil 0 :system t)
+      ("\\lambda" "λ" nil 0 :system t)
+      ("\\Lambda" "Λ" nil 0 :system t)
+      ("\\lamda" "λ" nil 0 :system t)
+      ("\\Lamda" "Λ" nil 0 :system t)
+      ("\\mu" "μ" nil 0 :system t)
+      ("\\Mu" "Μ" nil 0 :system t)
+      ("\\nu" "ν" nil 0 :system t)
+      ("\\Nu" "Ν" nil 0 :system t)
+      ("\\xi" "ξ" nil 0 :system t)
+      ("\\Xi" "Ξ" nil 0 :system t)
+      ("\\omicron" "ο" nil 0 :system t)
+      ("\\Omicron" "Ο" nil 0 :system t)
+      ("\\pi" "π" nil 0 :system t)
+      ("\\Pi" "Π" nil 0 :system t)
+      ("\\rho" "ρ" nil 0 :system t)
+      ("\\Rho" "Ρ" nil 0 :system t)
+      ("\\sigma" "σ" nil 0 :system t)
+      ("\\Sigma" "Σ" nil 0 :system t)
+      ("\\tau" "τ" nil 0 :system t)
+      ("\\Tau" "Τ" nil 0 :system t)
+      ("\\upsilon" "υ" nil 0 :system t)
+      ("\\Upsilon" "Υ" nil 0 :system t)
+      ("\\phi" "φ" nil 0 :system t)
+      ("\\Phi" "Φ" nil 0 :system t)
+      ("\\chi" "χ" nil 0 :system t)
+      ("\\Chi" "Χ" nil 0 :system t)
+      ("\\psi" "ψ" nil 0 :system t)
+      ("\\Psi" "Ψ" nil 0 :system t)
+      ("\\omega" "ω" nil 0 :system t)
+      ("\\Omega" "Ω" nil 0 :system t)
+      ("\\digamma" "ϝ" nil 0 :system t)
+      ("\\Digamma" "Ϝ" nil 0 :system t)
+      ("\\san" "ϻ" nil 0 :system t)
+      ("\\San" "Ϻ" nil 0 :system t)
+      ("\\qoppa" "ϙ" nil 0 :system t)
+      ("\\Qoppa" "Ϙ" nil 0 :system t)
+      ("\\sampi" "ϡ" nil 0 :system t)
+      ("\\Sampi" "Ϡ" nil 0 :system t)
+      ("\\stigma" "ϛ" nil 0 :system t)
+      ("\\Stigma" "Ϛ" nil 0 :system t)
+      ("\\heta" "ͱ" nil 0 :system t)
+      ("\\Heta" "Ͱ" nil 0 :system t)
+      ("\\sho" "ϸ" nil 0 :system t)
+      ("\\Sho" "Ϸ" nil 0 :system t)
+      ("_0 " "₀" nil 0 :system t)
+      ("_1 " "₁" nil 0 :system t)
+      ("_2 " "₂" nil 0 :system t)
+      ("_3 " "₃" nil 0 :system t)
+      ("_4 " "₄" nil 0 :system t)
+      ("_5 " "₅" nil 0 :system t)
+      ("_6 " "₆" nil 0 :system t)
+      ("_7 " "₇" nil 0 :system t)
+      ("_8 " "₈" nil 0 :system t)
+      ("_9 " "₉" nil 0 :system t)
+      ("^0 " "⁰" nil 0 :system t)
+      ("^1 " "¹" nil 0 :system t)
+      ("^2 " "²" nil 0 :system t)
+      ("^3 " "³" nil 0 :system t)
+      ("^4 " "⁴" nil 0 :system t)
+      ("^5 " "⁵" nil 0 :system t)
+      ("^6 " "⁶" nil 0 :system t)
+      ("^7 " "⁷" nil 0 :system t)
+      ("^8 " "⁸" nil 0 :system t)
+      ("^9 " "⁹" nil 0 :system t))
+    "Abbrev table used for inserting unicode characters in
+racket-mode buffers. Only has the abbreviations that I'm likely
+to use.")
+
+  (add-hook 'racket-mode-hook
+            (defun vz/racket-mode-turn-on-abbrev-mode ()
+              (setq-local local-abbrev-table racket-mode-unicode-abbrev-table)
+              (add-function :around (local 'abbrev-expand-function)
+                            (lambda (old)
+                              (with-syntax-table vz/racket-mode-syntax-table-during-abbrev
+                                (funcall old))))
+              (abbrev-mode t))))
 
 ;; ** Nix
 (use-package nix-mode

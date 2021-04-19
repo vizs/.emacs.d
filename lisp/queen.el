@@ -51,16 +51,35 @@
 
 ;; ** filter-map
 
+(defun vz/filter-map--primitive (pred list res)
+  (if (null list)
+      res
+    (vz/filter-map--primitive
+     pred
+     (butlast list)
+     (if-let ((elt (funcall pred (car (last list)))))
+         (cons elt res)
+       res))))
+
 (defun vz/filter-map (pred list)
   "Like (seq-filter #'(lambda (x) x) (seq-map #'pred list)."
-  (letrec ((helper #'(lambda (list res)
-                       (if (null list)
-                           res
-                         (funcall helper (butlast list)
-                          (if-let ((elt (funcall pred (car (last list)))))
-                              (cons elt res)
-                            res))))))
-    (funcall helper list '())))
+  (vz/filter-map--primitive pred list '()))
+
+(defun vz/filter-map-indexed--primitive (pred list index res)
+  (if (null list)
+      res
+    (vz/filter-map-indexed--primitive
+     pred
+     (butlast list)
+     (1- index)
+     (if-let ((elt (funcall pred (car (last list)) index)))
+         (cons elt res)
+       res))))
+
+(defun vz/filter-map-indexed (pred list)
+  "Like `vz/filter-map' but index of element is also given as the
+second argument to PRED."
+  (vz/filter-map-indexed--primitive pred list (1- (length list)) '()))
 
 ;; ** find-index
 

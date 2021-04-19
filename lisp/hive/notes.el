@@ -256,21 +256,18 @@ Highlight functions are handled specially.")
 (put 'vz/org-abbrev-file 'safe-local-variable
      #'(lambda (x) (or (null x) (stringp x))))
 
-;; TODO: Maybe I should change this to an around advice instead?
-;; Context: info page on abbrev-mode
-(defun vz/org-abbrev--expand-function ()
+(defun vz/org-abbrev--expand-function (expand)
   "When `vz/org-abbrev-mode' is active, then allow abbreviation expansion
 only in text environments. Otherwise, the default behaviour is
 followed."
   (require 'texmathp)
-  (if (and (derived-mode-p 'org-mode)
-           vz/org-abbrev-mode)
-      (unless (texmathp)
-        (abbrev--default-expand))
-    (abbrev--default-expand)))
+  (unless (texmathp)
+    (funcall expand)))
 
-;; TODO: Can this be a local variable?
-(setq abbrev-expand-function #'vz/org-abbrev--expand-function)
+(add-hook 'org-mode-hook
+          (defun vz/org-abbrev--set-abbrev-table ()
+            (when (and vz/org-abbrev-mode abbrev-mode)
+              (add-function :around (local 'abbrev-expand-function) #'vz/org-abbrev--expand-function))))
 
 (add-hook 'hack-local-variables-hook
           (defun vz/org-turn-on-abbrev-mode-maybe? ()
@@ -466,7 +463,7 @@ A ``proper'' pair is defined as ``<pair_start><pair_end>''."
   (interactive "p")
   (when (> (abs n) 0)
     (let ((pair
-           (vz/latex-smart-delete--find-pair-around-point (point) -1
+           (vz/latex-smart-delete--find-pair-around-point -1 (point)
                                                           vz/latex-smart-delete-pairs-start
                                                           vz/latex-smart-delete-pairs-end)))
       (if (null pair)
@@ -488,6 +485,26 @@ A ``proper'' pair is defined as ``<pair_start><pair_end>''."
 ;; This command looks for the closest starting pair backwards, then tries
 ;; to find the corresponding closest ending pair and deletes everything
 ;; from point till the start of the ending pair.
+
+(defun vz/latex-smart-kill--find-all-start ()
+  "Goto beginning and collect the location of all starting
+pairs that appear before point."
+  (save-excursion
+    (let ((beg (line-beginning-position))
+          (end (point)))
+      (apply #'append
+             (vz/filter-map-indexed
+              (lambda (pair index)
+                (letrec ((loop
+                          (lambda (x)
+                            (if (re-search-forward (car pair) end t 1)
+                                (let ((point (match-beginning 0)))
+                                  (goto-char (+ point (cdr pair)))
+                                  (funcall loop (cons (cons point index) x)))
+                              x))))
+                  (goto-char beg)
+                  (funcall loop '())))
+              vz/latex-smart-delete-pairs-start)))))
 
 (defun vz/latex-smart-kill ()
   (interactive)
@@ -515,17 +532,21 @@ A ``proper'' pair is defined as ``<pair_start><pair_end>''."
          (if (texmathp)
              (vz/latex-smart-delete-char N)
            (org-delete-char N)))
+
  "C-k" (defun vz/org-cdlatex-smart-kill-line (&optional arg)
          (interactive "p")
          (if (texmathp)
              (vz/latex-smart-kill)
            (org-kill-line arg)))
+
  "C-w" (defun vz/org-cdlatex-smart-delete-backward-char (&optional arg)
          (interactive "p")
          (if (and (not (use-region-p)) (texmathp))
              (vz/latex-smart-delete-backward-char arg)
            (let (org-cdlatex-mode)
-             (call-interactively (key-binding (vector last-input-event)))))))
+             (call-interactively (key-binding (vector last-input-event))))))
+
+ "<backspace>" #'vz/org-cdlatex-smart-delete-backward-char)
 
 ;; * -*-*-*-
 ;; Local Variables:
