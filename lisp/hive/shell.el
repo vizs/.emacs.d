@@ -38,15 +38,10 @@
 ;; ** Initialise
 (defun vz/shell-mode-init ()
   (shell-dirtrack-mode nil)
-  (add-hook 'comint-output-filter-function
-            #'comint-truncate-buffer)
-  (add-hook 'comint-output-filter-function
-            #'comint-watch-for-password-prompt)
-  (setq-local
-   ;; comint-prompt-read-only t
-   inhibit-field-text-motion t
-   comint-process-echoes t)
-  (setq-local Man-notify-method 'quiet))
+  (add-hook 'comint-output-filter-function #'comint-truncate-buffer)
+  (add-hook 'comint-output-filter-function #'comint-watch-for-password-prompt)
+  (setq-local inhibit-field-text-motion t
+              comint-process-echoes t))
 
 (add-hook 'shell-mode-hook #'vz/shell-mode-init)
 
@@ -67,7 +62,7 @@
                       (concat command "\n"))
   (comint-add-to-input-history command)
   (vz/shell-history--write command)
-  (vz/term-minor-mode-set-title command))
+  (vz/eterm--set-title command))
 
 ;; * Shell history tracking
 ;; ** Variables
@@ -125,13 +120,9 @@
 
 (defun vz/shell-shell-history ()
   "Returns current shell's history as a list"
-  (split-string (f-read
-                 (if (s-equals? (f-filename explicit-shell-file-name) "mksh")
-                     (progn
-                       (call-process "mksh" nil nil nil "-ic" "fc -r -l -n 1 >/tmp/shhist")
-                       "/tmp/shhist")
-                   (~ ".cache/bash_history")))
-                "\n" nil "\t"))
+  (with-temp-buffer
+    (call-process "mksh" nil (list (current-buffer) nil) t "-ic" "fc -r -l -n 1")
+    (split-string (buffer-substring (point-min) (point-max)) "\n" nil "\t")))
 
 ;; * History from shell
 (defun vz/shell-insert-from-shell-hist ()
@@ -147,15 +138,10 @@
 
 ;; * Jump to directory alias
 (defun vz/shell-get-dir-alias ()
-  (seq-map #'(lambda (x) (cadr (s-split "=" x)))
-        (butlast
-         (s-split "\n"
-                  (f-read
-                   (if (s-equals? (f-filename explicit-shell-file-name) "mksh")
-                       (progn
-                         (call-process "mksh" nil nil nil "-ic" "alias -d >/tmp/diralias")
-                         "/tmp/diralias")
-                       (~ "lib/directory-aliases")))))))
+  (with-temp-buffer
+    (call-process "mksh" nil (list (current-buffer) nil) t "-ic" "alias -d")
+    (split-string (buffer-substring (point-min) (point-max))
+                  "\n" nil (rx alnum "="))))
 
 ;; TODO: Figure out how to do this without setting directory to ""
 (defun vz/shell-jump-to-dir ()
@@ -168,11 +154,11 @@
     (ivy-read
      "> " (cons "." (vz/shell-get-dir-alias))
      :caller 'vz/shell-jump-to-dir
-     :action #'(lambda (x)
-                 (if (eq this-command #'ivy-call)
-                     (ivy-exit-with-action
-                      #'(lambda (_) (setq directory (read-directory-name "> " x))))
-                   (setq directory x))))
+     :action (lambda (x)
+               (if (eq this-command #'ivy-call)
+                   (ivy-exit-with-action
+                    (lambda (_) (setq directory (read-directory-name "> " x))))
+                 (setq directory x))))
     (vz/shell-history--ivy-action (concat "cd " (shell-quote-argument directory)))
     (comint-send-string (get-buffer-process (current-buffer))
                         input)))
@@ -189,9 +175,9 @@ If CWD is non-nil, then cd to CWD."
   (add-to-list 'vz/popup-shells buffer)
   (set-process-sentinel
    (get-buffer-process buffer)
-   #'(lambda (p)
-       (unless (process-live-p p)
-        (let ((buf (process-buffer p)))
+   (lambda (p)
+     (unless (process-live-p p)
+       (let ((buf (process-buffer p)))
          (setq vz/popup-shells (remove buf vz/popup-shells))
          (kill-buffer buf)))))
   (when cwd
@@ -216,19 +202,19 @@ shell buffer otherwise try to find ``free'' buffers that have the
 CWD as `default-directory' and switch to it. If nothing is found,
 create a new buffer."
   (interactive)
-  (if (seq-contains-p vz/term-minor-mode-frames (selected-frame))
+  (if (seq-contains-p vz/eterm--frames (selected-frame))
       (switch-to-buffer-other-window (frame-parameter (selected-frame) 'term-buffer))
     (let ((cwd (condition-case nil
                    (f-dirname (buffer-file-name))
                  (error (f-full default-directory)))))
       (if (null vz/popup-shells)
           (vz/popup-shell--add (shell) cwd)
-        (let* ((free-buffers (seq-filter #'(lambda (buf) (and (vz/inside-shell? buf)
-                                                          (null (get-buffer-window buf t))))
-                              vz/popup-shells))
-               (cwd-buffers (seq-filter #'(lambda (buf) (with-current-buffer buf
-                                                         (f-equal? default-directory cwd)))
-                             free-buffers)))
+        (let* ((free-buffers (seq-filter (lambda (buf) (and (vz/inside-shell? buf)
+                                                            (null (get-buffer-window buf t))))
+                                         vz/popup-shells))
+               (cwd-buffers (seq-filter (lambda (buf) (with-current-buffer buf
+                                                        (f-equal? default-directory cwd)))
+                                        free-buffers)))
           (cond
            (cwd-buffers
             (vz/popup-shell--switch (car cwd-buffers) cwd t))
@@ -261,70 +247,65 @@ create a new buffer."
   (interactive)
   (ivy-read "> " vz/shell--prompt-alist
             :sort nil
-            :action #'(lambda (p)
-                        (goto-char (cdr p))
-                        (vz/beacon-highlight))))
+            :action (lambda (p)
+                      (goto-char (cdr p))
+                      (vz/beacon-highlight))))
 
-;; * Emacs frame as terminal
+;; * Emacs frame as a terminal
 ;; ** Variables
-(define-minor-mode vz/term-minor-mode
-  "Minor mode for binding C-d in *term* buffers")
+(defvar-local vz/eterm--frame nil
+  "Frame assigned to eterm buffer.")
 
-(defvar vz/term-minor-mode-frame nil
-  "Frame variable that *term-asdf* buffer uses")
-
-(make-variable-buffer-local 'vz/term-minor-mode-frame)
-
-(defvar vz/term-minor-mode-frames nil
-  "Frames used by *term-asdf* buffers")
+(defvar vz/eterm--frames nil
+  "List of frames assinged to eterm buffers.")
 
 ;; ** Functions
-(defun vz/term-minor-mode-sentinel (process output)
-  "Process sentinel to auto kill associated buffer and frame in term-mode"
+(defun vz/eterm--sentinel (process _output)
+  "Process sentinel to auto kill associated buffer of eterm
+frames."
   (unless (process-live-p process)
     (let* ((b (process-buffer process))
            (f (asoc-get (buffer-local-variables b)
-                        'vz/term-minor-mode-frame))
+                        'vz/eterm--frame))
            (kill-buffer-query-functions nil))
       (kill-buffer b)
       (when (frame-live-p f)
         (delete-frame f)))))
 
 (defun vz/kill-dead-term ()
-  "Remove all dead *term* buffers"
+  "Remove all dead eterm buffers."
   (interactive)
   (let ((kill-buffer-query-functions nil))
     (seq-each
-        (seq-filter
-         #'(lambda (x) (with-current-buffer x
-                        (and (s-prefix? "*term-" (buffer-name x))
-                         (or (not (frame-live-p vz/term-minor-mode-frame))
-                          (not (get-buffer-process x))))))
-         (buffer-list))
-      #'kill-buffer)))
+     (seq-filter
+      (lambda (x) (with-current-buffer x
+                    (and (s-prefix? "*term-" (buffer-name x))
+                         (or (not (frame-live-p vz/eterm--frame))
+                             (not (get-buffer-process x))))))
+      (buffer-list))
+     #'kill-buffer)))
 
-(defun vz/term-minor-mode-set-title (string)
-  "Set frame title when `vz/term-minor-mode' is active"
-  (when (bound-and-true-p vz/term-minor-mode)
-    (set-frame-parameter vz/term-minor-mode-frame 'title
-                         (format "term@%s: %s" default-directory (s-trim-right string)))))
+(defun vz/eterm--set-title (string)
+  "Set frame title for eterm frames."
+  (set-frame-parameter vz/eterm--frame 'title
+                       (format "term@%s: %s" default-directory (s-trim-right string))))
 
-(add-hook 'comint-input-filter-functions #'vz/term-minor-mode-set-title)
+(add-hook 'comint-input-filter-functions #'vz/eterm--set-title)
 
 ;; `term-buffer' is set to the name of the shell buffer when the frame is created.
 ;; `term-buffer' is a frame parameter.
 
-(defun vz/term-minor-mode-on-delete-frame (frame)
-  "If FRAME is a member of `vz/term-minor-mode-frames', then kill the
-term buffer associated with it"
-  (when (and (member frame vz/term-minor-mode-frames)
-             ;(vz/inside-shell? (frame-parameter frame 'term-buffer))
+(defun vz/eterm--on-delete-frame (frame)
+  "If FRAME is a member of `vz/eterm--frames', then kill the
+shell buffer associated with it"
+  (when (and (member frame vz/eterm--frames)
+                                        ;(vz/inside-shell? (frame-parameter frame 'term-buffer))
              )
-    (setq vz/term-minor-mode-frames (remove frame vz/term-minor-mode-frames))
+    (setq vz/eterm--frames (remove frame vz/eterm--frames))
     (let ((kill-buffer-query-functions nil))
       (kill-buffer (frame-parameter frame 'term-buffer)))))
 
-(add-hook 'delete-frame-functions #'vz/term-minor-mode-on-delete-frame)
+(add-hook 'delete-frame-functions #'vz/eterm--on-delete-frame)
 
 ;; * Keybindings
 (defun vz/shell-send-keysequence-to-process (key)
