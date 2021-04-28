@@ -223,8 +223,9 @@ behaviour is similar to that of in `bind-keys'."
         olivetti-enable-visual-line-mode nil))
 
 ;; ** Folding text
-(use-package bicycle
+(use-package bicycle :after outline
   :after outline
+  :defer t
   :bind (:map outline-minor-mode-map
               ([C-tab] . bicycle-cycle)
               ("<backtab>" . bicycle-cycle-global)))
@@ -299,7 +300,7 @@ behaviour is similar to that of in `bind-keys'."
     company-idle-delay nil
     company-tooltip-limit 10
     company-show-numbers 'left
-    company-global-modes '(not shell-mode org-mode)
+    company-global-modes '(not org-mode)
     company-minimum-prefix-length 2
     completion-in-region-function
     #'(lambda (start end collection predicate)
@@ -364,14 +365,15 @@ behaviour is similar to that of in `bind-keys'."
   ;;          nil t))
 
 ;; ** Lua
-(use-package lua-mode)
+(use-package lua-mode
+  :defer t)
 
 ;; ** Racket
 (use-package racket-mode
   :defer t
   :hook (racket-mode . racket-xp-mode)
   :config
-  (setq font-lock-maximum-decoration '((racket-mode . 0) (t . t)))
+  (add-to-list 'font-lock-maximum-decoration '(racket-mode . nil))
 
   (add-hook 'racket-xp-mode-hook
             (defun vz/racket-xp-mode-init ()
@@ -412,91 +414,77 @@ behaviour is similar to that of in `bind-keys'."
   (modify-syntax-entry ?\\ "w" vz/racket-mode-syntax-table-during-abbrev)
 
   (define-abbrev-table 'racket-mode-unicode-abbrev-table
-    '(("lambda" "λ" nil 0 :system t)
-      ("\\alpha" "α" nil 0 :system t)
-      ("\\Alpha" "Α" nil 0 :system t)
-      ("\\beta" "β" nil 0 :system t)
-      ("\\Beta" "Β" nil 0 :system t)
-      ("\\gamma" "γ" nil 0 :system t)
-      ("\\Gamma" "Γ" nil 0 :system t)
-      ("\\delta" "δ" nil 0 :system t)
-      ("\\Delta" "Δ" nil 0 :system t)
-      ("\\epsilon" "ε" nil 0 :system t)
-      ("\\Epsilon" "Ε" nil 0 :system t)
-      ("\\zeta" "ζ" nil 0 :system t)
-      ("\\Zeta" "Ζ" nil 0 :system t)
-      ("\\eta" "η" nil 0 :system t)
-      ("\\Eta" "Η" nil 0 :system t)
-      ("\\theta" "θ" nil 0 :system t)
-      ("\\Theta" "Θ" nil 0 :system t)
-      ("\\iota" "ι" nil 0 :system t)
-      ("\\Iota" "Ι" nil 0 :system t)
-      ("\\kappa" "κ" nil 0 :system t)
-      ("\\Kappa" "Κ" nil 0 :system t)
-      ("\\lambda" "λ" nil 0 :system t)
-      ("\\Lambda" "Λ" nil 0 :system t)
-      ("\\lamda" "λ" nil 0 :system t)
-      ("\\Lamda" "Λ" nil 0 :system t)
-      ("\\mu" "μ" nil 0 :system t)
-      ("\\Mu" "Μ" nil 0 :system t)
-      ("\\nu" "ν" nil 0 :system t)
-      ("\\Nu" "Ν" nil 0 :system t)
-      ("\\xi" "ξ" nil 0 :system t)
-      ("\\Xi" "Ξ" nil 0 :system t)
-      ("\\omicron" "ο" nil 0 :system t)
-      ("\\Omicron" "Ο" nil 0 :system t)
-      ("\\pi" "π" nil 0 :system t)
-      ("\\Pi" "Π" nil 0 :system t)
-      ("\\rho" "ρ" nil 0 :system t)
-      ("\\Rho" "Ρ" nil 0 :system t)
-      ("\\sigma" "σ" nil 0 :system t)
-      ("\\Sigma" "Σ" nil 0 :system t)
-      ("\\tau" "τ" nil 0 :system t)
-      ("\\Tau" "Τ" nil 0 :system t)
-      ("\\upsilon" "υ" nil 0 :system t)
-      ("\\Upsilon" "Υ" nil 0 :system t)
-      ("\\phi" "φ" nil 0 :system t)
-      ("\\Phi" "Φ" nil 0 :system t)
-      ("\\chi" "χ" nil 0 :system t)
-      ("\\Chi" "Χ" nil 0 :system t)
-      ("\\psi" "ψ" nil 0 :system t)
-      ("\\Psi" "Ψ" nil 0 :system t)
-      ("\\omega" "ω" nil 0 :system t)
-      ("\\Omega" "Ω" nil 0 :system t)
-      ("\\digamma" "ϝ" nil 0 :system t)
-      ("\\Digamma" "Ϝ" nil 0 :system t)
-      ("\\san" "ϻ" nil 0 :system t)
-      ("\\San" "Ϻ" nil 0 :system t)
-      ("\\qoppa" "ϙ" nil 0 :system t)
-      ("\\Qoppa" "Ϙ" nil 0 :system t)
-      ("\\sampi" "ϡ" nil 0 :system t)
-      ("\\Sampi" "Ϡ" nil 0 :system t)
-      ("\\stigma" "ϛ" nil 0 :system t)
-      ("\\Stigma" "Ϛ" nil 0 :system t)
-      ("\\heta" "ͱ" nil 0 :system t)
-      ("\\Heta" "Ͱ" nil 0 :system t)
-      ("\\sho" "ϸ" nil 0 :system t)
-      ("\\Sho" "Ϸ" nil 0 :system t)
-      ("_0 " "₀" nil 0 :system t)
-      ("_1 " "₁" nil 0 :system t)
-      ("_2 " "₂" nil 0 :system t)
-      ("_3 " "₃" nil 0 :system t)
-      ("_4 " "₄" nil 0 :system t)
-      ("_5 " "₅" nil 0 :system t)
-      ("_6 " "₆" nil 0 :system t)
-      ("_7 " "₇" nil 0 :system t)
-      ("_8 " "₈" nil 0 :system t)
-      ("_9 " "₉" nil 0 :system t)
-      ("^0 " "⁰" nil 0 :system t)
-      ("^1 " "¹" nil 0 :system t)
-      ("^2 " "²" nil 0 :system t)
-      ("^3 " "³" nil 0 :system t)
-      ("^4 " "⁴" nil 0 :system t)
-      ("^5 " "⁵" nil 0 :system t)
-      ("^6 " "⁶" nil 0 :system t)
-      ("^7 " "⁷" nil 0 :system t)
-      ("^8 " "⁸" nil 0 :system t)
-      ("^9 " "⁹" nil 0 :system t))
+    '(("lambda"     "λ" nil 0 :system t)
+      ("\\alpha"    "α" nil 0 :system t)
+      ("\\Alpha"    "Α" nil 0 :system t)
+      ("\\beta"     "β" nil 0 :system t)
+      ("\\Beta"     "Β" nil 0 :system t)
+      ("\\gamma"    "γ" nil 0 :system t)
+      ("\\Gamma"    "Γ" nil 0 :system t)
+      ("\\delta"    "δ" nil 0 :system t)
+      ("\\Delta"    "Δ" nil 0 :system t)
+      ("\\epsilon"  "ε" nil 0 :system t)
+      ("\\Epsilon"  "Ε" nil 0 :system t)
+      ("\\zeta"     "ζ" nil 0 :system t)
+      ("\\Zeta"     "Ζ" nil 0 :system t)
+      ("\\eta"      "η" nil 0 :system t)
+      ("\\Eta"      "Η" nil 0 :system t)
+      ("\\theta"    "θ" nil 0 :system t)
+      ("\\Theta"    "Θ" nil 0 :system t)
+      ("\\iota"     "ι" nil 0 :system t)
+      ("\\Iota"     "Ι" nil 0 :system t)
+      ("\\kappa"    "κ" nil 0 :system t)
+      ("\\Kappa"    "Κ" nil 0 :system t)
+      ("\\lambda"   "λ" nil 0 :system t)
+      ("\\Lambda"   "Λ" nil 0 :system t)
+      ("\\lamda"    "λ" nil 0 :system t)
+      ("\\Lamda"    "Λ" nil 0 :system t)
+      ("\\mu"       "μ" nil 0 :system t)
+      ("\\Mu"       "Μ" nil 0 :system t)
+      ("\\nu"       "ν" nil 0 :system t)
+      ("\\Nu"       "Ν" nil 0 :system t)
+      ("\\xi"       "ξ" nil 0 :system t)
+      ("\\Xi"       "Ξ" nil 0 :system t)
+      ("\\omicron"  "ο" nil 0 :system t)
+      ("\\Omicron"  "Ο" nil 0 :system t)
+      ("\\pi"       "π" nil 0 :system t)
+      ("\\Pi"       "Π" nil 0 :system t)
+      ("\\rho"      "ρ" nil 0 :system t)
+      ("\\Rho"      "Ρ" nil 0 :system t)
+      ("\\sigma"    "σ" nil 0 :system t)
+      ("\\Sigma"    "Σ" nil 0 :system t)
+      ("\\tau"      "τ" nil 0 :system t)
+      ("\\Tau"      "Τ" nil 0 :system t)
+      ("\\upsilon"  "υ" nil 0 :system t)
+      ("\\Upsilon"  "Υ" nil 0 :system t)
+      ("\\phi"      "φ" nil 0 :system t)
+      ("\\Phi"      "Φ" nil 0 :system t)
+      ("\\chi"      "χ" nil 0 :system t)
+      ("\\Chi"      "Χ" nil 0 :system t)
+      ("\\psi"      "ψ" nil 0 :system t)
+      ("\\Psi"      "Ψ" nil 0 :system t)
+      ("\\omega"    "ω" nil 0 :system t)
+      ("\\Omega"    "Ω" nil 0 :system t)
+      ("_0"         "₀" nil 0 :system t)
+      ("_1"         "₁" nil 0 :system t)
+      ("_2"         "₂" nil 0 :system t)
+      ("_3"         "₃" nil 0 :system t)
+      ("_4"         "₄" nil 0 :system t)
+      ("_5"         "₅" nil 0 :system t)
+      ("_6"         "₆" nil 0 :system t)
+      ("_7"         "₇" nil 0 :system t)
+      ("_8"         "₈" nil 0 :system t)
+      ("_9"         "₉" nil 0 :system t)
+      ("^0"         "⁰" nil 0 :system t)
+      ("^1"         "¹" nil 0 :system t)
+      ("^2"         "²" nil 0 :system t)
+      ("^3"         "³" nil 0 :system t)
+      ("^4"         "⁴" nil 0 :system t)
+      ("^5"         "⁵" nil 0 :system t)
+      ("^6"         "⁶" nil 0 :system t)
+      ("^7"         "⁷" nil 0 :system t)
+      ("^8"         "⁸" nil 0 :system t)
+      ("^9"         "⁹" nil 0 :system t))
     "Abbrev table used for inserting unicode characters in
 racket-mode buffers. Only has the abbreviations that I'm likely
 to use.")
@@ -521,7 +509,8 @@ to use.")
 ;; ** Fennel
 ;; To Lua or not to Lua
 ;; TODO
-(use-package fennel-mode)
+(use-package fennel-mode
+  :defer t)
 
 ;; * Sorting entries
 ;; Save and sort entries in ivy and company
@@ -543,10 +532,6 @@ to use.")
   :after company
   :hook (prog-mode . company-prescient-mode))
 
-;; * Fun
-;; ** Dad Jokes
-(use-package dad-joke)
-
 ;; * Improve(?) editing experience
 (load-file (expand-file-name "lisp/hive/editing.el" user-emacs-directory))
 
@@ -561,6 +546,7 @@ to use.")
 
 ;; ** proced
 (use-package proced
+  :defer t
   :straight ( :type built-in)
   :config
   (setq-default proced-filter 'all))

@@ -3,15 +3,6 @@
 ;; Enable structure template completion
 (require 'org-tempo)
 
-;; Latex equation* template
-(tempo-define-template
- "org-latex-equation*"
- '("\\begin{equation*}" n "\\begin{alignat}" n r n
-   "\\end{alignat}" n "\\end{equation*}" >)
- "<eq")
-
-(add-to-list 'org-tempo-tags '("<eq" . tempo-template-org-latex-equation*))
-
 ;; Scale up the org-latex-preview images
 (plist-put org-format-latex-options :scale 1.5)
 ;; Make it completely black
@@ -23,15 +14,11 @@
                               org-entities-user))
 
 (use-package cdlatex
-  :demand t
-  :config
-  ;; Decrease cdlatex popup helper timeout
-  (setq-default cdlatex-auto-help-delay 0.50)
-  (setq
-   ;; +Disable simplification of super- and sub-scripts+
-   cdlatex-simplify-sub-super-scripts t
-   ;; Romanise sub/superscript if _,^ is pressed twice
-   cdlatex-make-sub-superscript-roman-if-pressed-twice t))
+  :defer t
+  :custom
+  (cdlatex-auto-help-delay 0.50)
+  (cdlatex-simplify-sub-super-scripts t)
+  (cdlatex-make-sub-superscript-roman-if-pressed-twice t))
 
 ;; Add a 'cdlatex' startup option to autostart `org-cdlatex-mode'
 (add-to-list 'org-startup-options '("cdlatex" org-cdlatex-mode t))
@@ -84,8 +71,8 @@
     (face-remap-add-relative 'org-level-3 :height height2)
     (face-remap-add-relative 'org-level-4 :height height3)
 
-    (setq-local org-num-face `(:family ,vz/variable-font :height 110 :weight bold
-                               :slant normal))))
+    (setq-local org-num-face `( :family ,vz/variable-font :height 110 :weight bold
+                                :slant normal))))
 
 (add-hook 'org-mode-hook #'vz/org-style)
 
@@ -240,7 +227,7 @@ markers for sub/super scripts but fontify them."
 (define-minor-mode vz/org-prettify-mode
   "When non-nil, use `prettify-symbols-mode' to prettify
   `org-entities-user'."
-  nil nil nil
+  nil " ℘" nil
   (if vz/org-prettify-mode
       (progn
         (setq-local prettify-symbols-compose-predicate #'vz/org-prettify--predicate

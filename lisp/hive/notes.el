@@ -10,8 +10,9 @@
 ;; TODO: Adding math units to expand-region try list would be nice but
 ;; I'm not sure how to write this, it's really confusing.
 
-;; TODO: Consider completely removing cdlatex and using
-;; https://github.com/ymarco/auto-activating-snippets instead
+;; TODO: It might be worth it to completely replace cdlatex tab
+;; commands with abbrev-mode. Racket-mode's abbrev completion for
+;; greek letter is a good example.
 
 ;; * Annotations
 
@@ -19,6 +20,7 @@
 ;; achieved using pdftools and org-noter + org-pdftools.
 
 (use-package pdf-tools
+  :defer t
   :config
   (pdf-tools-install))
 
@@ -104,7 +106,7 @@ Highlight functions are handled specially.")
 
 (add-hook 'pdf-annot-minor-mode-hook
           (defun vz/pdf-annot--set-header-line-format ()
-            (face-remap-add-relative 'header-line '(:inherit mode-line))
+            (face-remap-add-relative 'header-line '(:inherit default))
             (let* ((images (vz/pdf-annot-header-line--generate-images))
                    (length (seq-reduce #'(lambda (x res) (+ (length res) x))
                                        images 0)))
@@ -144,14 +146,15 @@ Highlight functions are handled specially.")
 ;; of interleave without some nuances, will work the best for me.
 
 (use-package org-noter
+  :defer t
+  :custom
+  (org-noter-default-heading-title "Page $p$")
+  (org-noter-doc-split-fraction '(0.6 . 0.4))
+  (org-noter-auto-save-last-location t)
+  (org-noter-default-notes-file-names '("annotations.org"))
+  (org-noter-notes-search-path (seq-map #'(lambda (x) (~ x)) '("doc/org" "doc/uni/notes")))
+  (org-noter-doc-property-in-notes t)
   :config
-  (setq
-   org-noter-default-heading-title "Page $p$"
-   org-noter-doc-split-fraction '(0.6 . 0.4)
-   org-noter-auto-save-last-location t
-   org-noter-default-notes-file-names '("annotations.org")
-   org-noter-notes-search-path (seq-map #'(lambda (x) (~ x)) '("doc/org" "doc/uni/notes"))
-   org-noter-doc-property-in-notes t)
   ;; I really don't need org-noter to add stuff to my modeline
   (advice-add 'org-noter--mode-line-text :override #'(lambda () ""))
   (vz/bind
@@ -193,32 +196,32 @@ Highlight functions are handled specially.")
 ;; ** Custom cdlatex-commands
 
 (use-package cdlatex
+  :defer t
+  :custom
+  (cdlatex-use-dollar-to-ensure-math nil)
+  (cdlatex-math-symbol-prefix ?\;)
+  (cdlatex-command-alist
+   '(("dv"   "Insert derivative"                     "\\frac{\\mathrm{d}?}{\\mathrm{d}}"              cdlatex-position-cursor nil nil t)
+     ("pv"   "Insert partial derivative"             "\\frac{\\partial ?}{\\partial }"                cdlatex-position-cursor nil nil t)
+     ("pv("  "Insert partial derivative"             "\\left(\\frac{\\partial ?}{\\partial }\\right)" cdlatex-position-cursor nil nil t)
+     ("txt"  "Insert \\intertext{}"                  "\\intertext{?}"                                 cdlatex-position-cursor nil nil t)
+     ("lim"  "Insert limit"                          "\\lim_{?}"                                      cdlatex-position-cursor nil nil t)
+     ("cc"   "Insert the concentration of substance" "[\\ch{?}] "                                     cdlatex-position-cursor nil nil t)
+     ("ch"   "Insert the chemical formula"           "\\ch{?}"                                        cdlatex-position-cursor nil nil t)
+     ("intl" "Insert integral with limits"           "\\int_{?}^{}"                                   cdlatex-position-cursor nil nil t)
+     ("1/"   "Insert the inverse of"                 "\\frac{1}{?}"                                   cdlatex-position-cursor nil nil t)))
+  (cdlatex-math-symbol-alist
+   '((?0 ("\\ominus" "\\circ"))))
   :config
   (vz/bind
    :map org-cdlatex-mode-map
    "`" nil
-   ";" #'(lambda ()
-           (interactive)
-           (if (texmathp)
-               (cdlatex-math-symbol)
-             (let (org-cdlatex-mode)
-              (call-interactively (key-binding (vector last-input-event)))))))
-  (setq
-   ;; Don't use dollar
-   cdlatex-use-dollar-to-ensure-math nil
-   cdlatex-math-symbol-prefix ?\;
-   cdlatex-command-alist
-   '(("dv" "Insert derivative" "\\frac{\\mathrm{d}?}{\\mathrm{d}}" cdlatex-position-cursor nil nil t)
-     ("pv" "Insert partial derivative" "\\frac{\\partial ?}{\\partial }" cdlatex-position-cursor nil nil t)
-     ("pv(" "Insert partial derivative" "\\left(\\frac{\\partial ?}{\\partial }\\right)" cdlatex-position-cursor nil nil t)
-     ("txt" "Insert \\intertext{}" "\\intertext{?}" cdlatex-position-cursor nil nil t)
-     ("lim" "Insert limit" "\\lim_{?}" cdlatex-position-cursor nil nil t)
-     ("cc" "Insert the concentration of substance" "[\\ch{?}] " cdlatex-position-cursor nil nil t)
-     ("ch" "Insert the chemical formula" "\\ch{?}" cdlatex-position-cursor nil nil t)
-     ("intl" "Insert integral with limits" "\\int_{?}^{}" cdlatex-position-cursor nil nil t)
-     ("1/" "Insert the inverse of" "\\frac{1}{?}" cdlatex-position-cursor nil nil t))
-   cdlatex-math-symbol-alist '((?0 ("\\ominus" "\\circ"))))
-  (cdlatex-compute-tables))
+   ";" (defun vz/org-cdlatex-try-math-symbol ()
+         (interactive)
+         (if (texmathp)
+             (cdlatex-math-symbol)
+           (let (org-cdlatex-mode)
+             (call-interactively (key-binding (vector last-input-event))))))))
 
 ;; ** TODO: Custom latex macros
 ;; Look into using this https://www.reddit.com/r/orgmode/comments/7u2n0h/tip_for_defining_latex_macros_for_use_in_both/
@@ -265,7 +268,7 @@ followed."
     (funcall expand)))
 
 (add-hook 'org-mode-hook
-          (defun vz/org-abbrev--set-abbrev-table ()
+          (defun vz/org-abbrev--set-abbrev-expand-function ()
             (when (and vz/org-abbrev-mode abbrev-mode)
               (add-function :around (local 'abbrev-expand-function) #'vz/org-abbrev--expand-function))))
 
@@ -543,10 +546,12 @@ pairs that appear before point."
          (interactive "p")
          (if (and (not (use-region-p)) (texmathp))
              (vz/latex-smart-delete-backward-char arg)
-           (let (org-cdlatex-mode)
+           (let ((org-cdlatex-mode nil))
              (call-interactively (key-binding (vector last-input-event))))))
 
- "<backspace>" #'vz/org-cdlatex-smart-delete-backward-char)
+ ;; TODO: Fix
+ ;"DEL" #'vz/org-cdlatex-smart-delete-backward-char
+ )
 
 ;; * -*-*-*-
 ;; Local Variables:

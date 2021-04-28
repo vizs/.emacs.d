@@ -1,7 +1,15 @@
 ;; -*- lexical-binding: t; -*-
 
-(require 'battery)
-(require 'time)
+;; (require 'battery)
+;; (require 'time)
+
+;; Disable line and columns
+(line-number-mode -1)
+(column-number-mode -1)
+
+(dolist (m '(ws-butler-mode ivy-mode counsel-mode))
+  (setcdr (assq m minor-mode-alist) '("")))
+
 (use-package moody
   :demand t)
 
@@ -79,11 +87,11 @@
 (defvar vz/mode-line-time ""
   "Variable that stores the svg image of current time.")
 
-(let ((fn #'(lambda (_ _ x)
-              (when (eq x 'set)
-               (force-mode-line-update t)))))
-  (add-variable-watcher 'vz/mode-line-battery fn)
-  (add-variable-watcher 'vz/mode-line-time fn))
+;; (let ((fn #'(lambda (_ _ x)
+;;               (when (eq x 'set)
+;;                (force-mode-line-update t)))))
+;;   (add-variable-watcher 'vz/mode-line-battery fn)
+;;   (add-variable-watcher 'vz/mode-line-time fn))
 
 (defun vz/mode-line-update-battery ()
   "Update battery status in mode-line."
@@ -135,24 +143,24 @@
   "If non-nil, include (:eval vz/mode-line-file-extra-info) after
   file name image.")
 
-(setq-default
- vz/mode-line-extra-info '()
- ;; (quote (:eval (and
- ;;                (window-at-side-p nil 'right)
- ;;                (window-at-side-p nil 'bottom)
- ;;                (concat vz/mode-line-time
- ;;                 " "
- ;;                 vz/mode-line-battery))))
- vz/mode-line-format `("  "
-                       (:eval (vz/mode-line-roundise-text
-                               (concat (when vz/mode-line-file-include-file-short-path?
-                                        (vz/mode-line-file-short-dir))
-                                (buffer-name)
-                                (when vz/mode-line-file-include-file-status? (vz/mode-line-file-state)))))
-                       (:eval (when vz/mode-line-file-extra-info
-                               (eval vz/mode-line-file-extra-info)))
-                       " "
-                       (:eval (vz/mode-line-roundise-text (vz/mode-line-git-branch)))
-                       (:eval (vz/mode-line-fill 'mode-line 18))
-                       ,vz/mode-line-extra-info)
- mode-line-format vz/mode-line-format)
+;; (setq-default
+;;  vz/mode-line-extra-info '()
+;;  ;; (quote (:eval (and
+;;  ;;                (window-at-side-p nil 'right)
+;;  ;;                (window-at-side-p nil 'bottom)
+;;  ;;                (concat vz/mode-line-time
+;;  ;;                 " "
+;;  ;;                 vz/mode-line-battery))))
+;;  vz/mode-line-format `("  "
+;;                        (:eval (vz/mode-line-roundise-text
+;;                                (concat (when vz/mode-line-file-include-file-short-path?
+;;                                         (vz/mode-line-file-short-dir))
+;;                                 (buffer-name)
+;;                                 (when vz/mode-line-file-include-file-status? (vz/mode-line-file-state)))))
+;;                        (:eval (when vz/mode-line-file-extra-info
+;;                                (eval vz/mode-line-file-extra-info)))
+;;                        " "
+;;                        (:eval (vz/mode-line-roundise-text (vz/mode-line-git-branch)))
+;;                        (:eval (vz/mode-line-fill 'mode-line 18))
+;;                        ,vz/mode-line-extra-info)
+;;  mode-line-format vz/mode-line-format)

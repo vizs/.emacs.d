@@ -301,6 +301,13 @@ LIST. Return nil if otherwise."
 ;; Inner border
 (add-to-list 'default-frame-alist '(internal-border-width . 4))
 
+;; Make `font-lock-maximum-decoration' a list
+(use-package font-lock
+  :straight ( :type built-in)
+  :custom
+  (font-lock-maximum-decoration '((t . t))))
+
+
 ;; ** Highlight on long cursor movements
 
 (require 'pulse)

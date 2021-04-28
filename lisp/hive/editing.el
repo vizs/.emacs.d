@@ -86,7 +86,6 @@ on the position of the cursor."
  "C-c M--" #'vz/decrease-number-at-point
 
  "C-a" #'vz/beginning-of-line
- "C-j" #'newline
  "M-j" #'vz/join-line
 
  "C-w" #'vz/backward-delete-or-kill-region

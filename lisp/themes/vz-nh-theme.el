@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 ;; Don't mind the name
 
-(deftheme vz-nh "A custom theme")
+(deftheme vz-nh "A custom theme.")
 
 (let ((class '((type graphic) (class color) (min-colors 89)))
       (bg "#ffffff")
@@ -10,8 +10,9 @@
       (blue "#79a2ed")
       (grey "#cccccc")
       (green "#c1e1c1")
+      (off-white "#ffffbf")
+      (darker-off-white "#ffff9e")
       (dark-red "#ff0000")
-      (dark-green "#32cd32")
       (cursor "#505152")
       (light-fg "#a9a9a9")
       (darker-bg "#a9a9a9")
@@ -30,23 +31,23 @@
    ;; Emacs >=27 only
    `(fill-column-indicator            ((,class :background ,dark-bg :foreground ,dark-bg)))
 
-   `(error                            ((,class :background ,bg :foreground ,red)))
+   `(error                            ((,class :foreground ,red)))
    `(link                             ((,class :foreground ,blue :underline t)))
 
    `(cursor                           ((,class :background ,cursor :foreground ,fg)))
    `(fringe                           ((,class :background ,bg :foreground ,light-fg)))
 
-   `(region                           ((,class :background ,dark-bg :foreground ,fg)))
+   `(region                           ((,class :background ,off-white :foreground ,fg)))
    `(match                            ((,class :background ,dark-bg :foreground ,fg)))
    `(secondary-selection              ((,class :background ,darker-bg :foreground ,fg)))
-   `(minibuffer-prompt                ((,class :background ,bg :foreground ,fg)))
+   `(minibuffer-prompt                ((,class :foreground ,fg)))
    `(isearch                          ((,class :background ,dark-bg :foreground ,fg)))
-   `(lazy-highlight                   ((,class :background ,dark-bg :foreground ,fg)))
-   `(highlight                        ((,class :background ,dark-bg :foreground ,fg)))
+   `(lazy-highlight                   ((,class :background ,darker-off-white)))
+   `(highlight                        ((,class :background ,dark-bg)))
    `(trailing-whitespace              ((,class :background ,darker-bg :foreground ,fg)))
 
-   `(holiday                          ((,class :background ,bg :foreground ,dark-red)))
-   `(calendar-today                   ((,class :background ,bg :foreground ,blue)))
+   `(holiday                          ((,class :foreground ,dark-red)))
+   `(calendar-today                   ((,class :foreground ,blue)))
 
    `(Info-quoted                      ((,class :foreground ,light-fg :inherit fixed-pitch)))
 
@@ -56,15 +57,8 @@
 
    `(beacon-fallback-background       ((,class :background ,darker-bg :foreground ,darker-bg)))
 
-   `(line-number                      ((,class :background ,bg :foreground ,light-fg)))
-   `(line-number-current-line         ((,class :background ,bg :foreground ,fg)))
-
-   `(evil-mc-region-face              ((,class :background ,dark-bg :foreground ,fg)))
-
-   `(evil-ex-info                     ((,class :background ,bg :foreground ,red)))
-   `(evil-ex-substitute-matches       ((,class :background ,dark-bg :foreground ,fg)))
-   `(evil-ex-substitute-replacement   ((,class :background ,bg :foreground ,fg)))
-   `(evil-ex-search                   ((,class :background ,bg :foreground ,fg)))
+   `(line-number                      ((,class :foreground ,light-fg)))
+   `(line-number-current-line         ((,class :foreground ,fg)))
 
    `(ivy-grep-info                    ((,class :background ,bg :foreground ,fg)))
    `(ivy-yanked-word                  ((,class :background ,bg :foreground ,fg)))
@@ -82,39 +76,29 @@
    `(ivy-minibuffer-match-face-4      ((,class :background ,bg :foreground ,light-fg)))
    `(ivy-match-required-face          ((,class :background ,bg :foreground ,red)))
 
-   `(ivy-modified-buffer              ((,class :background ,bg :foreground ,fg)))
-   `(ivy-modified-outside-buffer      ((,class :background ,bg :foreground ,fg)))
+   `(ivy-modified-buffer              ((,class :foreground ,fg)))
+   `(ivy-modified-outside-buffer      ((,class :foreground ,fg)))
    `(ivy-org                          ((,class :inherit default)))
 
-   `(ivy-separator                    ((,class :background ,bg :foreground ,light-fg)))
-   `(ivy-remote                       ((,class :background ,bg :foreground ,light-fg)))
+   `(ivy-separator                    ((,class :foreground ,light-fg)))
+   `(ivy-remote                       ((,class :foreground ,light-fg)))
 
-   `(swiper-background-match-face-1   ((,class :background ,bg :foreground ,light-fg)))
-   `(swiper-background-match-face-2   ((,class :background ,bg :foreground ,light-fg)))
-   `(swiper-background-match-face-3   ((,class :background ,bg :foreground ,light-fg)))
-   `(swiper-background-match-face-4   ((,class :background ,bg :foreground ,light-fg)))
+   `(completions-common-part          ((,class :foreground ,light-fg)))
 
-   `(swiper-line-face                 ((,class :background ,dark-bg :foreground ,fg)))
-   `(swiper-match-face-3              ((,class :background ,bg :foreground ,light-fg)))
-   `(swiper-match-face-4              ((,class :background ,bg :foreground ,light-fg)))
-   `(swiper-match-face-1              ((,class :background ,bg :foreground ,light-fg)))
-   `(swiper-match-face-2              ((,class :background ,bg :foreground ,light-fg)))
+   `(company-scrollbar-bg ((,class :background ,off-white)))
+   `(company-scrollbar-fg ((,class :background ,red)))
 
-   `(completions-common-part          ((,class :background ,bg :foreground ,light-fg)))
+   ;; Face used to highlight main company "window"
+   `(company-tooltip ((,class :background ,off-white)))
 
-   `(company-echo-common                  ((,class :background ,dark-bg :foreground ,fg)))
-   `(company-preview                      ((,class :background ,bg :foreground ,light-fg)))
-   `(company-preview-common               ((,class :background ,bg :foreground ,light-fg)))
-   `(company-preview-search               ((,class :background ,bg :foreground ,light-fg)))
-   `(company-scrollbar-bg                 ((,class :background ,dark-bg :foreground ,fg)))
-   `(company-scrollbar-fg                 ((,class :background ,darker-bg :foreground ,fg)))
-   `(company-template-field               ((,class :background ,bg :foreground ,light-fg)))
-   `(company-tooltip                      ((,class :background ,darker-bg :foreground ,fg)))
-   `(company-tooltip-annotation           ((,class :background ,darker-bg :foreground ,fg)))
-   `(company-tooltip-annotation-selection ((,class :background ,dark-bg :foreground ,light-fg)))
-   `(company-tooltip-common               ((,class :background ,darker-bg :foreground ,dark-bg)))
-   `(company-tooltip-common-selection     ((,class :background ,dark-bg :foreground ,fg)))
-   `(company-tooltip-selection            ((,class :background ,dark-bg :foreground ,fg)))
+   ;; Face used to highlight common string
+   `(company-tooltip-common ((,class :foreground ,red)))
+
+   ;; Face used to highlight the entire selected line
+   `(company-tooltip-selection ((,class :background ,darker-bg)))
+
+   ;; Face used to highlight ONLY the common string but the selected one instead
+   `(company-tooltip-common-selection ((,class :background ,darker-bg :foreground ,red)))
 
    `(avy-goto-char-timer-face         ((,class :background ,darker-bg :foreground ,fg)))
 
@@ -123,28 +107,28 @@
    `(avy-lead-face-1                  ((,class :background ,bg :foreground ,red)))
    `(avy-lead-face-2                  ((,class :background ,bg :foreground ,red)))
 
-   `(org-todo                         ((,class :background ,bg :foreground ,red)))
-   `(org-done                         ((,class :background ,bg :foreground ,fg)))
-   `(org-table                        ((,class :background ,bg :foreground ,fg)))
-   `(org-block                        ((,class :background ,bg :foreground ,fg)))
-   `(org-code                         ((,class :background ,bg :foreground ,fg)))
-   `(org-headline-done                ((,class :background ,bg :foreground ,fg)))
-   `(org-latex-and-related            ((,class :background ,bg :foreground ,fg)))
-   `(org-document-title               ((,class :background ,bg :foreground ,fg)))
-   `(org-document-info                ((,class :background ,bg :foreground ,light-fg)))
-   `(org-drawer                       ((,class :background ,bg :foreground ,light-fg)))
-   `(org-date                         ((,class :background ,bg :foreground ,light-fg)))
-   `(org-meta-line                    ((,class :background ,bg :foreground ,fg :weight bold)))
+   `(org-todo                         ((,class :foreground ,red)))
+   `(org-done                         ((,class :foreground ,fg)))
+   `(org-table                        ((,class :foreground ,fg)))
+   `(org-block                        ((,class :foreground ,fg)))
+   `(org-code                         ((,class :foreground ,fg)))
+   `(org-headline-done                ((,class :foreground ,fg)))
+   `(org-latex-and-related            ((,class :foreground ,fg)))
+   `(org-document-title               ((,class :foreground ,fg)))
+   `(org-document-info                ((,class :foreground ,light-fg)))
+   `(org-drawer                       ((,class :foreground ,light-fg)))
+   `(org-date                         ((,class :foreground ,light-fg)))
+   `(org-meta-line                    ((,class :foreground ,fg :weight bold)))
 
-   `(org-agenda-done                  ((,class :background ,bg :foreground ,light-fg)))
-   `(org-agenda-date                  ((,class :background ,bg :foreground ,fg)))
-   `(org-agenda-date-today            ((,class :background ,bg :foreground ,fg :weight bold)))
-   `(org-agenda-date-weekend          ((,class :background ,bg :foreground ,light-fg)))
-   `(org-agenda-structure             ((,class :background ,bg :foreground ,fg)))
+   `(org-agenda-done                  ((,class :foreground ,light-fg)))
+   `(org-agenda-date                  ((,class :foreground ,fg)))
+   `(org-agenda-date-today            ((,class :foreground ,fg :weight bold)))
+   `(org-agenda-date-weekend          ((,class :foreground ,light-fg)))
+   `(org-agenda-structure             ((,class :foreground ,fg)))
    `(org-scheduled                    ((,class :foreground ,fg)))
    `(org-scheduled-today              ((,class :foreground ,fg)))
-   `(org-scheduled-previously         ((,class :background ,bg :foreground ,dark-red)))
-   `(org-time-grid                    ((,class :background ,bg :foreground ,light-fg)))
+   `(org-scheduled-previously         ((,class :foreground ,dark-red)))
+   `(org-time-grid                    ((,class :foreground ,light-fg)))
 
    ;; `(org-deadline-today               ((,class :foreground ,dark-red)))
    `(org-upcoming-deadline            ((,class :foreground ,fg)))
@@ -152,26 +136,27 @@
 
    `(makefile-space                   ((,class :background ,darker-bg :foreground ,bg)))
 
-   `(header-line                      ((,class :box (:line-width 4 :color ,bg) :background ,bar-bg :foreground ,fg)))
-   `(header-line-highlight            ((,class :box (:line-width 4 :color ,bg) :background ,bar-bg :foreground ,bar-ufg)))
-   `(mode-line                        ((,class :box (:line-width 4 :color ,bg) :background ,bg :foreground ,fg)))
-   `(mode-line-highlight              ((,class :box (:line-width 4 :color ,bg) :background ,bar-bg :foreground ,bar-ufg)))
-   `(mode-line-inactive               ((,class :box (:line-width 4 :color ,bg) :background ,bg :foreground ,light-fg)))
+   ;; `(header-line                      ((,class :box (:line-width 4 :color ,bg) :background ,bar-bg :foreground ,fg)))
+   ;; `(header-line-highlight            ((,class :box (:line-width 4 :color ,bg) :background ,bar-bg :foreground ,bar-ufg)))
+   ;; `(mode-line                        ((,class :box (:line-width 4 :color ,bg) :background ,bg :foreground ,fg)))
+   ;; `(mode-line-highlight              ((,class :box (:line-width 4 :color ,bg) :background ,bar-bg :foreground ,bar-ufg)))
+   ;; `(mode-line-inactive               ((,class :box (:line-width 4 :color ,bg) :background ,bg :foreground ,light-fg)))
 
-   `(comint-highlight-prompt          ((,class :backgorund ,bg :foreground ,fg)))
+   `(comint-highlight-prompt          ((,class :foreground ,fg)))
+   `(comint-highlight-input           ((,class :weight normal)))
 
-   `(hl-todo                          ((,class :background ,bg :foreground ,light-fg :bold nil)))
+   `(hl-todo                          ((,class :foreground ,light-fg :bold nil)))
 
-   `(lui-highlight-face               ((,class :background ,bg :foreground ,light-fg)))
-   `(lui-time-stamp-face              ((,class :background ,bg :foreground ,light-fg)))
-   `(lui-button-face                  ((,class :background ,bg :foreground ,light-fg)))
-   `(lui-server-face                  ((,class :background ,bg :foreground ,light-fg)))
+   `(lui-highlight-face               ((,class :foreground ,light-fg)))
+   `(lui-time-stamp-face              ((,class :foreground ,light-fg)))
+   `(lui-button-face                  ((,class :foreground ,light-fg)))
+   `(lui-server-face                  ((,class :foreground ,light-fg)))
 
-   `(circe-highlight-nick-face        ((,class :background ,bg :foreground ,light-fg)))
-   `(circe-my-message-face            ((,class :background ,bg :foreground ,grey)))
-   `(circe-prompt-face                ((,class :background ,bg :foreground ,light-fg)))
-   `(circe-server-face                ((,class :background ,bg :foreground ,light-fg)))
-   `(circe-originator-face            ((,class :background ,bg :foreground ,light-fg)))
+   `(circe-highlight-nick-face        ((,class :foreground ,light-fg)))
+   `(circe-my-message-face            ((,class :foreground ,grey)))
+   `(circe-prompt-face                ((,class :foreground ,light-fg)))
+   `(circe-server-face                ((,class :foreground ,light-fg)))
+   `(circe-originator-face            ((,class :foreground ,light-fg)))
 
    `(edit-indirect-edited-region      ((,class :background ,dark-bg :foreground ,fg)))
 

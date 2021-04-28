@@ -16,6 +16,8 @@
 
 (add-hook 'emacs-lisp-mode-hook #'vz/elisp-init)
 
+(add-to-list 'font-lock-maximum-decoration '(emacs-lisp-mode . nil))
+
 ;; From https://www.reddit.com/r/emacs/comments/d7x7x8/finally_fixing_indentation_of_quoted_lists/
 
 (advice-add #'calculate-lisp-indent :override #'vz/calculate-lisp-indent)
