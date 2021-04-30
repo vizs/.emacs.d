@@ -20,7 +20,6 @@
 ;; achieved using pdftools and org-noter + org-pdftools.
 
 (use-package pdf-tools
-  :defer t
   :config
   (pdf-tools-install))
 
@@ -157,11 +156,12 @@ Highlight functions are handled specially.")
   :config
   ;; I really don't need org-noter to add stuff to my modeline
   (advice-add 'org-noter--mode-line-text :override #'(lambda () ""))
-  (vz/bind
-   :map org-mode-map
-   "C-c n" #'org-noter
-   :map pdf-view-mode-map
-   "C-c n" #'org-noter))
+  :bind
+  ( :map org-mode-map
+         ("C-c n" . org-noter))
+  :bind
+  ( :map pdf-view-mode-map
+         ("C-c n" . org-noter)))
 
 ;; TODO: org-noter-pdftools doesn't really like to work. It starts
 ;; asking stuff when I enable org-noter.

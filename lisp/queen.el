@@ -1,5 +1,8 @@
 ;; -*- lexical-binding: t; -*-
 
+;; TODO: Maybe consider ditching ivy and using
+;; https://github.com/oantolin/live-completions
+
 ;; * Package manager
 
 ;; Quelpa scares me so I'm using straight, use `use-package' to manage
@@ -148,7 +151,8 @@ LIST. Return nil if otherwise."
    backup-by-copying t
 
    ;; Save backup files under a single directory
-   backup-directory-alist `((".*" . ,(~ ".cache/emacs-bkups/")))))
+   backup-directory-alist `((".*" . ,(~ ".cache/emacs-bkups/"))))
+  (auto-save-visited-mode t))
 
 ;; ** Auto-revert mode
 
@@ -338,12 +342,15 @@ LIST. Return nil if otherwise."
   :bind ( :map ivy-minibuffer-map
                ("<C-up>" . ivy-minibuffer-grow)
                ("<C-down>" . ivy-minibuffer-shrink))
+  :custom
+  (ivy-count-format " [%d/%d] ")
+  (ivy-use-virtual-buffers t)
+  (ivy-do-completion-in-region nil)
+  (ivy-wrap t)
+  (ivy-height 15)
+  ;; See https://github.com/abo-abo/swiper/issues/2852
+  (comint-completion-addsuffix nil)
   :config
-  (setq ivy-count-format " [%d/%d] "
-        ivy-use-virtual-buffers t
-        ivy-do-completion-in-region nil
-        ivy-wrap t
-        ivy-height 15)
   ;; This was moved to ivy-hydra.el
   (defun ivy-minibuffer-grow ()
     "Grow the minibuffer window by 1 line."
@@ -366,10 +373,11 @@ LIST. Return nil if otherwise."
   :after ivy
   :demand t
   :bind ("C-c j" . counsel-imenu)
+  :custom
+  (counsel-find-file-at-point t)
+  (counsel-org-headline-display-todo t)
+  (counsel-org-headline-display-tags t)
   :config
-  (setq counsel-find-file-at-point t
-        counsel-org-headline-display-todo t
-        counsel-org-headline-display-tags t)
   (defun vz/counsel-M-x-prompt ()
     "pls ")
   (advice-add 'counsel--M-x-prompt :override #'vz/counsel-M-x-prompt)

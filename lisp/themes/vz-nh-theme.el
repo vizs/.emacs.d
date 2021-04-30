@@ -85,6 +85,7 @@
 
    `(completions-common-part          ((,class :foreground ,light-fg)))
 
+
    `(company-scrollbar-bg ((,class :background ,off-white)))
    `(company-scrollbar-fg ((,class :background ,red)))
 
@@ -92,13 +93,16 @@
    `(company-tooltip ((,class :background ,off-white)))
 
    ;; Face used to highlight common string
-   `(company-tooltip-common ((,class :foreground ,red)))
+   `(company-tooltip-common ((,class :foreground ,dark-red)))
 
    ;; Face used to highlight the entire selected line
-   `(company-tooltip-selection ((,class :background ,darker-bg)))
+   `(company-tooltip-selection ((,class :background ,dark-bg)))
 
    ;; Face used to highlight ONLY the common string but the selected one instead
-   `(company-tooltip-common-selection ((,class :background ,darker-bg :foreground ,red)))
+   `(company-tooltip-common-selection ((,class :background ,dark-bg :foreground ,dark-red)))
+
+   `(company-preview-common ((,class :foreground ,fg)))
+   `(company-preview        ((,class :foreground ,fg)))
 
    `(avy-goto-char-timer-face         ((,class :background ,darker-bg :foreground ,fg)))
 

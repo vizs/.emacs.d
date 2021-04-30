@@ -143,25 +143,17 @@
     (split-string (buffer-substring (point-min) (point-max))
                   "\n" nil (rx alnum "="))))
 
-;; TODO: Figure out how to do this without setting directory to ""
 (defun vz/shell-jump-to-dir ()
-  "Jump to directory alias. Calling `ivy-call' launches
-`read-directory-name', jumps to selected directory otherwise."
+  "Read directory from mksh's directory alias list and invoke
+`read-directory-name' with the selected directory as input."
   (interactive)
   (when-let ((input (comint-get-old-input-default))
-             (directory "")
              (_ (vz/inside-shell?)))
-    (ivy-read
-     "> " (cons "." (vz/shell-get-dir-alias))
-     :caller 'vz/shell-jump-to-dir
-     :action (lambda (x)
-               (if (eq this-command #'ivy-call)
-                   (ivy-exit-with-action
-                    (lambda (_) (setq directory (read-directory-name "> " x))))
-                 (setq directory x))))
-    (vz/shell-history--ivy-action (concat "cd " (shell-quote-argument directory)))
-    (comint-send-string (get-buffer-process (current-buffer))
-                        input)))
+    (vz/shell-history--ivy-action
+     (concat "cd " (shell-quote-argument
+                    (read-directory-name "Switch to: "
+                     (completing-read "Switch from: " (cons "." (vz/shell-get-dir-alias)))))))
+    (comint-send-string (get-buffer-process (current-buffer)) input)))
 
 ;; * Popup a shell in `default-directory'
 ;; ** Variables

@@ -10,6 +10,9 @@
 (dolist (m '(ws-butler-mode ivy-mode counsel-mode))
   (setcdr (assq m minor-mode-alist) '("")))
 
+(custom-set-variables
+ '(mode-line-format (remove 'mode-line-position mode-line-format)))
+
 (use-package moody
   :demand t)
 

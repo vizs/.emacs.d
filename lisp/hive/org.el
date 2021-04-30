@@ -264,3 +264,31 @@ markers for sub/super scripts but fontify them."
 ;; Agenda
 (with-eval-after-load 'org-agenda
   (load-file (expand-file-name "lisp/hive/agenda.el" user-emacs-directory)))
+
+;; Scratch buffers in org-mode
+(defvar vz/org-scratch-file (~ "doc/org/scratch.org")
+  "Path where *org-scratch* buffers are stored.")
+
+(defun vz/org-scratch--headline-present-p ()
+  "Check if headline for current day is present. Return the
+position if present, nil otherwise."
+  (org-find-exact-headline-in-buffer (format-time-string "%Y%m%d")
+                                     "scratch.org"
+                                     t))
+
+;; Saving is done `auto-save-visited-mode' which saves the "in-place"
+;; rather than creating an auto save file.
+
+(defun vz/org-scratch-init ()
+  (with-current-buffer (find-file-noselect vz/org-scratch-file)
+    (let ((position (vz/org-scratch--headline-present-p)))
+      (unless position
+        (insert (format-time-string "* %Y%m%d\n"))
+        (setq position (point-min)))
+      (goto-char (+ 1 1 4 2 2 1         ; * <year><month><day>\n
+                    position))
+      (insert (format-time-string "** %H%M\n")))
+    (narrow-to-region (point) (point-max))
+    (rename-buffer "*org-scratch*")))
+
+(vz/org-scratch-init)

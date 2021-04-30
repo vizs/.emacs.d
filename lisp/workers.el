@@ -300,7 +300,7 @@ behaviour is similar to that of in `bind-keys'."
     company-idle-delay nil
     company-tooltip-limit 10
     company-show-numbers 'left
-    company-global-modes '(not org-mode)
+    company-global-modes '(not shell-mode org-mode)
     company-minimum-prefix-length 2
     completion-in-region-function
     #'(lambda (start end collection predicate)
@@ -515,17 +515,19 @@ to use.")
 ;; * Sorting entries
 ;; Save and sort entries in ivy and company
 (use-package prescient
-  :config
-  (setq prescient-history-length 150
+  :custom
+  (prescient-history-length 150)
         ;;  prescient-filter-method '(literal regexp initialism fuzzy)
-        prescient-save-file (~ ".cache/emacs-prescient.el"))
+  (prescient-save-file (~ ".cache/emacs-prescient.el"))
+  :config
   (prescient-persist-mode))
 
 (use-package ivy-prescient
   :after prescient
+  :custom
+  (ivy-prescient-enable-sorting t)
+  (ivy-prescient-sort-commands (append ivy-prescient-sort-commands '(vz/shell-jump-to-dir proced-filter-interactive)))
   :config
-  (setq ivy-prescient-enable-sorting t
-        ivy-prescient-sort-commands (append ivy-prescient-sort-commands '(proced-filter-interactive)))
   (ivy-prescient-mode t))
 
 (use-package company-prescient
@@ -548,8 +550,8 @@ to use.")
 (use-package proced
   :defer t
   :straight ( :type built-in)
-  :config
-  (setq-default proced-filter 'all))
+  :custom
+  (proced-filter 'all))
 
 ;; ** Calendar
 ;; The way I'm setting the holidays is probably not idiomatic IDRC. I
