@@ -1,16 +1,13 @@
 ;; -*- lexical-binding: t; -*-
 ;; Custom navigation commands and such
 
-;; I never got into the habit of ending sentences with double space
-(setq sentence-end-double-space nil)
-
 (add-hook 'server-after-make-frame-hook
           (defun vz/add-to-input-decode-map ()
             (vz/bind
              :map input-decode-map
              (kbd "C-M-m") [C-M-m]
              (kbd "C-M-S-m") [C-M-S-m])
-            (remove-hook #'vz/add-to-input-decode-map 'server-after-make-frame-hook)))
+            (remove-hook 'server-after-make-frame-hook #'vz/add-to-input-decode-map)))
 
 (defun vz/beginning-of-line ()
   "Run `back-to-indentation` or `beginning-of-line` depending

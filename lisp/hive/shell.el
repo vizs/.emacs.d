@@ -151,8 +151,8 @@
              (_ (vz/inside-shell?)))
     (vz/shell-history--ivy-action
      (concat "cd " (shell-quote-argument
-                    (read-directory-name "Switch to: "
-                     (completing-read "Switch from: " (cons "." (vz/shell-get-dir-alias)))))))
+                    (expand-file-name (read-directory-name "Go to: "
+                                          (completing-read "Jump to: " (cons "." (vz/shell-get-dir-alias))))))))
     (comint-send-string (get-buffer-process (current-buffer)) input)))
 
 ;; * Popup a shell in `default-directory'

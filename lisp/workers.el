@@ -78,7 +78,7 @@ behaviour is similar to that of in `bind-keys'."
 ;; * Builtin stuff that doesn't depend on anything else
 ;; ** Fringe
 (use-package fringe
-  :straight (:type built-in)
+  :straight ( :type built-in)
   :config
   ;; Remove the ugly left and right curly arrow for continued lines
   (setf (cdr (assoc 'continuation fringe-indicator-alist)) '(nil nil))
@@ -89,10 +89,10 @@ behaviour is similar to that of in `bind-keys'."
 (use-package show-paren
   :defer t
   :hook (prog-mode . show-paren-mode)
-  :straight (:type built-in)
-  :config
-  (setq show-paren-delay 0
-        show-paren-when-point-inside-paren t))
+  :straight ( :type built-in)
+  :custom
+  (show-paren-delay 0)
+  (show-paren-when-point-inside-paren t))
 
 ;; ** Spell check
 ;; Enabled on major-mode basis
@@ -134,7 +134,7 @@ behaviour is similar to that of in `bind-keys'."
 ;; I don't like the underline face lol
 (add-hook 'grep-mode-hook
           (defun vz/style-grep-menu ()
-            (seq-each #'(lambda (x) (face-remap-add-relative x :underline nil))
+            (seq-each (lambda (x) (face-remap-add-relative x :underline nil))
                       '(compilation-info compilation-line-number underline))))
 
 ;; ** Help menu binds
@@ -148,14 +148,47 @@ behaviour is similar to that of in `bind-keys'."
                              (interactive)
                              (revert-buffer nil t))))
 
-;; * Dired
-(use-package dired
-  :straight (:type built-in)
+;; ** Recentf
+
+;; I end up looking at the definitions of functions and variables
+;; quite often and it gets quite annoying when they end up in the
+;; recentf list.
+
+(use-package recentf
   :defer t
-  :config
-  (setq
-   ;; Human readable size
-   dired-listing-switches "-alh"))
+  :straight ( :type built-in)
+  :custom
+  (recentf-exclude
+   (list (rx bol
+             (eval (expand-file-name "straight/"
+                                     user-emacs-directory))
+             (or "repo/" "build/")
+             (1+ print)
+             "/"
+             (1+ print)
+             (or ".el" ".el.gz")
+             eol)
+         (rx bol
+             "/nix/store/"
+             (1+ alnum) ;; Hash
+             "-emacs"
+             (1+ (any ?. ?- alnum))
+             "/share/emacs/"
+             (eval emacs-version)
+             "/lisp/"
+             (1+ print)
+             (or ".el" ".el.gz")
+             eol)))
+  (recentf-max-saved-items 50)
+  (recentf-max-menu-items 50))
+
+;; ** Dired
+(use-package dired
+  :straight ( :type built-in)
+  :defer t
+  :custom
+  ;; Human readable size
+  (dired-listing-switches "-alh"))
 
 ;; * Modeline
 (with-eval-after-load user-init-file
@@ -168,10 +201,10 @@ behaviour is similar to that of in `bind-keys'."
   :straight (:type built-in)
   :functions (vz/comint-send-input)
   :bind
-  (:map comint-mode-map
-        ("<S-return>" . comint-accumulate)
-        ("<return>"   . vz/comint-send-input)
-        ("RET" . vz/comint-send-input))
+  ( :map comint-mode-map
+    ("<S-return>" . comint-accumulate)
+    ("<return>"   . vz/comint-send-input)
+    ("RET" . vz/comint-send-input))
   :config
   (defun vz/comint-send-input ()
     "Send region if present, otherwise current line to current buffer's process"
@@ -193,12 +226,6 @@ behaviour is similar to that of in `bind-keys'."
   :straight (:type built-in))
 
 ;; * External packages
-;; ** pos-tip
-;; Used by quite a lot of packages
-;; Might as well install it explicitly
-(use-package pos-tip
-  :defer t)
-
 ;; ** Whitespace
 (use-package ws-butler
   :config (ws-butler-global-mode))
@@ -208,9 +235,9 @@ behaviour is similar to that of in `bind-keys'."
   :defer t
   :hook (prog-mode . hl-todo-mode)
   :bind
-  (:map prog-mode-map
-   ("C-c tn" . hl-todo-next)
-   ("C-c tp" . hl-todo-previous))
+  ( :map prog-mode-map
+    ("C-c tn" . hl-todo-next)
+    ("C-c tp" . hl-todo-previous))
   :config
   (setq hl-todo-highlight-punctuation ":"))
 
@@ -218,23 +245,27 @@ behaviour is similar to that of in `bind-keys'."
 (use-package olivetti
   :defer t
   :bind ("C-c C" . olivetti-mode)
-  :config
-  (setq olivetti-body-width 80
-        olivetti-enable-visual-line-mode nil))
+  :custom
+  (olivetti-body-width 80)
+  (olivetti-enable-visual-line-mode nil))
 
 ;; ** Folding text
-(use-package bicycle :after outline
-  :after outline
-  :defer t
-  :bind (:map outline-minor-mode-map
+(if (< emacs-major-version 28)
+    (use-package bicycle
+      :after outline
+      :defer t
+      :bind ( :map outline-minor-mode-map
               ([C-tab] . bicycle-cycle)
               ("<backtab>" . bicycle-cycle-global)))
+  (custom-set-variables
+   '(outline-minor-mode-cycle t)))
 
 ;; ** Edit a part of a buffer in separate window
-(use-package edit-indirect
-  :defer t)
+;; (use-package edit-indirect
+;;   :defer t)
 
 ;; ** TODO: Execute actions based on text
+;; Actually hyperbole might be better since it has implicit buttons.
 ;; Desperately needs a rewrite
 ;; (vz/use-package wand "plumb"
 ;;   :straight (:type git :host github
@@ -244,8 +275,9 @@ behaviour is similar to that of in `bind-keys'."
 ;; * Org-mode
 ;; You don't need any explanation
 (vz/use-package org nil
-  :straight (:type git
-             :host github :repo "emacsmirror/org")
+  :demand t
+  :straight ( :type git
+                    :host github :repo "emacsmirror/org")
   :bind
   (("C-c oc" . org-capture)
    ("C-c oa" . org-agenda)
@@ -285,9 +317,9 @@ behaviour is similar to that of in `bind-keys'."
               vz/company-previous-candidate
               vz/company-next-candidate)
   :bind
-  (:map company-active-map
-        ("C-n" . vz/company-next-candidate)
-        ("C-p" . vz/company-previous-candidate))
+  ( :map company-active-map
+    ("C-n" . vz/company-next-candidate)
+    ("C-p" . vz/company-previous-candidate))
   :config
   (defun vz/company-previous-candidate ()
     (interactive)
@@ -295,24 +327,20 @@ behaviour is similar to that of in `bind-keys'."
   (defun vz/company-next-candidate ()
     (interactive)
     (company-complete-common-or-cycle 1))
-  (setq
-    company-require-match nil
-    company-idle-delay nil
-    company-tooltip-limit 10
-    company-show-numbers 'left
-    company-global-modes '(not shell-mode org-mode)
-    company-minimum-prefix-length 2
-    completion-in-region-function
-    #'(lambda (start end collection predicate)
-        (if company-mode
-            (company-complete-common)
-          (ivy-completion-in-region start end collection predicate))))
   (add-to-list 'company-backends #'company-capf)
-  (global-company-mode))
-
-;; Useful for lisps
-(use-package aggressive-indent
-  :defer t)
+  (global-company-mode)
+  :custom
+  (company-require-match nil)
+  (company-idle-delay nil)
+  (company-tooltip-limit 10)
+  (company-show-numbers 'left)
+  (company-global-modes '(not special-mode shell-mode org-mode))
+  (company-minimum-prefix-length 2)
+  (completion-in-region-function
+   (lambda (start end collection predicate)
+     (if company-mode
+         (company-complete-common)
+       (ivy-completion-in-region start end collection predicate)))))
 
 ;; ** Shellcheck
 (use-package flymake-shellcheck
@@ -327,9 +355,9 @@ behaviour is similar to that of in `bind-keys'."
   :straight (:type built-in)
   ;:bind
   ;("C-c df" . python-describe-at-point)
-  :config
-  (setq python-shell-interpreter "python3"
-        python-shell-interpreter-args "-i"))
+  :custom
+  (python-shell-interpreter "python3")
+  (python-shell-interpreter-args "-i"))
 
 ;; ** Scheme
 ;; Depends on chicken
@@ -506,12 +534,6 @@ to use.")
 ;; TODO: Use nix-sandbox for flymake commands
 ;; (use-package nix-sandbox)
 
-;; ** Fennel
-;; To Lua or not to Lua
-;; TODO
-(use-package fennel-mode
-  :defer t)
-
 ;; * Sorting entries
 ;; Save and sort entries in ivy and company
 (use-package prescient
@@ -526,9 +548,10 @@ to use.")
   :after prescient
   :custom
   (ivy-prescient-enable-sorting t)
-  (ivy-prescient-sort-commands (append ivy-prescient-sort-commands '(vz/shell-jump-to-dir proced-filter-interactive)))
   :config
-  (ivy-prescient-mode t))
+  (ivy-prescient-mode t)
+  (custom-set-variables
+   '(ivy-prescient-sort-commands (append ivy-prescient-sort-commands '(vz/shell-jump-to-dir proced-filter-interactive)))))
 
 (use-package company-prescient
   :after company
@@ -542,9 +565,9 @@ to use.")
 (use-package transmission
   :demand t
   :bind ("C-c T" . transmission)
-  :config
-  (setq transmission-time-format "%A, %d %B, %Y %k:%M"
-        transmission-units 'iec))
+  :custom
+  (transmission-time-format "%A, %d %B, %Y %k:%M")
+  (transmission-units 'iec))
 
 ;; ** proced
 (use-package proced
@@ -558,36 +581,38 @@ to use.")
 ;; don't live in murica anw
 
 (use-package calendar
+  :defer t
   :straight ( :type built-in)
   :config
-  (setq calendar-mark-holidays-flag t
-        calendar-islamic-all-holidays-flag t
-        holiday-hindu-holidays ;; Only fixed ones. Majority vary every year.
+  (add-hook 'calendar-today-visible-hook #'calendar-mark-today)
+  :init
+  (setq holiday-hindu-holidays ;; Only fixed ones. Majority vary every year.
         '((holiday-fixed 1 15 "Makar Sankranti")
           ;; Technically Tamil only but eh
           (holiday-fixed 1 15 "Pongal")
-          (holiday-fixed 1 14 "Tamil New Year"))
-        holiday-christian-holidays
-        '((holiday-easter-etc -2 "Good Friday")
-          (holiday-fixed 12 25 "Christmas"))
-        holiday-islamic-holidays
-        '((holiday-islamic 10 1 "Eid-ul-Fitr")
-          (holiday-islamic 3 12 "Eid-e-Milad-un-Nabi"))
-        holiday-general-holidays
-        '((holiday-fixed 1 1 "New Year's")
-          (holiday-fixed 1 26 "Republic Day")
-          (holiday-fixed 1 14 "Dr. B.R. Ambedkar Jayanti")
-          (holiday-fixed 8 18 "Independence Day")
-          (holiday-fixed 10 2 "Gandhi Jayanthi"))
-        calendar-holidays (append holiday-hindu-holidays
-                                  holiday-general-holidays
-                                  holiday-christian-holidays
-                                  holiday-islamic-holidays)
-
-        calendar-date-style 'european
-        calendar-month-abbrev-array calendar-month-name-array
-        calendar-day-abbrev-array calendar-day-name-array)
-  (add-hook 'calendar-today-visible-hook #'calendar-mark-today))
+          (holiday-fixed 1 14 "Tamil New Year")))
+  :custom
+  (calendar-mark-holidays-flag t)
+  (calendar-islamic-all-holidays-flag t)
+  (holiday-christian-holidays
+   '((holiday-easter-etc -2 "Good Friday")
+     (holiday-fixed 12 25 "Christmas")))
+  (holiday-islamic-holidays
+   '((holiday-islamic 10 1 "Eid-ul-Fitr")
+     (holiday-islamic 3 12 "Eid-e-Milad-un-Nabi")))
+  (holiday-general-holidays
+   '((holiday-fixed 1 1 "New Year's")
+     (holiday-fixed 1 26 "Republic Day")
+     (holiday-fixed 1 14 "Dr. B.R. Ambedkar Jayanti")
+     (holiday-fixed 8 18 "Independence Day")
+     (holiday-fixed 10 2 "Gandhi Jayanthi")))
+  (calendar-holidays (append holiday-hindu-holidays
+                             holiday-general-holidays
+                             holiday-christian-holidays
+                             holiday-islamic-holidays))
+  (calendar-date-style 'european)
+  (calendar-month-abbrev-array calendar-month-name-array)
+  (calendar-day-abbrev-array calendar-day-name-array))
 
 ;; Local Variables:
 ;; eval: (outline-minor-mode)

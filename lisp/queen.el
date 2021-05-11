@@ -65,7 +65,7 @@
        res))))
 
 (defun vz/filter-map (pred list)
-  "Like (seq-filter #'(lambda (x) x) (seq-map #'pred list)."
+  "Like (seq-filter (lambda (x) x) (seq-map #'pred list)."
   (vz/filter-map--primitive pred list '()))
 
 (defun vz/filter-map-indexed--primitive (pred list index res)
@@ -88,7 +88,7 @@ second argument to PRED."
 
 (defun vz/find-index (pred list)
   "Find first index for which PRED returned non-nil in
-LIST. Return nil if otherwise."
+LIST.  Return nil if otherwise."
   (letrec ((helper #'(lambda (n list)
                        (cond
                         ((null list) nil)
@@ -105,11 +105,11 @@ LIST. Return nil if otherwise."
 ;; ** Set face's font-family
 
 (defun vz/set-monospace-faces (faces)
-  (seq-each #'(lambda (x) (set-face-attribute x nil :family vz/monospace-font))
+  (seq-each (lambda (x) (set-face-attribute x nil :family vz/monospace-font))
             faces))
 
 (defun vz/set-variable-faces (faces)
-  (seq-each #'(lambda (x) (set-face-attribute x nil :family vz/variable-font))
+  (seq-each (lambda (x) (set-face-attribute x nil :family vz/variable-font))
             faces))
 
 ;; ** External Elisp Enhancers
@@ -181,6 +181,8 @@ LIST. Return nil if otherwise."
 (setq-default
  cursor-in-non-selected-windows nil
  cursor-type '(bar . 2))
+
+(blink-cursor-mode -1)
 
 ;; ** End files w/ newline
 

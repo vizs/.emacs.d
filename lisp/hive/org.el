@@ -8,10 +8,11 @@
 ;; Make it completely black
 (plist-put org-format-latex-options :foreground "Black")
 
-(setq org-entities-user (append '(("ominus" "\\ominus" t "o" "o" "o" "⊖")
-                                  ("vdots" "\\vdots" t "&x2999" "..." "..." "⋮")
-                                  ("ddots" "\\ddots" t "&x22F1" "..." "..." "⋱"))
-                              org-entities-user))
+(custom-set-variables
+ '(org-entities-user (append '(("ominus" "\\ominus" t "o" "o" "o" "⊖")
+                               ("vdots" "\\vdots" t "&x2999" "..." "..." "⋮")
+                               ("ddots" "\\ddots" t "&x22F1" "..." "..." "⋱"))
+                             org-entities-user)))
 
 (use-package cdlatex
   :defer t
@@ -25,7 +26,9 @@
 
 ;; Completey hide headline stars
 (use-package org-starless
-  :straight (:type git :host github :repo "TonCherAmi/org-starless")
+  :straight ( :type git
+              :host github
+              :repo "TonCherAmi/org-starless")
   :defer t
   :hook (org-mode . org-starless-mode))
 
@@ -33,20 +36,33 @@
 (add-hook 'org-mode-hook #'org-num-mode)
 
 ;; native uses auctex highlighting?
-(setq org-highlight-latex-and-related '(latex))
+(custom-set-variables '(org-highlight-latex-and-related '(latex)))
+
+(defvar vz/org-style-faces
+  `( org-link org-code org-block
+     org-drawer org-date org-special-keyword org-verbatim
+     org-tag org-latex-and-related ,@org-level-faces
+     org-quote org-block-begin-line org-block-end-line
+     org-num-face)
+  "List of fonts whose :family changed by `vz/org-style'.")
+
+;; It would be incredibly nice if we could also scale up/down LaTeX
+;; inline previews but that is really expensive :(
+(defun vz/org-style-do-after-text-scale ()
+  ;; We don't have to worry about reverting the changes since the
+  ;; function stores the faces modified.
+  (dolist (f vz/org-style-faces)
+    (face-remap--remap-face f)))
 
 (defun vz/org-style ()
   (interactive)
-
   (setq-local buffer-face-mode-face `(:family ,vz/variable-font :height 120)
               line-spacing 0.1)
   (buffer-face-mode)
-
   (seq-each (lambda (x) (face-remap-add-relative x :weight 'bold :slant 'normal))
             org-level-faces)
-
-  (let ((faces '(org-link org-code org-block org-drawer
-                 org-date org-special-keyword org-verbatim org-tag)))
+  (let ((faces '( org-link org-code org-block org-drawer
+                  org-date org-special-keyword org-verbatim org-tag)))
     (seq-each (lambda (x)
                 (face-remap-add-relative x :height 102
                                          :family vz/monospace-font))
@@ -55,13 +71,10 @@
                            :family "IBM Plex Mono"
                            :slant 'italic
                            :height 102)
-
   (face-remap-add-relative 'org-quote :family vz/variable-font :slant 'italic)
-
   (let ((height 100))
     (face-remap-add-relative 'org-block-begin-line :height height :weight 'bold)
     (face-remap-add-relative 'org-block-end-line   :height height :weight 'bold))
-
   (let* ((height0 (+ 120 40))
          (height1 (+ 120 30))
          (height2 (+ 120 25))
@@ -70,9 +83,11 @@
     (face-remap-add-relative 'org-level-2 :height height1)
     (face-remap-add-relative 'org-level-3 :height height2)
     (face-remap-add-relative 'org-level-4 :height height3)
-
     (setq-local org-num-face `( :family ,vz/variable-font :height 110 :weight bold
-                                :slant normal))))
+                                :slant normal))
+    (add-hook 'text-scale-mode-hook
+              #'vz/org-style-do-after-text-scale
+              nil t)))
 
 (add-hook 'org-mode-hook #'vz/org-style)
 
@@ -81,42 +96,41 @@
   :straight (:type git :host github :repo "casouri/valign")
   :defer t
   :hook (org-mode . valign-mode)
-  :config
-  (setq valign-fancy-bar t))
+  :custom
+  (valign-fancy-bar t))
 
-;; Hide emphasis markers
-(setq org-hide-emphasis-markers t
-      org-fontify-quote-and-verse-blocks t)
+(custom-set-variables
+ ;; Hide emphasis markers
+ '(org-hide-emphasis-markers t)
+ '(org-fontify-quote-and-verse-blocks t)
 
-;; Turn on `org-indent-mode'
-(setq org-startup-indented t)
+ ;; Turn on `org-indent-mode'
+ '(org-startup-indented t)
 
-;; Misc settings
-(setq
+ ;; Misc settings
  ;; For whitespace sensiitive languages
- org-src-preserve-indentation t
-
- org-src-fontify-natively nil
+ '(org-src-preserve-indentation t)
+ '(org-src-fontify-natively nil)
 
  ;; Path to various stuff
- org-directory (~ "doc/org")
- org-default-notes-file (~ "doc/org/notes.org")
- org-preview-latex-image-directory (~ ".cache/org-ltximg/")
+ '(org-directory (~ "doc/org"))
+ '(org-default-notes-file (~ "doc/org/notes.org"))
+ '(org-preview-latex-image-directory (~ ".cache/org-ltximg/"))
 
  ;; Timestamp format
- org-time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %H:%M>")
+ '(org-time-stamp-custom-formats '("<%A, %d %B, %Y>" . "<%A, %d %B, %Y %H:%M>"))
 
- org-preview-latex-default-process 'dvisvgm
+ '(org-preview-latex-default-process 'dvisvgm)
 
  ;; From org 9.3, it is set to 'show-everything
- org-startup-folded t
+ '(org-startup-folded t)
 
  ;; Avoid editing invisible part
- org-catch-invisible-edits 'show-and-error
+ '(org-catch-invisible-edits 'show-and-error)
 
- org-babel-load-languages '((emacs-lisp . t) (C .t)))
+ '(org-babel-load-languages '((emacs-lisp . t) (C .t)))
 
-(setq-default org-display-custom-times t)
+ '(org-display-custom-times t))
 
 (org-babel-do-load-languages 'org-babel-load-languages
                              org-babel-load-languages)
@@ -150,7 +164,8 @@
 ;; super-sub-script display, give it a new face and "prettify"
 ;; it too.
 
-(setq org-pretty-entities-include-sub-superscripts t)
+(custom-set-variables
+ '(org-pretty-entities-include-sub-superscripts t))
 
 (defface vz/org-script-markers '((t :inherit shadow))
   "Face to be used for sub/superscripts markers i.e., ^, _, {, }.")
@@ -245,7 +260,8 @@ markers for sub/super scripts but fontify them."
 (load-file (expand-file-name "lisp/hive/notes.el" user-emacs-directory))
 
 ;; Special C-{a,e} movements
-(setq org-special-ctrl-a/e t)
+(custom-set-variables
+ '(org-special-ctrl-a/e t))
 
 (with-eval-after-load 'org
   (when org-special-ctrl-a/e
@@ -255,7 +271,10 @@ markers for sub/super scripts but fontify them."
 
 ;; This is convenient to have
 (use-package math-delimiters
-  :straight (:type git :host github :repo "oantolin/math-delimiters")
+  :defer t
+  :straight ( :type git
+              :host github
+              :repo "oantolin/math-delimiters")
   :config
   (vz/bind
    :map org-cdlatex-mode-map
@@ -266,29 +285,24 @@ markers for sub/super scripts but fontify them."
   (load-file (expand-file-name "lisp/hive/agenda.el" user-emacs-directory)))
 
 ;; Scratch buffers in org-mode
-(defvar vz/org-scratch-file (~ "doc/org/scratch.org")
+(defvar vz/org-scratch-file (~ "doc/scratch.org")
   "Path where *org-scratch* buffers are stored.")
-
-(defun vz/org-scratch--headline-present-p ()
-  "Check if headline for current day is present. Return the
-position if present, nil otherwise."
-  (org-find-exact-headline-in-buffer (format-time-string "%Y%m%d")
-                                     "scratch.org"
-                                     t))
 
 ;; Saving is done `auto-save-visited-mode' which saves the "in-place"
 ;; rather than creating an auto save file.
 
 (defun vz/org-scratch-init ()
   (with-current-buffer (find-file-noselect vz/org-scratch-file)
-    (let ((position (vz/org-scratch--headline-present-p)))
-      (unless position
-        (insert (format-time-string "* %Y%m%d\n"))
-        (setq position (point-min)))
-      (goto-char (+ 1 1 4 2 2 1         ; * <year><month><day>\n
-                    position))
-      (insert (format-time-string "** %H%M\n")))
-    (narrow-to-region (point) (point-max))
-    (rename-buffer "*org-scratch*")))
+    (let ((pos (org-find-exact-headline-in-buffer
+                (format-time-string "%A %d %B %Y") nil t)))
+      (if pos
+          (goto-char pos)
+          (insert (format-time-string "* %A %d %B %Y\n")))
+      (forward-line)
+      (insert (format-time-string "** %H:%M\n"))
+      (forward-line)
+      (narrow-to-region (point) (point))
+      (rename-buffer "*org-scratch*")
+      (org-num-mode -1))))
 
 (vz/org-scratch-init)

@@ -130,11 +130,11 @@ Highlight functions are handled specially.")
                                  (lambda (_) (interactive "e")
                                    (call-interactively #'pdf-view-goto-page)))))))
 
-(add-hook 'pdf-tools-enabled-hook
-          (defun vz/pdf-tools-mode-line ()
-            (setq-local vz/mode-line-file-include-file-status? nil
-                        vz/mode-line-file-extra-info
-                        '(vz/pdf-tools-mode-line--get-page-number))))
+;; (add-hook 'pdf-tools-enabled-hook
+;;           (defun vz/pdf-tools-mode-line ()
+;;             (setq-local vz/mode-line-file-include-file-status? nil
+;;                         vz/mode-line-file-extra-info
+;;                         '(vz/pdf-tools-mode-line--get-page-number))))
 
 ;; * org-noter
 ;; org-noter package is inspired by interleave which in turn mimicks
